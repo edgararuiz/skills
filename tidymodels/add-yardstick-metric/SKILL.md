@@ -16,6 +16,7 @@ Creating a custom yardstick metric provides:
 - NA handling
 - Grouped data frame support
 - Integration with `metric_set()`
+- Optional autoplot support for visualization (curves and confusion matrices)
 
 ## Prerequisites
 
@@ -486,6 +487,368 @@ finalize_estimator_internal.miss_rate <- function(metric_dispatcher, x,
 #' @export
 ```
 
+## Autoplot Support (Optional)
+
+Autoplot provides automatic visualization for metrics that return structured, multi-dimensional data. This section guides you through implementing autoplot support when appropriate.
+
+### When to implement autoplot
+
+**Autoplot is appropriate for:**
+- **Confusion matrices**: Binary or multiclass classification results that can be shown as heatmaps or mosaic plots
+- **Curve metrics**: Metrics that trace a curve (ROC, PR, gain, lift) across thresholds or other continuous values
+- **Grouped/stratified metrics**: When the metric naturally produces multiple facetable results
+- **Other structured outputs**: Any metric returning data that tells a visual story
+
+**NOT appropriate for:**
+- **Single-value summary metrics**: accuracy, RMSE, F1 score, MAE, etc. - these return a single number with nothing to plot
+
+**Decision guide**: If your metric returns a tibble with multiple rows or a special object (like a confusion matrix), consider autoplot. If it returns a single value, skip it.
+
+### Data structure requirements
+
+Before implementing autoplot, ensure your metric returns properly structured data.
+
+**For curve metrics**, your metric must return a tibble with:
+```r
+# Standard structure for curve metrics
+tibble::tibble(
+  .threshold = ...,     # Or other identifier column
+  sensitivity = ...,    # Value column 1
+  specificity = ...,    # Value column 2 (optional)
+  # Additional columns as needed
+)
+```
+
+**For confusion matrices**, your metric must return:
+```r
+# An object of class "conf_mat"
+# Typically created via yardstick::conf_mat()
+```
+
+The returned object MUST have a class attribute that autoplot can dispatch on.
+
+### Dependencies and imports
+
+**Add ggplot2 to your package:**
+```r
+usethis::use_package("ggplot2")
+```
+
+**In your NAMESPACE** (via roxygen2):
+- Add `#' @export` to your autoplot method
+- The autoplot generic comes from ggplot2, so you don't need to import it separately
+- Use `ggplot2::` prefix for all ggplot2 functions to avoid import issues
+
+### S3 method registration
+
+Autoplot uses S3 dispatch based on the class of your metric's return value.
+
+**Method naming pattern:**
+```r
+autoplot.your_metric_class <- function(object, ...) {
+  # Implementation
+}
+```
+
+**How the class is determined:**
+```r
+# When you create your metric output, set the class
+result <- tibble::tibble(...)
+class(result) <- c("roc_curve", "data.frame")  # Example for ROC curve
+
+# Then autoplot will dispatch to:
+autoplot.roc_curve <- function(object, ...) { ... }
+```
+
+**For confusion matrices**, the class is already set by `yardstick::conf_mat()`.
+
+### Complete implementation template: Curve metric
+
+```r
+#' Plot an ROC curve
+#'
+#' @param object A data frame from [roc_curve()].
+#' @param ... Additional arguments passed to [ggplot2::geom_line()]. Common
+#'   options include color, size, linetype, and alpha.
+#'
+#' @return A ggplot object.
+#'
+#' @export
+autoplot.roc_curve <- function(object, ...) {
+  ggplot2::ggplot(object, ggplot2::aes(x = 1 - specificity, y = sensitivity)) +
+    ggplot2::geom_line(...) +
+    ggplot2::geom_abline(lty = 2, color = "grey50") +
+    ggplot2::coord_equal() +
+    ggplot2::labs(
+      x = "1 - Specificity",
+      y = "Sensitivity",
+      title = "ROC Curve"
+    ) +
+    ggplot2::theme_minimal()
+}
+```
+
+### Complete implementation template: Confusion matrix with type
+
+```r
+#' Plot a confusion matrix
+#'
+#' @param object A `conf_mat` object from [conf_mat()].
+#' @param type Type of plot. Options: "heatmap" (default) or "mosaic".
+#' @param ... Not currently used.
+#'
+#' @return A ggplot object.
+#'
+#' @export
+autoplot.conf_mat <- function(object, type = "heatmap", ...) {
+  type <- rlang::arg_match(type, c("heatmap", "mosaic"))
+
+  # Convert confusion matrix to data frame for plotting
+  df <- as.data.frame(object$table)
+
+  if (type == "heatmap") {
+    ggplot2::ggplot(df, ggplot2::aes(x = Prediction, y = Truth, fill = Freq)) +
+      ggplot2::geom_tile() +
+      ggplot2::geom_text(ggplot2::aes(label = Freq), color = "white", size = 8) +
+      ggplot2::scale_fill_gradient(low = "grey90", high = "grey20") +
+      ggplot2::theme_minimal() +
+      ggplot2::labs(title = "Confusion Matrix")
+  } else {
+    # Mosaic plot implementation
+    ggplot2::ggplot(df, ggplot2::aes(x = Prediction, y = Freq, fill = Truth)) +
+      ggplot2::geom_col(position = "fill") +
+      ggplot2::theme_minimal() +
+      ggplot2::labs(
+        title = "Confusion Matrix (Mosaic)",
+        y = "Proportion"
+      )
+  }
+}
+```
+
+### Handling the `...` parameter
+
+The `...` parameter allows users to customize plot aesthetics without adding many explicit parameters.
+
+**Common patterns:**
+
+```r
+# Pass ... to geom layer for aesthetic customization
+autoplot.your_curve <- function(object, ...) {
+  ggplot2::ggplot(object, ggplot2::aes(x = x, y = y)) +
+    ggplot2::geom_line(...)  # User can set color, size, linetype, alpha, etc.
+}
+
+# Or pass to labs for title customization
+autoplot.your_curve <- function(object, ...) {
+  p <- ggplot2::ggplot(object, ggplot2::aes(x = x, y = y)) +
+    ggplot2::geom_line()
+
+  p + ggplot2::labs(...)  # User can set title, subtitle, caption, etc.
+}
+```
+
+**Document what `...` does:**
+```r
+#' @param ... Additional arguments passed to [ggplot2::geom_line()]. Common
+#'   options include color, size, linetype, and alpha.
+```
+
+**Test that common arguments work:**
+```r
+test_that("autoplot accepts ggplot2 aesthetics", {
+  result <- your_curve_metric(df, truth, estimate)
+
+  # Should not error with common aesthetics
+  expect_no_error(autoplot(result, color = "red", size = 2))
+  expect_no_error(autoplot(result, linetype = "dashed", alpha = 0.7))
+})
+```
+
+### Handling the `type` parameter
+
+Use `type` when there are genuinely different ways to visualize the same data (not just minor variations).
+
+**Implementation pattern:**
+```r
+autoplot.conf_mat <- function(object, type = "heatmap", ...) {
+  # Validate the type argument
+  type <- rlang::arg_match(type, c("heatmap", "mosaic"))
+
+  # Branch based on type
+  if (type == "heatmap") {
+    # Heatmap implementation
+  } else if (type == "mosaic") {
+    # Mosaic implementation
+  }
+}
+```
+
+**When to use type:**
+- ✅ Fundamentally different plot styles (heatmap vs mosaic, line vs step)
+- ✅ Different data representations (raw vs normalized)
+- ❌ Minor aesthetic changes (use `...` instead)
+- ❌ Color schemes (use `...` with scale functions)
+
+**Testing type parameter:**
+```r
+test_that("autoplot type parameter works", {
+  result <- conf_mat(df, truth, estimate)
+
+  # Each type should work
+  expect_no_error(autoplot(result, type = "heatmap"))
+  expect_no_error(autoplot(result, type = "mosaic"))
+
+  # Invalid type should error
+  expect_error(autoplot(result, type = "invalid"))
+})
+```
+
+### Custom parameters
+
+For metric-specific customization, add dedicated parameters.
+
+**Example with boolean flag:**
+```r
+#' @param show_diagonal Should the diagonal reference line be shown?
+#'   Default is TRUE.
+autoplot.roc_curve <- function(object, show_diagonal = TRUE, ...) {
+  check_bool(show_diagonal)  # Validate with standalone checker
+
+  p <- ggplot2::ggplot(object, ggplot2::aes(x = 1 - specificity, y = sensitivity)) +
+    ggplot2::geom_line(...)
+
+  if (show_diagonal) {
+    p <- p + ggplot2::geom_abline(lty = 2, color = "grey50")
+  }
+
+  p
+}
+```
+
+**Example with numeric parameter:**
+```r
+#' @param alpha Transparency level for confidence bands. Default is 0.3.
+autoplot.survival_curve <- function(object, alpha = 0.3, ...) {
+  check_number_decimal(alpha, min = 0, max = 1)
+
+  # Use alpha in ribbon layer
+  ggplot2::ggplot(object) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymin = lower, ymax = upper), alpha = alpha)
+}
+```
+
+### Testing autoplot
+
+**Basic structure test:**
+```r
+test_that("autoplot returns ggplot object", {
+  result <- your_curve_metric(df, truth, estimate)
+  p <- autoplot(result)
+
+  expect_s3_class(p, "gg")
+  expect_s3_class(p, "ggplot")
+})
+
+test_that("autoplot works with metric output", {
+  result <- your_metric(df, truth, estimate)
+
+  # Should not error
+  expect_no_error(autoplot(result))
+})
+```
+
+**Test customization:**
+```r
+test_that("autoplot respects custom parameters", {
+  result <- your_curve_metric(df, truth, estimate)
+
+  # Test with reference line off
+  p1 <- autoplot(result, show_diagonal = FALSE)
+  expect_s3_class(p1, "ggplot")
+
+  # Test with reference line on
+  p2 <- autoplot(result, show_diagonal = TRUE)
+  expect_s3_class(p2, "ggplot")
+})
+```
+
+**Note on visual testing**: Without snapshot testing infrastructure, focus on testing that the function runs without error and returns the correct object type. Visual inspection during development is sufficient.
+
+### When to skip autoplot
+
+**Skip autoplot if:**
+- Your metric returns a single numeric value (the vast majority of metrics)
+- You're unsure how to visualize it meaningfully
+- The metric is for internal use only
+- You want to iterate on the metric first, add autoplot later
+
+**Autoplot is completely optional**. Your metric works perfectly fine without it. Users can always create their own plots using the data your metric returns.
+
+### The metric-autoplot relationship
+
+**Understand the flow:**
+
+1. **Metric function returns data** with a specific class:
+```r
+your_curve_metric <- function(data, truth, estimate) {
+  # ... calculation ...
+
+  result <- tibble::tibble(
+    threshold = thresholds,
+    sensitivity = sens_values,
+    specificity = spec_values
+  )
+
+  class(result) <- c("your_curve_metric", class(result))
+  result
+}
+```
+
+2. **Autoplot dispatches on that class**:
+```r
+# When user calls:
+autoplot(result)
+
+# R looks for:
+autoplot.your_curve_metric(result)
+```
+
+3. **Your autoplot method receives the data and plots it**:
+```r
+autoplot.your_curve_metric <- function(object, ...) {
+  ggplot2::ggplot(object, ggplot2::aes(x = threshold, y = sensitivity)) +
+    ggplot2::geom_line(...)
+}
+```
+
+### Critical warnings
+
+**Don't try these:**
+- ❌ **Don't look for yardstick plotting helpers** - they may not exist or aren't exported
+- ❌ **Don't assume autoplot is automatic** - you must explicitly implement it
+- ❌ **Don't try to reuse yardstick's internal plotting code** - build your own with ggplot2
+- ❌ **Don't forget `#' @export`** - the method won't be available without it
+- ❌ **Don't add autoplot to single-value metrics** - only for curves and matrices
+- ❌ **Don't overcomplicate** - a simple line plot is often sufficient
+
+### Users can extend plots
+
+Document that users can modify the returned plot:
+
+```r
+#' @return A ggplot object that can be further customized using ggplot2.
+#'
+#' @examples
+#' # Create and customize the plot
+#' p <- autoplot(result)
+#' p +
+#'   ggplot2::theme_minimal() +
+#'   ggplot2::labs(title = "My Custom Title")
+```
+
+This allows users to add themes, modify scales, add annotations, etc., without requiring you to expose every possible customization as a parameter.
+
 ## Testing
 
 ### Create your own test data
@@ -754,7 +1117,8 @@ if (is.null(case_weights)) {
 4. ✅ **Create generic and data frame method** with proper NSE (`enquo`, `!!`)
 5. ✅ **Add comprehensive documentation** (use templates above, no external templates)
 6. ✅ **Create tests** (use simple inline test data, not yardstick internals)
-7. ✅ **Run and verify:**
+7. ✅ **Add autoplot support (optional)** - only if metric returns curves or confusion matrices
+8. ✅ **Run and verify:**
 
 ```bash
 # From command line
@@ -775,6 +1139,10 @@ Rscript -e "devtools::test()"      # Run tests
 8. ❌ Creating package in wrong directory or forgetting to check DESCRIPTION exists
 9. ❌ Using `UseMethod()` after calling `new_*_metric()` (do it before)
 10. ❌ Forgetting to export the data frame method with `@export`
+11. ❌ Adding autoplot to single-value metrics (only for curves/matrices)
+12. ❌ Forgetting to add ggplot2 as a dependency when implementing autoplot
+13. ❌ Not using `ggplot2::` prefix for ggplot2 functions in autoplot methods
+14. ❌ Trying to reuse yardstick's internal plotting code (build your own with ggplot2)
 
 ## Pre-flight checklist
 
@@ -786,6 +1154,7 @@ Before creating a metric, verify:
 - [ ] You know which type of metric (numeric/class/prob)
 - [ ] You have the formula/calculation method clearly defined
 - [ ] You understand how to handle the specific metric type's requirements
+- [ ] You've decided if autoplot is appropriate (curves/matrices only)
 
 ## Troubleshooting
 
