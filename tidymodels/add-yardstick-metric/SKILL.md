@@ -18,6 +18,101 @@ Creating a custom yardstick metric provides:
 - Integration with `metric_set()`
 - Optional autoplot support for visualization (curves and confusion matrices)
 
+## Understanding the Metric System
+
+Before creating metrics, understanding how yardstick's metric system works helps you build metrics that integrate properly with the ecosystem.
+
+### What `new_*_metric()` does
+
+When you wrap your metric function with `new_numeric_metric()`, `new_class_metric()`, or `new_prob_metric()`, it:
+
+1. **Sets attributes** that describe your metric:
+   - `direction`: "minimize", "maximize", or "zero" (what's optimal?)
+   - `range`: `c(min, max)` (possible values the metric can take)
+
+2. **Creates a class hierarchy**:
+   ```r
+   # Example for accuracy
+   class(accuracy)
+   # [1] "accuracy" "class_metric" "metric" "function"
+   ```
+
+3. **Enables ecosystem integration**:
+   - `metric_set()` knows how to combine your metric with others
+   - The metric can be identified and validated
+   - Automatic method dispatch works correctly
+
+### Why this matters
+
+**For `metric_set()` composition:**
+```r
+metrics <- metric_set(accuracy, precision, recall)
+```
+
+The metric class hierarchy allows `metric_set()` to:
+- Verify all metrics are compatible
+- Group results by `.estimator` appropriately
+- Apply metrics to data correctly
+
+**For direction and range:**
+```r
+# These attributes help users understand the metric
+attr(accuracy, "direction")  # "maximize"
+attr(accuracy, "range")       # c(0, 1)
+```
+
+Tools can use this to:
+- Know if higher is better or worse
+- Validate metric values are in expected range
+- Create appropriate visualizations
+
+### The `.estimator` column
+
+Every metric returns a tibble with a `.estimator` column:
+
+**For numeric metrics:**
+```r
+# Always "standard"
+mae(df, truth, estimate)
+# .metric .estimator .estimate
+# mae     standard   0.5
+```
+
+**For class metrics:**
+```r
+# Depends on number of classes
+accuracy(df_binary, truth, estimate)
+# .metric  .estimator .estimate
+# accuracy binary     0.75
+
+accuracy(df_multiclass, truth, estimate)
+# .metric  .estimator .estimate
+# accuracy multiclass 0.68
+```
+
+**The estimator value comes from `finalize_estimator()`:**
+- Binary classification → "binary"
+- Multiclass with 3+ levels → "macro", "micro", or "macro_weighted"
+- Numeric/regression → "standard"
+
+**Why it matters:** When you use `metric_set()`, results are grouped by `.estimator`:
+```r
+metrics <- metric_set(accuracy, precision, recall)
+metrics(df, truth, estimate)
+# All three metrics share the same .estimator value
+```
+
+### Class naming conventions
+
+Your metric's primary class should match the function name:
+```r
+mse <- new_numeric_metric(mse, direction = "minimize", range = c(0, Inf))
+class(mse)
+# [1] "mse" "numeric_metric" "metric" "function"
+```
+
+This enables S3 dispatch for methods like `autoplot.mse()`.
+
 ## Prerequisites
 
 ### Check and initialize project structure
@@ -55,6 +150,143 @@ Yardstick supports several metric types:
 - **Probability metrics**: For class probabilities (e.g., ROC AUC, log loss)
 - **Survival metrics**: For survival analysis
 - **Quantile metrics**: For quantile predictions
+
+## Design Considerations
+
+Before implementing a new metric, consider whether you actually need to create one.
+
+### When to create a new metric
+
+**Create a new metric when:**
+- It measures a genuinely different aspect of model performance
+- It's commonly used in your domain and not available in yardstick
+- It has a well-defined formula or calculation method
+- You'll use it repeatedly across multiple projects
+
+**Don't create a new metric if:**
+- It's just a transformation of an existing metric (use `metric_tweak()` instead)
+- It can be composed from existing metrics
+- It's a one-off calculation for a specific analysis
+- It's too domain-specific for general use
+
+### Using `metric_tweak()` for variations
+
+For simple variations of existing metrics, use `metric_tweak()`:
+
+```r
+# Create a variant of F-measure with beta = 2
+f2_meas <- metric_tweak("f2_meas", f_meas, beta = 2)
+
+# Use it like any other metric
+f2_meas(df, truth, estimate)
+metric_set(accuracy, f2_meas)
+```
+
+This is much simpler than creating a full new metric.
+
+### Naming conventions
+
+**Follow yardstick patterns:**
+- Use lowercase with underscores: `mean_squared_error` → `mse`
+- Avoid camelCase or PascalCase
+- Be consistent with existing naming
+
+**Abbreviations vs full names:**
+- Well-known abbreviations: `rmse`, `mae`, `auc` (widely recognized)
+- Full names for clarity: `accuracy`, `precision`, `recall` (already short)
+- When in doubt, use the full name
+
+**Avoid conflicts:**
+```r
+# Bad: too generic
+error()  # Conflicts with base::error
+metric()  # Too vague
+
+# Good: specific and descriptive
+prediction_error()
+classification_metric()
+```
+
+**Examples of good names:**
+- `miss_rate` (clear, descriptive)
+- `huber_loss` (named after the technique)
+- `roc_auc` (standard abbreviation)
+
+### Parameter design
+
+**What should be arguments:**
+```r
+# Hyperparameters that affect calculation
+huber_loss(data, truth, estimate, delta = 1.0)
+
+# Configuration that changes behavior
+f_meas(data, truth, estimate, beta = 1)
+
+# Thresholds or cutoffs
+classification_cost(data, truth, estimate, costs = c(1, 2))
+```
+
+**What should NOT be arguments:**
+- Constants that are part of the metric definition
+- Values that would break the metric's meaning
+- Options that should be separate metrics
+
+**Keep parameters minimal:**
+```r
+# Good: focused parameters
+mse(data, truth, estimate, na_rm = TRUE, case_weights = NULL)
+
+# Bad: too many options
+mse(data, truth, estimate, na_rm = TRUE, case_weights = NULL,
+    sqrt = FALSE, relative = FALSE, log_scale = FALSE)
+# These should be separate metrics: rmse(), relative_mse(), log_mse()
+```
+
+Users can always wrap your metric if they need variations:
+```r
+my_custom_mse <- function(data, truth, estimate) {
+  result <- mse(data, truth, estimate)
+  result$.estimate <- sqrt(result$.estimate)
+  result
+}
+```
+
+### Single responsibility principle
+
+**Each metric should do one thing well:**
+
+```r
+# Good: accuracy measures one thing
+accuracy(data, truth, estimate)
+
+# Bad: don't combine multiple metrics
+accuracy_and_precision()  # Should be two separate metrics
+combined_scores()         # Use metric_set() instead
+```
+
+**Compose with `metric_set()` instead:**
+```r
+# Let users compose metrics
+metrics <- metric_set(accuracy, precision, recall, f_meas)
+metrics(data, truth, estimate)
+```
+
+### Scope and reusability
+
+**Design for general use:**
+- Avoid hard-coded domain-specific values
+- Make assumptions explicit in documentation
+- Allow customization through parameters when appropriate
+
+**Example:**
+```r
+# Bad: too specific
+credit_risk_score(data, truth, estimate)  # Hard-codes credit risk logic
+
+# Good: general with parameters
+classification_cost(data, truth, estimate, costs = c(fp = 2, fn = 5))
+# Users can set costs for their domain
+```
 
 ## CRITICAL: Exported vs Internal Functions
 
@@ -368,6 +600,610 @@ finalize_estimator_internal.miss_rate <- function(metric_dispatcher, x,
 
   "binary"
 }
+```
+
+### Factor level ordering
+
+Factor levels critically affect how classification metrics are calculated. Understanding this helps avoid confusion and errors.
+
+#### How factor levels determine the confusion matrix
+
+The confusion matrix rows and columns follow the order of factor levels:
+
+```r
+truth <- factor(c("yes", "no", "yes", "no"), levels = c("yes", "no"))
+estimate <- factor(c("yes", "yes", "no", "no"), levels = c("yes", "no"))
+
+yardstick::yardstick_table(truth, estimate)
+#         estimate
+# truth    yes no
+#   yes      1  1
+#   no       1  1
+```
+
+**The order matches the levels:**
+- First level ("yes") = first row and column
+- Second level ("no") = second row and column
+
+#### Binary classification: which level is "positive"?
+
+For binary metrics, the "positive" class depends on **both** factor order and `event_level`:
+
+```r
+# With levels = c("yes", "no") and event_level = "first"
+# "yes" is treated as the positive class
+
+# With levels = c("yes", "no") and event_level = "second"
+# "no" is treated as the positive class
+
+# With levels = c("no", "yes") and event_level = "first"
+# "no" is treated as the positive class
+```
+
+See the next section on event level mechanics for details.
+
+#### Multiclass: affects per-class calculations
+
+For multiclass metrics, factor level order determines:
+- Which class corresponds to which row/column in the confusion matrix
+- The order of per-class metric calculations
+- How averaging is applied
+
+```r
+# Three classes with different orderings
+truth1 <- factor(x, levels = c("A", "B", "C"))
+truth2 <- factor(x, levels = c("C", "B", "A"))
+
+# Confusion matrices will have different row/column orders
+# But final averaged metrics should be the same (if using macro averaging)
+```
+
+#### Unused levels after filtering
+
+**Critical issue:** Factors retain levels even after filtering:
+
+```r
+original <- factor(c("A", "A", "B", "B", "C", "C"), levels = c("A", "B", "C"))
+filtered <- original[1:4]  # Only A and B remain
+
+levels(filtered)
+# [1] "A" "B" "C"  # C is still a level!
+
+# This affects confusion matrix dimensions
+yardstick::yardstick_table(filtered, filtered)
+#   A B C
+# A 2 0 0
+# B 0 2 0
+# C 0 0 0  # Empty row/column for unused level
+```
+
+**Best practice in your tests:**
+Create factors with only the levels you need:
+
+```r
+# Good: explicit levels matching the data
+truth <- factor(c("A", "A", "B", "B"), levels = c("A", "B"))
+
+# Avoid: extra levels that aren't used
+truth <- factor(c("A", "A", "B", "B"), levels = c("A", "B", "C"))
+```
+
+**Note:** Most yardstick metrics handle unused levels correctly, but it can affect confusion matrix interpretation and some edge cases.
+
+#### Ensuring consistent levels
+
+When creating test data, always specify levels explicitly:
+
+```r
+# Good: explicit, consistent levels
+truth <- factor(c("pos", "pos", "neg", "neg"), levels = c("pos", "neg"))
+estimate <- factor(c("pos", "neg", "pos", "neg"), levels = c("pos", "neg"))
+
+# Bad: implicit levels (order depends on data)
+truth <- factor(c("pos", "pos", "neg", "neg"))      # Levels: "neg", "pos" (alphabetical!)
+estimate <- factor(c("pos", "neg", "pos", "neg"))  # Same
+
+# Very bad: inconsistent levels
+truth <- factor(c("pos", "neg"), levels = c("pos", "neg"))
+estimate <- factor(c("pos", "neg"), levels = c("neg", "pos"))  # Different order!
+```
+
+### Event level mechanics
+
+The `event_level` parameter is one of the most confusing aspects of binary classification metrics. This section clarifies how it works and when to use it.
+
+#### What is event_level?
+
+For binary classification, `event_level` specifies which factor level represents the "event" or "positive" class:
+
+- `event_level = "first"` (default): The first factor level is the positive class
+- `event_level = "second"`: The second factor level is the positive class
+
+#### Why does it matter?
+
+Many binary metrics are asymmetric - they depend on which class is considered "positive":
+
+**Affected metrics:**
+- `sensitivity()` (true positive rate)
+- `specificity()` (true negative rate)
+- `ppv()` / `precision()` (positive predictive value)
+- `npv()` (negative predictive value)
+- `recall()` (same as sensitivity)
+
+**Unaffected metrics:**
+- `accuracy()` (symmetric)
+- `bal_accuracy()` (accounts for both classes)
+- `mcc()` (Matthews correlation coefficient)
+
+#### Practical example
+
+```r
+truth <- factor(c("disease", "disease", "healthy", "healthy"),
+                levels = c("disease", "healthy"))
+estimate <- factor(c("disease", "healthy", "healthy", "healthy"),
+                   levels = c("disease", "healthy"))
+
+# With event_level = "first" (default)
+# "disease" is the positive class
+sensitivity(df, truth, estimate, event_level = "first")
+# Measures: of actual disease cases, how many were detected?
+# TP=1, FN=1 → sensitivity = 1/2 = 0.5
+
+specificity(df, truth, estimate, event_level = "first")
+# Measures: of actual healthy cases, how many were correctly identified?
+# TN=2, FP=0 → specificity = 2/2 = 1.0
+
+# With event_level = "second"
+# "healthy" is now the positive class
+sensitivity(df, truth, estimate, event_level = "second")
+# Now measures: of actual healthy cases, how many were detected?
+# This is the same as specificity with event_level = "first"!
+# Result: 1.0
+
+specificity(df, truth, estimate, event_level = "second")
+# Now measures: of actual disease cases, how many were correctly identified?
+# This is the same as sensitivity with event_level = "first"!
+# Result: 0.5
+```
+
+**Key insight:** Changing `event_level` swaps sensitivity and specificity.
+
+#### Factor level ordering interaction
+
+Event level interacts with factor level ordering:
+
+```r
+# Scenario 1: levels = c("disease", "healthy"), event_level = "first"
+# → "disease" is positive class
+
+# Scenario 2: levels = c("healthy", "disease"), event_level = "first"
+# → "healthy" is positive class
+
+# Scenario 3: levels = c("disease", "healthy"), event_level = "second"
+# → "healthy" is positive class
+
+# Scenario 2 and Scenario 3 are equivalent!
+```
+
+#### Which event_level to use?
+
+**Default (`event_level = "first"`) when:**
+- The first level in your factor is naturally the "event" or "positive" outcome
+- You're following a convention where positive class comes first
+- You're detecting something (disease, fraud, failure)
+
+**Use `event_level = "second"` when:**
+- The second level is actually the event of interest
+- Your factor levels are ordered alphabetically but that's not your "positive" class
+- Legacy code/data has levels in a specific order
+
+**Best practice:** Order factor levels so the positive class is first, then use default `event_level = "first"`.
+
+#### Confusion matrix indexing
+
+Understanding how event_level maps to confusion matrix positions:
+
+```r
+# With event_level = "first"
+event <- levels(truth)[1]
+control <- levels(truth)[2]
+
+# Confusion matrix indexing:
+xtab[event, event]      # True Positives (TP)
+xtab[control, event]    # False Positives (FP)
+xtab[event, control]    # False Negatives (FN)
+xtab[control, control]  # True Negatives (TN)
+
+# With event_level = "second"
+event <- levels(truth)[2]
+control <- levels(truth)[1]
+# Same indexing logic, but event and control are swapped
+```
+
+#### When implementing your metric
+
+**If your metric is symmetric** (like accuracy, MCC):
+- You can ignore `event_level`
+- Or include it for consistency but note it doesn't affect the result
+
+**If your metric is asymmetric** (like sensitivity, PPV):
+- **You must include `event_level` parameter**
+- Default to `event_level = "first"`
+- Use it to determine which level is the "positive" class
+- Document clearly how `event_level` affects interpretation
+
+**Implementation pattern:**
+```r
+your_metric_vec <- function(truth, estimate, estimator = NULL, na_rm = TRUE,
+                            case_weights = NULL, event_level = "first", ...) {
+  # ... validation ...
+
+  # Determine event level
+  event <- if (identical(event_level, "first")) {
+    levels(truth)[1]
+  } else {
+    levels(truth)[2]
+  }
+
+  # Use event to index confusion matrix correctly
+  # ...
+}
+```
+
+#### Testing with different event levels
+
+Always test both event levels if your metric is affected:
+
+```r
+test_that("metric respects event_level parameter", {
+  df <- data.frame(
+    truth = factor(c("yes", "yes", "no", "no"), levels = c("yes", "no")),
+    estimate = factor(c("yes", "no", "yes", "no"), levels = c("yes", "no"))
+  )
+
+  result_first <- metric_vec(df$truth, df$estimate, event_level = "first")
+  result_second <- metric_vec(df$truth, df$estimate, event_level = "second")
+
+  # Results should differ for asymmetric metrics
+  expect_false(result_first == result_second)
+
+  # Verify the actual values are correct for each case
+  expect_equal(result_first, expected_value_when_yes_is_positive)
+  expect_equal(result_second, expected_value_when_no_is_positive)
+})
+```
+
+#### Common mistakes
+
+**Mistake 1: Assuming alphabetical order**
+```r
+# Data has levels: c("negative", "positive") (alphabetical)
+# User expects "positive" to be event_level = "first"
+# But first level is actually "negative"!
+```
+
+**Mistake 2: Ignoring event_level for asymmetric metrics**
+```r
+# Bad: sensitivity calculation that doesn't use event_level
+sensitivity_impl <- function(truth, estimate) {
+  # Assumes first level is always positive - wrong!
+}
+```
+
+**Mistake 3: Not documenting the behavior**
+```r
+# Bad: no documentation about what event_level does
+#' @param event_level Either "first" or "second"
+
+# Good: clear documentation
+#' @param event_level A string either "first" or "second" to specify which
+#'   level of truth to consider as the "event" or "positive" class.
+#'   Default is "first".
+```
+
+## Creating a probability metric
+
+Probability metrics evaluate predicted probabilities rather than hard classifications. These metrics are used when your model outputs probability estimates for each class.
+
+### Key differences from class metrics
+
+**Probability metrics:**
+- Accept probability columns (`.pred_class1`, `.pred_class2`, etc.)
+- Work with continuous [0, 1] probability values
+- Often more informative than hard classifications
+- Examples: `roc_auc`, `pr_auc`, `mn_log_loss`, `brier_class`
+
+**Class metrics:**
+- Accept factor predictions
+- Work with discrete class labels
+- Simpler to interpret
+- Examples: `accuracy`, `precision`, `recall`
+
+### Understanding probability column structure
+
+For binary classification:
+```r
+# Data has predicted probabilities for each class
+df <- tibble(
+  truth = factor(c("yes", "no", "yes", "no")),
+  .pred_yes = c(0.9, 0.2, 0.7, 0.3),
+  .pred_no = c(0.1, 0.8, 0.3, 0.7)
+)
+```
+
+For multiclass:
+```r
+df <- tibble(
+  truth = factor(c("A", "B", "C")),
+  .pred_A = c(0.7, 0.1, 0.1),
+  .pred_B = c(0.2, 0.8, 0.2),
+  .pred_C = c(0.1, 0.1, 0.7)
+)
+```
+
+**Column naming convention:** `.pred_{level}` where `{level}` matches the factor level.
+
+### Step 1: Implementation function for binary case
+
+```r
+# Example: Brier Score (Mean Squared Error for probabilities)
+brier_class_binary <- function(truth, prob_estimate, event_level) {
+  # Determine which probability column to use
+  event <- if (identical(event_level, "first")) {
+    levels(truth)[1]
+  } else {
+    levels(truth)[2]
+  }
+
+  # Convert truth to 0/1 (1 = event occurred)
+  truth_binary <- as.integer(truth == event)
+
+  # Calculate squared errors
+  mean((prob_estimate - truth_binary)^2)
+}
+```
+
+### Step 2: Vector function
+
+```r
+brier_class_vec <- function(truth, estimate, estimator = NULL, na_rm = TRUE,
+                            case_weights = NULL, event_level = "first", ...) {
+  # Validate na_rm
+  if (!is.logical(na_rm) || length(na_rm) != 1) {
+    cli::cli_abort("{.arg na_rm} must be a single logical value.")
+  }
+
+  # Check for class_pred (shouldn't be used with probability metrics)
+  yardstick::abort_if_class_pred(truth)
+
+  # Finalize estimator
+  estimator <- yardstick::finalize_estimator(
+    truth,
+    estimator,
+    metric_class = "brier_class"
+  )
+
+  # Validate inputs - note: using check_prob_metric for probability validation
+  yardstick::check_prob_metric(truth, estimate, case_weights, estimator)
+
+  # Handle NAs
+  if (na_rm) {
+    result <- yardstick::yardstick_remove_missing(truth, estimate, case_weights)
+    truth <- result$truth
+    estimate <- result$estimate
+    case_weights <- result$case_weights
+  } else if (yardstick::yardstick_any_missing(truth, estimate, case_weights)) {
+    return(NA_real_)
+  }
+
+  brier_class_binary(truth, estimate, event_level)
+}
+```
+
+**Key differences for probability metrics:**
+- Use `check_prob_metric()` instead of `check_class_metric()`
+- `estimate` is a numeric vector of probabilities, not a factor
+- Still need `event_level` to know which probability to use
+
+### Step 3: Data frame method
+
+```r
+brier_class <- function(data, ...) {
+  UseMethod("brier_class")
+}
+
+brier_class <- yardstick::new_prob_metric(
+  brier_class,
+  direction = "minimize",
+  range = c(0, 1)
+)
+
+#' @export
+#' @rdname brier_class
+brier_class.data.frame <- function(data, truth, estimate, estimator = NULL,
+                                   na_rm = TRUE, case_weights = NULL,
+                                   event_level = "first", ...) {
+  yardstick::prob_metric_summarizer(
+    name = "brier_class",
+    fn = brier_class_vec,
+    data = data,
+    truth = !!rlang::enquo(truth),
+    estimate = !!rlang::enquo(estimate),
+    estimator = estimator,
+    na_rm = na_rm,
+    case_weights = !!rlang::enquo(case_weights),
+    event_level = event_level
+  )
+}
+```
+
+**Key differences:**
+- Use `new_prob_metric()` instead of `new_class_metric()`
+- Use `prob_metric_summarizer()` instead of `class_metric_summarizer()`
+
+### Handling multiple probability columns
+
+For multiclass probability metrics, the `estimate` parameter can refer to multiple columns:
+
+```r
+# User specifies probability columns with dplyr selection
+roc_auc(data, truth, c(.pred_A, .pred_B, .pred_C))
+
+# Or using tidyselect helpers
+roc_auc(data, truth, starts_with(".pred_"))
+```
+
+The `prob_metric_summarizer()` handles extracting the appropriate probability columns based on the truth factor levels.
+
+**Your implementation receives:**
+- `truth`: factor vector
+- `estimate`: matrix or data frame of probabilities (for multiclass) OR numeric vector (for binary)
+
+For binary metrics, extract the relevant probability:
+```r
+# estimate is just the probability for the event level
+# prob_metric_summarizer handles this for you
+```
+
+For multiclass metrics, you'll receive all probability columns:
+```r
+# estimate is a matrix with columns for each class
+# You need to handle the full probability distribution
+```
+
+### Multiclass probability metrics
+
+For multiclass (one-vs-all) probability metrics:
+
+```r
+brier_class_multiclass <- function(truth, prob_matrix, estimator) {
+  # prob_matrix has one column per class
+  # Create one-hot encoded truth matrix
+  truth_matrix <- model.matrix(~ truth - 1)
+
+  # Calculate Brier score for each class
+  per_class <- colMeans((prob_matrix - truth_matrix)^2)
+
+  if (estimator == "micro") {
+    # Average all predictions together
+    mean(per_class)
+  } else {
+    # Return per-class scores for macro averaging
+    per_class
+  }
+}
+```
+
+Then in your vector function:
+```r
+if (estimator == "binary") {
+  brier_class_binary(truth, estimate, event_level)
+} else {
+  # estimate is now a matrix for multiclass
+  per_class <- brier_class_multiclass(truth, estimate, estimator)
+
+  # Handle averaging
+  if (estimator == "macro") {
+    mean(per_class)
+  } else if (estimator == "macro_weighted") {
+    # Weight by class frequency
+    class_freq <- table(truth)
+    weighted.mean(per_class, class_freq)
+  } else {
+    # micro already averaged in multiclass function
+    per_class
+  }
+}
+```
+
+### Differences in estimator behavior
+
+**For class metrics:** estimator usually defaults based on number of levels
+- 2 levels → "binary"
+- 3+ levels → "macro"
+
+**For probability metrics:** estimator might behave differently
+- Some metrics only support binary (like `pr_auc`)
+- Some support one-vs-all multiclass (like `roc_auc`)
+- Document clearly what estimators your metric supports
+
+### Common probability metric patterns
+
+**Log loss / Cross-entropy:**
+```r
+# Binary log loss
+-mean(ifelse(truth_binary == 1,
+             log(prob_estimate),
+             log(1 - prob_estimate)))
+```
+
+**Brier score (shown above):**
+```r
+mean((prob_estimate - truth_binary)^2)
+```
+
+**Calibration metrics:**
+- Compare predicted probabilities to observed frequencies
+- Bin predictions and calculate bias within bins
+
+### Testing probability metrics
+
+```r
+test_that("probability metric calculation is correct", {
+  df <- data.frame(
+    truth = factor(c("yes", "yes", "no", "no"), levels = c("yes", "no")),
+    .pred_yes = c(0.9, 0.7, 0.3, 0.1),
+    .pred_no = c(0.1, 0.3, 0.7, 0.9)
+  )
+
+  # Test with the probability for "yes"
+  result <- brier_class_vec(df$truth, df$.pred_yes)
+
+  # Manual calculation:
+  # truth binary: 1, 1, 0, 0
+  # predictions: 0.9, 0.7, 0.3, 0.1
+  # errors: (0.9-1)^2, (0.7-1)^2, (0.3-0)^2, (0.1-0)^2
+  #       = 0.01, 0.09, 0.09, 0.01
+  # mean = 0.05
+  expect_equal(result, 0.05)
+})
+
+test_that("probability metric works with data frame interface", {
+  df <- data.frame(
+    truth = factor(c("yes", "no", "yes", "no"), levels = c("yes", "no")),
+    .pred_yes = c(0.9, 0.2, 0.7, 0.3)
+  )
+
+  result <- brier_class(df, truth, .pred_yes)
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(result$.metric, "brier_class")
+  expect_equal(result$.estimator, "binary")
+})
+```
+
+### Validation considerations
+
+**Probabilities should sum to 1** (for multiclass):
+- For binary, `.pred_yes + .pred_no = 1`
+- For multiclass, sum across all `.pred_*` columns should be 1
+- `check_prob_metric()` validates this
+
+**Probabilities should be in [0, 1]:**
+- Values outside this range are invalid
+- `check_prob_metric()` validates this
+
+**Column names must match levels:**
+```r
+# Good: column names match factor levels
+truth = factor(c("A", "B")),
+.pred_A = c(0.7, 0.3),
+.pred_B = c(0.3, 0.7)
+
+# Bad: mismatched names
+truth = factor(c("A", "B")),
+.pred_class1 = c(0.7, 0.3),  # Doesn't match "A"
+.pred_class2 = c(0.3, 0.7)   # Doesn't match "B"
 ```
 
 ## Documentation
@@ -1029,6 +1865,349 @@ test_that("Works with grouped data", {
 })
 ```
 
+### Real-world edge cases
+
+Beyond standard tests, your metric should handle edge cases that occur in real data. Test these explicitly to avoid surprises.
+
+#### Empty data frames
+
+```r
+test_that("handles empty data frames", {
+  df_empty <- data.frame(
+    truth = numeric(0),
+    estimate = numeric(0)
+  )
+
+  result <- metric_name(df_empty, truth, estimate)
+
+  # Should return a tibble with NA or appropriate value
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 1)
+  # The .estimate might be NA or NaN depending on your metric
+})
+```
+
+**Common behaviors:**
+- Averages of empty vectors: `mean(numeric(0))` = `NaN`
+- Sums of empty vectors: `sum(numeric(0))` = `0`
+- Document which behavior your metric has
+
+#### All-`NA` columns
+
+```r
+test_that("handles all-NA values", {
+  truth <- c(NA, NA, NA)
+  estimate <- c(1, 2, 3)
+
+  # With na_rm = TRUE, all values are removed
+  result <- metric_name_vec(truth, estimate, na_rm = TRUE)
+
+  # Should return NA or NaN (empty after removing NAs)
+  expect_true(is.na(result) || is.nan(result))
+})
+
+test_that("handles all-NA in both vectors", {
+  truth <- c(NA, NA)
+  estimate <- c(NA, NA)
+
+  expect_true(is.na(metric_name_vec(truth, estimate, na_rm = TRUE)))
+  expect_equal(metric_name_vec(truth, estimate, na_rm = FALSE), NA_real_)
+})
+```
+
+#### Single-row data frames
+
+```r
+test_that("handles single observation", {
+  df_single <- data.frame(
+    truth = 5,
+    estimate = 5.1
+  )
+
+  result <- metric_name(df_single, truth, estimate)
+
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 1)
+  expect_false(is.na(result$.estimate))
+})
+```
+
+**Watch for:**
+- Variance-based metrics with n=1 (often undefined)
+- Metrics that require multiple observations
+- Division by zero in calculations
+
+#### Factors with unused levels
+
+```r
+test_that("handles factors with unused levels", {
+  # Create factor with 3 levels but only use 2
+  truth <- factor(c("A", "A", "B", "B"), levels = c("A", "B", "C"))
+  estimate <- factor(c("A", "B", "A", "B"), levels = c("A", "B", "C"))
+
+  # Should work, but confusion matrix has unused level
+  result <- metric_name_vec(truth, estimate)
+  expect_false(is.na(result))
+})
+```
+
+#### Zero or all-zero case weights
+
+```r
+test_that("handles zero case weights", {
+  df <- data.frame(
+    truth = c(1, 2, 3),
+    estimate = c(1, 2, 3),
+    weights = c(0, 0, 0)  # All zero!
+  )
+
+  # weighted.mean with all-zero weights returns NaN
+  result <- metric_name_vec(df$truth, df$estimate, case_weights = df$weights)
+  expect_true(is.na(result) || is.nan(result))
+})
+
+test_that("handles some zero case weights", {
+  df <- data.frame(
+    truth = c(1, 2, 3),
+    estimate = c(1.5, 2, 3),
+    weights = c(1, 0, 1)  # Middle observation has zero weight
+  )
+
+  # Should only use observations with non-zero weights
+  result <- metric_name_vec(df$truth, df$estimate, case_weights = df$weights)
+
+  # Manual: only (1, 1.5) and (3, 3) with weights 1, 1
+  # This depends on your metric's implementation
+  expect_false(is.na(result))
+})
+```
+
+#### Perfect separation (classification)
+
+```r
+test_that("handles perfect predictions", {
+  # All predictions correct
+  truth <- factor(c("A", "A", "B", "B"), levels = c("A", "B"))
+  estimate <- factor(c("A", "A", "B", "B"), levels = c("A", "B"))
+
+  result <- metric_name_vec(truth, estimate)
+
+  # Should give optimal value, not error
+  expect_equal(result, optimal_value)  # e.g., 1.0 for accuracy
+})
+
+test_that("handles all wrong predictions", {
+  # All predictions incorrect
+  truth <- factor(c("A", "A", "B", "B"), levels = c("A", "B"))
+  estimate <- factor(c("B", "B", "A", "A"), levels = c("A", "B"))
+
+  result <- metric_name_vec(truth, estimate)
+
+  # Should give worst value, not error
+  expect_equal(result, worst_value)  # e.g., 0.0 for accuracy
+})
+
+test_that("handles predictions all of one class", {
+  # Model only predicts one class
+  truth <- factor(c("A", "A", "B", "B"), levels = c("A", "B"))
+  estimate <- factor(c("A", "A", "A", "A"), levels = c("A", "B"))
+
+  # Some metrics become undefined (e.g., precision for unpredicted class)
+  result <- metric_name_vec(truth, estimate)
+
+  # Behavior depends on metric
+  # Might be NA, 0, or a valid value
+})
+```
+
+#### Extreme values (numeric)
+
+```r
+test_that("handles very large values", {
+  truth <- c(1e10, 2e10, 3e10)
+  estimate <- c(1.1e10, 2.1e10, 3.1e10)
+
+  result <- metric_name_vec(truth, estimate)
+
+  # Should not overflow or return Inf
+  expect_true(is.finite(result))
+})
+
+test_that("handles very small values", {
+  truth <- c(1e-10, 2e-10, 3e-10)
+  estimate <- c(1.1e-10, 2.1e-10, 3.1e-10)
+
+  result <- metric_name_vec(truth, estimate)
+
+  # Should not underflow or lose precision
+  expect_false(is.na(result))
+})
+```
+
+### Integration testing
+
+Test that your metric works properly within the yardstick ecosystem.
+
+#### Comprehensive `metric_set()` testing
+
+```r
+test_that("works in metric_set with other metrics", {
+  df <- data.frame(
+    truth = c(1, 2, 3, 4, 5),
+    estimate = c(1.1, 2.2, 2.9, 4.1, 5.2)
+  )
+
+  # Combine with multiple yardstick metrics
+  metrics <- yardstick::metric_set(
+    metric_name,
+    yardstick::rmse,
+    yardstick::mae,
+    yardstick::rsq
+  )
+
+  result <- metrics(df, truth, estimate)
+
+  # Check structure
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 4)
+  expect_equal(ncol(result), 3)
+
+  # Check all metrics present
+  expect_true("metric_name" %in% result$.metric)
+  expect_true("rmse" %in% result$.metric)
+  expect_true("mae" %in% result$.metric)
+  expect_true("rsq" %in% result$.metric)
+
+  # Check all have same estimator
+  expect_true(all(result$.estimator == "standard"))
+
+  # Check all have numeric estimates
+  expect_true(all(is.numeric(result$.estimate)))
+  expect_true(all(!is.na(result$.estimate)))
+})
+```
+
+#### Testing all estimator types (classification)
+
+```r
+test_that("works with all estimator types", {
+  # Binary data
+  df_binary <- data.frame(
+    truth = factor(c("A", "A", "B", "B"), levels = c("A", "B")),
+    estimate = factor(c("A", "B", "A", "B"), levels = c("A", "B"))
+  )
+
+  result_binary <- metric_name(df_binary, truth, estimate)
+  expect_equal(result_binary$.estimator, "binary")
+
+  # Multiclass data
+  df_multi <- data.frame(
+    truth = factor(c("A", "A", "B", "B", "C", "C")),
+    estimate = factor(c("A", "B", "B", "C", "C", "A"))
+  )
+
+  # Test macro
+  result_macro <- metric_name(df_multi, truth, estimate, estimator = "macro")
+  expect_equal(result_macro$.estimator, "macro")
+
+  # Test macro_weighted
+  result_weighted <- metric_name(df_multi, truth, estimate, estimator = "macro_weighted")
+  expect_equal(result_weighted$.estimator, "macro_weighted")
+
+  # Test micro
+  result_micro <- metric_name(df_multi, truth, estimate, estimator = "micro")
+  expect_equal(result_micro$.estimator, "micro")
+
+  # All should return valid numeric values
+  expect_true(is.numeric(result_macro$.estimate))
+  expect_true(is.numeric(result_weighted$.estimate))
+  expect_true(is.numeric(result_micro$.estimate))
+})
+```
+
+#### Grouped data integration
+
+```r
+test_that("respects dplyr groups", {
+  df <- data.frame(
+    group1 = rep(c("X", "Y"), each = 6),
+    group2 = rep(c("low", "high"), 6),
+    truth = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+    estimate = c(1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 8.1, 9.1, 10.1, 11.1, 12.1)
+  )
+
+  # Single grouping variable
+  result_single <- df |>
+    dplyr::group_by(group1) |>
+    metric_name(truth, estimate)
+
+  expect_equal(nrow(result_single), 2)  # Two groups
+  expect_equal(sort(result_single$group1), c("X", "Y"))
+  expect_true(all(!is.na(result_single$.estimate)))
+
+  # Multiple grouping variables
+  result_multi <- df |>
+    dplyr::group_by(group1, group2) |>
+    metric_name(truth, estimate)
+
+  expect_equal(nrow(result_multi), 4)  # 2 × 2 = 4 groups
+  expect_true(all(!is.na(result_multi$.estimate)))
+})
+```
+
+#### Case weights with grouping
+
+```r
+test_that("case weights work with grouped data", {
+  df <- data.frame(
+    group = rep(c("A", "B"), each = 3),
+    truth = c(1, 2, 3, 4, 5, 6),
+    estimate = c(1.5, 2.5, 3.5, 4.5, 5.5, 6.5),
+    weights = c(1, 2, 1, 1, 2, 1)
+  )
+
+  result <- df |>
+    dplyr::group_by(group) |>
+    metric_name(truth, estimate, case_weights = weights)
+
+  expect_equal(nrow(result), 2)
+  expect_true(all(!is.na(result$.estimate)))
+
+  # Each group should use its own weights
+  # Group A: weights 1, 2, 1
+  # Group B: weights 1, 2, 1
+})
+```
+
+#### Integration with tidymodels workflow
+
+```r
+test_that("works in typical tidymodels workflow", {
+  # Simulating a typical workflow
+  df <- data.frame(
+    truth = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+    estimate = c(1.1, 2.2, 2.9, 4.1, 5.2, 5.8, 7.1, 8.2, 8.9, 10.1)
+  )
+
+  # Multiple metrics at once
+  all_metrics <- yardstick::metric_set(
+    metric_name,
+    yardstick::rmse,
+    yardstick::mae
+  )
+
+  result <- all_metrics(df, truth = truth, estimate = estimate)
+
+  # Verify structure matches tidymodels expectations
+  expect_true("tbl_df" %in% class(result))
+  expect_true(all(c(".metric", ".estimator", ".estimate") %in% names(result)))
+
+  # Verify can be easily filtered/manipulated
+  my_metric <- result |> dplyr::filter(.metric == "metric_name")
+  expect_equal(nrow(my_metric), 1)
+})
+```
+
 ## File naming conventions
 
 - **Source files**: `R/[type]-[name].R`
@@ -1047,7 +2226,61 @@ Use `yardstick_table()` to create weighted confusion matrices:
 xtab <- yardstick::yardstick_table(truth, estimate, case_weights = case_weights)
 ```
 
-Access elements (assuming 2x2 binary case):
+#### What yardstick_table returns
+
+`yardstick_table()` returns a base R `table` object (which is technically an array):
+
+```r
+xtab <- yardstick_table(truth, estimate)
+class(xtab)
+# [1] "table"
+
+# It's a 2D array with dimnames
+dimnames(xtab)
+# $truth
+# [1] "yes" "no"
+#
+# $estimate
+# [1] "yes" "no"
+```
+
+**Structure:**
+- Rows represent actual truth values
+- Columns represent predicted estimate values
+- Cell values are counts (or weighted counts if case_weights provided)
+
+#### How case_weights are incorporated
+
+When you provide `case_weights`, they're summed within each cell:
+
+```r
+truth <- factor(c("A", "A", "B", "B"))
+estimate <- factor(c("A", "B", "A", "B"))
+weights <- c(1, 2, 3, 4)
+
+xtab <- yardstick_table(truth, estimate, case_weights = weights)
+#      estimate
+# truth A B
+#   A   1 2  # Weights for correct/incorrect "A" predictions
+#   B   3 4  # Weights for incorrect/correct "B" predictions
+```
+
+Without weights, these would just be counts (1, 1, 1, 1).
+
+#### Accessing elements correctly
+
+**Critical:** Use character names, not integer indices:
+
+```r
+# Good: use level names
+tp <- xtab["yes", "yes"]
+fp <- xtab["no", "yes"]
+
+# Bad: numeric indices can be confusing
+tp <- xtab[1, 1]  # Which level is row 1?
+```
+
+**Pattern for any metric:**
 ```r
 # Determine event and control levels
 event <- if (identical(event_level, "first")) {
@@ -1057,18 +2290,109 @@ event <- if (identical(event_level, "first")) {
 }
 control <- setdiff(levels(truth), event)
 
-# True positives: predicted event, actual event
-tp <- xtab[event, event]
-
-# False positives: predicted event, actual control
-fp <- xtab[control, event]
-
-# False negatives: predicted control, actual event
-fn <- xtab[event, control]
-
-# True negatives: predicted control, actual control
-tn <- xtab[control, control]
+# Access using names
+tp <- xtab[event, event]      # True positives: actual event, predicted event
+fp <- xtab[control, event]    # False positives: actual control, predicted event
+fn <- xtab[event, control]    # False negatives: actual event, predicted control
+tn <- xtab[control, control]  # True negatives: actual control, predicted control
 ```
+
+**Remember:**
+- First index (row) = actual truth
+- Second index (column) = prediction
+
+#### Confusion matrix for multiclass
+
+For multiclass, the table is larger:
+
+```r
+truth <- factor(c("A", "A", "B", "B", "C", "C"))
+estimate <- factor(c("A", "B", "A", "C", "C", "A"))
+
+xtab <- yardstick_table(truth, estimate)
+#      estimate
+# truth A B C
+#   A   1 1 0
+#   B   1 0 1
+#   C   1 0 1
+```
+
+**Extracting per-class metrics:**
+```r
+# True positives: diagonal elements
+tp <- diag(xtab)
+# [1] 1 0 1  (for A, B, C respectively)
+
+# Total actual per class: row sums
+actual_per_class <- rowSums(xtab)
+# [1] 2 2 2
+
+# Total predicted per class: column sums
+predicted_per_class <- colSums(xtab)
+# [1] 3 1 2
+
+# False positives for each class: column sum minus diagonal
+fp <- colSums(xtab) - diag(xtab)
+# [1] 2 1 1
+
+# False negatives for each class: row sum minus diagonal
+fn <- rowSums(xtab) - diag(xtab)
+# [1] 1 2 1
+```
+
+#### Common mistakes with table indexing
+
+**Mistake 1: Row/column confusion**
+```r
+# Wrong: thinking columns are truth
+tp <- xtab[event, event]  # This is CORRECT
+
+# Wrong interpretation: "predicted event" as rows
+tp <- xtab[event, event]  # Actually: "actual event" as rows
+```
+
+Remember: `xtab[truth_value, predicted_value]`
+
+**Mistake 2: Assuming numeric indices**
+```r
+# Fragile: depends on factor level order
+tp <- xtab[1, 1]
+fp <- xtab[2, 1]
+
+# Robust: uses level names
+tp <- xtab[event, event]
+fp <- xtab[control, event]
+```
+
+**Mistake 3: Not handling zero counts**
+```r
+# When a cell is zero, it's still numeric
+fp <- xtab[control, event]  # Could be 0
+
+# Don't need special handling for zeros
+sensitivity <- tp / (tp + fn)  # Works even if fn = 0 (gives Inf or NaN)
+```
+
+#### Factor level ordering and the table
+
+The table rows and columns follow factor level order:
+
+```r
+truth <- factor(c("B", "A"), levels = c("A", "B"))
+estimate <- factor(c("B", "A"), levels = c("A", "B"))
+
+xtab <- yardstick_table(truth, estimate)
+#      estimate
+# truth A B
+#   A   1 0
+#   B   0 1
+
+# Levels order matches table order:
+rownames(xtab)  # "A", "B"
+colnames(xtab)  # "A", "B"
+```
+
+This is why it's important to specify factor levels explicitly in tests.
 
 ### Multiclass averaging
 
@@ -1194,10 +2518,212 @@ Before creating a metric, verify:
 - Don't use dynamic roxygen code with non-exported functions
 
 ### Performance
-- Separate multiclass logic for reusability
-- Apply weighting once at the end
-- Use vectorized operations
-- Cache confusion matrices when possible
+
+Writing efficient metric code ensures your metrics work well with large datasets and in repeated evaluations (like cross-validation).
+
+#### Vectorization over loops
+
+**Always prefer vectorized operations:**
+
+```r
+# Good: vectorized
+errors <- truth - estimate
+squared_errors <- errors^2
+mean(squared_errors)
+
+# Bad: loop
+total <- 0
+for (i in seq_along(truth)) {
+  total <- total + (truth[i] - estimate[i])^2
+}
+total / length(truth)
+```
+
+**Vectorized functions:**
+- Arithmetic: `+`, `-`, `*`, `/`, `^`
+- Comparisons: `==`, `!=`, `>`, `<`
+- Logical: `&`, `|`, `!`
+- Math: `abs()`, `sqrt()`, `log()`, `exp()`
+- Aggregations: `sum()`, `mean()`, `max()`, `min()`
+
+#### Use matrix operations for multiclass
+
+**Efficient per-class calculations:**
+
+```r
+# Good: matrix operations
+confusion_matrix <- yardstick_table(truth, estimate)
+tp <- diag(confusion_matrix)
+fp <- colSums(confusion_matrix) - tp
+fn <- rowSums(confusion_matrix) - tp
+
+# Bad: looping over classes
+tp <- numeric(n_classes)
+for (i in seq_len(n_classes)) {
+  tp[i] <- confusion_matrix[i, i]
+}
+```
+
+**Use `colSums()` and `rowSums()`:**
+```r
+# Good
+class_totals <- colSums(confusion_matrix)
+actual_totals <- rowSums(confusion_matrix)
+
+# Avoid
+class_totals <- apply(confusion_matrix, 2, sum)  # Slower
+```
+
+#### Cache confusion matrix calculations
+
+**Don't recalculate the same thing:**
+
+```r
+# Good: calculate once, reuse
+miss_rate_impl <- function(truth, estimate, estimator, event_level, case_weights) {
+  # Calculate confusion matrix once
+  xtab <- yardstick::yardstick_table(truth, estimate, case_weights = case_weights)
+
+  # Use it multiple times
+  miss_rate_estimator_impl(xtab, estimator, event_level)
+}
+
+# Bad: calculate multiple times
+miss_rate_impl <- function(truth, estimate, estimator, event_level, case_weights) {
+  # Calculating table in each helper call
+  binary_result <- miss_rate_binary(truth, estimate, event_level, case_weights)
+  # ...
+}
+```
+
+#### Apply weighting once, at the end
+
+**For multiclass averaging, weight the final results:**
+
+```r
+# Good: calculate per-class, then weight
+per_class_values <- compute_per_class_metric(confusion_matrix)
+
+weights <- if (estimator == "macro") {
+  rep(1, length(per_class_values))
+} else {
+  colSums(confusion_matrix)  # Frequency weighting
+}
+
+weighted.mean(per_class_values, weights)
+
+# Bad: applying weights multiple times in intermediate steps
+# (More complex, harder to reason about, potentially buggy)
+```
+
+#### Avoid repeated validations
+
+**Validate once at entry point, trust internally:**
+
+```r
+# Good: validate in vec function
+metric_vec <- function(truth, estimate, ...) {
+  check_numeric_metric(truth, estimate, case_weights)  # Validate once
+
+  metric_impl(truth, estimate, ...)  # Trust the data
+}
+
+metric_impl <- function(truth, estimate, ...) {
+  # No validation needed - data already validated
+  mean((truth - estimate)^2)
+}
+
+# Bad: validating multiple times
+metric_impl <- function(truth, estimate, ...) {
+  check_numeric_metric(truth, estimate, case_weights)  # Redundant!
+  mean((truth - estimate)^2)
+}
+```
+
+#### Pre-compute constant values
+
+**Calculate invariants outside loops or repeated operations:**
+
+```r
+# Good: compute levels once
+levels_list <- levels(truth)
+n_levels <- length(levels_list)
+
+for (i in seq_len(n_levels)) {
+  # Use pre-computed values
+}
+
+# Bad: recomputing each iteration
+for (i in seq_len(length(levels(truth)))) {
+  levels_list <- levels(truth)  # Redundant!
+}
+```
+
+#### Avoid unnecessary data copies
+
+**Use views/references when possible:**
+
+```r
+# Good: work with vectors directly
+mean((truth - estimate)^2)
+
+# Avoid: creating intermediate data frames unnecessarily
+df_temp <- data.frame(truth = truth, estimate = estimate)
+mean((df_temp$truth - df_temp$estimate)^2)
+```
+
+#### Handle case weights efficiently
+
+**Convert hardhat weights once:**
+
+```r
+# Good: convert once at the start
+if (!is.null(case_weights)) {
+  if (inherits(case_weights, c("hardhat_importance_weights",
+                               "hardhat_frequency_weights"))) {
+    case_weights <- as.double(case_weights)
+  }
+  # Now use case_weights multiple times
+}
+
+# Bad: converting repeatedly
+if (!is.null(case_weights)) {
+  result1 <- weighted.mean(x, as.double(case_weights))
+  result2 <- weighted.mean(y, as.double(case_weights))  # Converting again!
+}
+```
+
+#### Profile before optimizing
+
+**Focus optimization where it matters:**
+
+1. Start with clear, correct code
+2. Profile with `profvis::profvis()` if performance is an issue
+3. Optimize the actual bottlenecks
+4. Don't prematurely optimize
+
+```r
+# Profile your metric
+profvis::profvis({
+  for (i in 1:100) {
+    metric_name_vec(truth, estimate)
+  }
+})
+```
+
+Most metrics are fast enough without optimization. Focus on correctness first.
+
+#### When performance doesn't matter
+
+**Don't optimize unnecessarily:**
+- Metrics are typically called once or a few times per model evaluation
+- The metric calculation is usually fast compared to model fitting
+- Readability and correctness are more important than micro-optimizations
+
+**Do optimize when:**
+- Your metric will be called thousands of times (hyperparameter tuning, cross-validation)
+- You're working with very large datasets (millions of observations)
+- Profiling shows your metric is the bottleneck
 
 ### Error messages
 - Use `cli::cli_abort()` for errors
