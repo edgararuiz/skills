@@ -142,6 +142,52 @@ if (!file.exists("DESCRIPTION")) {
 }
 ```
 
+**Set up .Rbuildignore:**
+
+Add patterns to exclude from package builds:
+
+```r
+# Add common exclusions to .Rbuildignore
+writeLines(c(
+  "^\\.here$",
+  "^\\.claude$",
+  "^example.*\\.R$",
+  "^.*\\.Rproj$",
+  "^\\.Rproj\\.user$"
+), ".Rbuildignore", useBytes = TRUE)
+```
+
+Or manually edit `.Rbuildignore` to include:
+```
+^\.here$
+^\.claude$
+^example.*\.R$
+^.*\.Rproj$
+^\.Rproj\.user$
+```
+
+This prevents `R CMD check` NOTEs about non-standard files.
+
+## Development Workflow
+
+**IMPORTANT:** Follow this workflow to develop your metric efficiently.
+
+### During Development (Fast Iteration Cycle)
+
+Run these commands repeatedly while developing:
+
+1. `devtools::document()` - Generate documentation
+2. `devtools::load_all()` - Load your package
+3. `devtools::test()` - Run tests
+
+This cycle is fast (seconds) and gives you immediate feedback.
+
+### Final Validation (Run Once at End)
+
+4. `devtools::check()` - Full R CMD check
+
+**WARNING:** Do NOT run `check()` during iteration. It takes 1-2 minutes and is unnecessary until you're done. Only run it once at the very end for final validation before submitting/publishing.
+
 ## Metric types
 
 Yardstick supports several metric types:
@@ -439,6 +485,53 @@ mse.data.frame <- function(data, truth, estimate, na_rm = TRUE,
 - Specify `range` as `c(min, max)` (use `Inf` or `-Inf` for unbounded)
 - Use `rlang::enquo()` and `!!` for NSE support
 - Export the data frame method with `@export`
+
+### Step 4: Handling Custom Parameters (Optional)
+
+If your metric needs custom parameters beyond the standard ones (na_rm, case_weights), use the `fn_options` parameter in `numeric_metric_summarizer()`.
+
+**Example with threshold parameter:**
+
+```r
+#' @param threshold Threshold value for the metric. Default is 0.1.
+threshold_accuracy.data.frame <- function(data, truth, estimate, threshold = 0.1,
+                                          na_rm = TRUE, case_weights = NULL, ...) {
+  yardstick::numeric_metric_summarizer(
+    name = "threshold_accuracy",
+    fn = threshold_accuracy_vec,
+    data = data,
+    truth = !!rlang::enquo(truth),
+    estimate = !!rlang::enquo(estimate),
+    na_rm = na_rm,
+    case_weights = !!rlang::enquo(case_weights),
+    fn_options = list(threshold = threshold)  # Pass custom parameter here
+  )
+}
+```
+
+**Validate custom parameters in your _vec function:**
+
+```r
+threshold_accuracy_vec <- function(truth, estimate, threshold = 0.1, na_rm = TRUE,
+                                   case_weights = NULL, ...) {
+  # Validate threshold
+  if (!is.numeric(threshold) || length(threshold) != 1 || threshold < 0) {
+    cli::cli_abort("{.arg threshold} must be a single non-negative numeric value.")
+  }
+
+  # Validate na_rm
+  if (!is.logical(na_rm) || length(na_rm) != 1) {
+    cli::cli_abort("{.arg na_rm} must be a single logical value.")
+  }
+
+  # ... rest of validation and calculation
+}
+```
+
+**Common validation patterns:**
+- Numeric range: `if (threshold < 0 || threshold > 1) cli::cli_abort(...)`
+- Single value: `if (length(param) != 1) cli::cli_abort(...)`
+- Character options: `param <- rlang::arg_match(param, c("option1", "option2"))`
 
 ## Creating a class metric
 
@@ -1201,6 +1294,31 @@ truth = factor(c("A", "B")),
 #'
 #' @export
 ```
+
+## Package-level Documentation for Imports
+
+When you use base R or stats functions like `weighted.mean()`, you need to import them via a package-level documentation file.
+
+**Create `R/{packagename}-package.R`:**
+
+```r
+#' @keywords internal
+#' @importFrom stats weighted.mean
+"_PACKAGE"
+
+## usethis namespace: start
+## usethis namespace: end
+NULL
+```
+
+Replace `{packagename}` with your actual package name (e.g., `R/mymetrics-package.R`).
+
+**When to use this:**
+- Importing functions from base/stats packages
+- Any function that `R CMD check` warns about as "no visible global function definition"
+
+**After creating this file:**
+Run `devtools::document()` to update your NAMESPACE file.
 
 ## Autoplot Support (Optional)
 
@@ -2057,14 +2175,13 @@ if (is.null(case_weights)) {
 5. ✅ **Add comprehensive documentation** (use templates above, no external templates)
 6. ✅ **Create tests** (use simple inline test data, not yardstick internals)
 7. ✅ **Add autoplot support (optional)** - only if metric returns curves or confusion matrices
-8. ✅ **Run and verify:**
-
-```bash
-# From command line
-Rscript -e "devtools::document()"  # Generate documentation
-Rscript -e "devtools::load_all()"  # Load package
-Rscript -e "devtools::test()"      # Run tests
-```
+8. ✅ **Develop iteratively** (see Development Workflow section):
+   - `devtools::document()` - Generate documentation
+   - `devtools::load_all()` - Load package
+   - `devtools::test()` - Run tests
+   - **Repeat this fast cycle** during development
+9. ✅ **Final validation** (once at the end):
+   - `devtools::check()` - Full R CMD check (⚠️ slow, only run once at end)
 
 ## Common pitfalls to avoid
 
@@ -2082,6 +2199,10 @@ Rscript -e "devtools::test()"      # Run tests
 12. ❌ Forgetting to add ggplot2 as a dependency when implementing autoplot
 13. ❌ Not using `ggplot2::` prefix for ggplot2 functions in autoplot methods
 14. ❌ Trying to reuse yardstick's internal plotting code (build your own with ggplot2)
+15. ❌ Running `check()` during iteration (it's slow - only run at the end)
+16. ❌ Not passing custom parameters through `fn_options` in metric_summarizer
+17. ❌ Forgetting to import base/stats functions (causes check NOTEs)
+18. ❌ Not setting up .Rbuildignore (causes check NOTEs about non-standard files)
 
 ## Pre-flight checklist
 
@@ -2089,6 +2210,7 @@ Before creating a metric, verify:
 - [ ] DESCRIPTION file exists (if not, run package initialization)
 - [ ] yardstick, rlang, cli are in Imports section
 - [ ] testthat is configured (tests/testthat/ directory exists)
+- [ ] .Rbuildignore is set up (excludes .claude, .here, example files)
 - [ ] R/ directory exists
 - [ ] You know which type of metric (numeric/class/prob)
 - [ ] You have the formula/calculation method clearly defined
@@ -2116,6 +2238,18 @@ Before creating a metric, verify:
 ### Tests fail with "object 'data_altman' not found"
 - **Cause**: Using yardstick internal test data
 - **Fix**: Create simple test data inline (see Testing section)
+
+### "Can't find custom parameter in _vec function"
+- **Cause**: Custom parameters not passed through fn_options
+- **Fix**: Pass custom parameters through `fn_options` in `numeric_metric_summarizer()` (see Step 4 in numeric metrics)
+
+### "R CMD check NOTE: no visible global function definition for 'weighted.mean'"
+- **Cause**: Missing import for base/stats functions
+- **Fix**: Add package-level documentation file (R/{packagename}-package.R) with `@importFrom stats weighted.mean`
+
+### "R CMD check NOTE: non-standard files/directories found"
+- **Cause**: Hidden files or example files not excluded from package build
+- **Fix**: Set up .Rbuildignore to exclude .claude, .here, example files, etc. (see Prerequisites section)
 
 ## Best practices
 
