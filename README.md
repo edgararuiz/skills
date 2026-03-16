@@ -18,6 +18,27 @@ Comprehensive guide for creating new yardstick performance metrics (numeric, cla
 
 **Why is this a large skill?** This skill is ~2,350 lines because it covers three metric types (numeric, class, probability), each with different complexity levels, plus comprehensive testing patterns, edge case handling, autoplot support, and yardstick-specific internals (confusion matrices, event levels, factor ordering). It's designed as a self-contained reference guide that Claude searches rather than reads linearly—users without access to yardstick source code need complete working examples and detailed explanations of non-exported functions.
 
+## Installation
+
+### Via Claude Code Marketplace
+
+The easiest way to install these skills is through the Claude Code marketplace:
+
+```bash
+# Add the marketplace
+/plugin marketplace add edgararuiz/skills
+
+# Install the tidymodels development plugin
+/plugin install tidymodels-dev@tidymodels-skills
+```
+
+**Note:** The repository must be public for GitHub-based installation. For local development, you can add the marketplace using the local path:
+
+```bash
+/plugin marketplace add /Users/edgar/Projects/skills-personal
+/plugin install tidymodels-dev@tidymodels-skills
+```
+
 ## Using Skills
 
 Skills are automatically invoked by Claude Code when your request matches the skill's description. For example:

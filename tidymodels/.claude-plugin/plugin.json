@@ -1,0 +1,9 @@
+{
+  "name": "tidymodels-dev",
+  "description": "Development tools and guides for tidymodels ecosystem packages",
+  "version": "1.0.0",
+  "author": {
+    "name": "Edgar Ruiz"
+  },
+  "keywords": ["tidymodels", "yardstick", "metrics", "r-packages"]
+}
