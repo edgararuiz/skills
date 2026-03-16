@@ -5,11 +5,15 @@
   "author": {
     "name": "Edgar Ruiz"
   },
-  "keywords": ["tidymodels", "yardstick", "metrics", "r-packages"],
+  "keywords": ["tidymodels", "yardstick", "metrics", "recipes", "r-packages"],
   "skills": [
     {
       "name": "add-yardstick-metric",
       "source": "./skills/add-yardstick-metric"
+    },
+    {
+      "name": "add-recipe-step",
+      "source": "./skills/add-recipe-step"
     }
   ]
 }
