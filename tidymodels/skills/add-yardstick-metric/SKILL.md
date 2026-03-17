@@ -18,6 +18,35 @@ Creating a custom yardstick metric provides:
 - Integration with `metric_set()`
 - Optional autoplot support for visualization (curves and confusion matrices)
 
+## Repository Access (Optional but Recommended)
+
+For enhanced guidance with real implementation examples from the yardstick package, you can clone the source code repository locally.
+
+**Benefits:**
+- See actual metric implementations
+- Reference real test patterns
+- Search through source code
+- Understand package architecture
+
+**Quick Setup:**
+
+Run from your R package directory:
+
+```bash
+# macOS/Linux/WSL
+./path/to/skills-personal/shared-scripts/clone-tidymodels-repos.sh yardstick
+
+# Windows (PowerShell)
+.\path\to\skills-personal\shared-scripts\clone-tidymodels-repos.ps1 yardstick
+
+# Any platform (Python)
+python3 /path/to/skills-personal/shared-scripts/clone-tidymodels-repos.py yardstick
+```
+
+**For complete instructions**, see: [Repository Access Setup](../shared-references/repository-access.md)
+
+**Note:** Repository access is optional. This skill works with built-in references if you choose not to clone.
+
 ## Quick Navigation
 
 **Reference Files:**
