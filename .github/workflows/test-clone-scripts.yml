@@ -186,7 +186,7 @@ jobs:
             Write-Error "Expected exit code 1, got $LASTEXITCODE"
             exit 1
           }
-          Write-Host "✓ Script correctly exits with code 1 when no arguments provided"
+          Write-Host "[PASS] Script correctly exits with code 1 when no arguments provided"
 
       - name: Test cloning yardstick
         shell: powershell
@@ -207,35 +207,35 @@ jobs:
             Write-Error "repos\yardstick directory not found"
             exit 1
           }
-          Write-Host "✓ repos\yardstick directory exists"
+          Write-Host "[PASS] repos\yardstick directory exists"
 
           # Check for R files
           if (!(Test-Path "repos\yardstick\R")) {
             Write-Error "repos\yardstick\R directory not found"
             exit 1
           }
-          Write-Host "✓ repos\yardstick\R directory exists"
+          Write-Host "[PASS] repos\yardstick\R directory exists"
 
           # Check shallow clone
           if (!(Test-Path "repos\yardstick\.git\shallow")) {
             Write-Error "Not a shallow clone"
             exit 1
           }
-          Write-Host "✓ Shallow clone verified"
+          Write-Host "[PASS] Shallow clone verified"
 
           # Check .gitignore
           if (!(Select-String -Path .gitignore -Pattern "repos/" -Quiet)) {
             Write-Error "repos/ not found in .gitignore"
             exit 1
           }
-          Write-Host "✓ .gitignore contains 'repos/'"
+          Write-Host "[PASS] .gitignore contains 'repos/'"
 
           # Check .Rbuildignore
           if (!(Select-String -Path .Rbuildignore -Pattern "\^repos\$" -Quiet)) {
             Write-Error "^repos$ not found in .Rbuildignore"
             exit 1
           }
-          Write-Host "✓ .Rbuildignore contains '^repos$'"
+          Write-Host "[PASS] .Rbuildignore contains '^repos$'"
 
       - name: Test idempotency (run again)
         shell: powershell
@@ -255,14 +255,14 @@ jobs:
             Write-Error "Found $gitignoreCount occurrences of 'repos/' in .gitignore (expected 1)"
             exit 1
           }
-          Write-Host "✓ No duplicates in .gitignore"
+          Write-Host "[PASS] No duplicates in .gitignore"
 
           $rbuildCount = (Select-String -Path .Rbuildignore -Pattern "\^repos\$" -AllMatches).Matches.Count
           if ($rbuildCount -ne 1) {
             Write-Error "Found $rbuildCount occurrences of '^repos$' in .Rbuildignore (expected 1)"
             exit 1
           }
-          Write-Host "✓ No duplicates in .Rbuildignore"
+          Write-Host "[PASS] No duplicates in .Rbuildignore"
 
       - name: Test cloning all packages
         shell: powershell
@@ -282,7 +282,7 @@ jobs:
             Write-Error "Not all packages cloned"
             exit 1
           }
-          Write-Host "✓ All packages cloned successfully"
+          Write-Host "[PASS] All packages cloned successfully"
 
   test-python:
     name: Test Python Script on ${{ matrix.os }}
@@ -374,27 +374,27 @@ jobs:
           echo "|--------|----------|--------|" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ needs.test-bash-macos.result }}" == "success" ]; then
-            echo "| Bash | macOS | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Bash | macOS | :white_check_mark: Passed |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Bash | macOS | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Bash | macOS | :x: Failed |" >> $GITHUB_STEP_SUMMARY
           fi
 
           if [ "${{ needs.test-bash-linux.result }}" == "success" ]; then
-            echo "| Bash | Linux | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Bash | Linux | :white_check_mark: Passed |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Bash | Linux | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Bash | Linux | :x: Failed |" >> $GITHUB_STEP_SUMMARY
           fi
 
           if [ "${{ needs.test-powershell-windows.result }}" == "success" ]; then
-            echo "| PowerShell | Windows | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| PowerShell | Windows | :white_check_mark: Passed |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| PowerShell | Windows | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+            echo "| PowerShell | Windows | :x: Failed |" >> $GITHUB_STEP_SUMMARY
           fi
 
           if [ "${{ needs.test-python.result }}" == "success" ]; then
-            echo "| Python | All platforms | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Python | All platforms | :white_check_mark: Passed |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Python | All platforms | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Python | All platforms | :x: Failed |" >> $GITHUB_STEP_SUMMARY
           fi
 
           # Fail if any job failed
@@ -403,9 +403,9 @@ jobs:
              [ "${{ needs.test-powershell-windows.result }}" != "success" ] || \
              [ "${{ needs.test-python.result }}" != "success" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "⚠️ Some tests failed. Please review the logs above." >> $GITHUB_STEP_SUMMARY
+            echo ":warning: Some tests failed. Please review the logs above." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ All tests passed successfully!" >> $GITHUB_STEP_SUMMARY
+          echo ":white_check_mark: All tests passed successfully!" >> $GITHUB_STEP_SUMMARY
