@@ -22,6 +22,8 @@ Creating a custom yardstick metric provides:
 
 **Reference Files:**
 - [Metric System Architecture](references/metric-system.md) - How new_*_metric() works, .estimator column, design considerations
+- [Combining Metrics](references/metric-set.md) - Using metric_set() to combine multiple metrics
+- [Groupwise Metrics](references/groupwise-metrics.md) - Creating disparity/fairness metrics
 - [Numeric Metrics](references/numeric-metrics.md) - Regression metrics (MAE, RMSE, MSE)
 - [Class Metrics](references/class-metrics.md) - Classification metrics (accuracy, precision, recall)
 - [Probability Metrics](references/probability-metrics.md) - Probability-based metrics (ROC AUC, log loss)
@@ -532,6 +534,47 @@ See [Class Metrics](references/class-metrics.md) for complete guide.
 **Macro averaging:** Average of per-class metrics (treats all classes equally)
 **Micro averaging:** Pool all observations, calculate once (treats all observations equally)
 **Macro-weighted averaging:** Weighted average by class prevalence
+
+## Advanced Topics
+
+### Combining Metrics with metric_set()
+
+Once you've created your metric, you can combine it with other metrics using `metric_set()`:
+
+```r
+my_metrics <- metric_set(mae, rmse, my_custom_metric)
+my_metrics(data, truth = y, estimate = y_pred)
+```
+
+**Key benefits:**
+- Calculate multiple metrics at once
+- More efficient (shared calculations)
+- Integrates with tune package
+- Works with grouped data
+
+See [Combining Metrics](references/metric-set.md) for complete guide.
+
+### Creating Groupwise Metrics
+
+Groupwise metrics measure disparity in metric values across groups (useful for fairness):
+
+```r
+accuracy_diff <- new_groupwise_metric(
+  fn = accuracy,
+  name = "accuracy_diff",
+  aggregate = function(x) diff(range(x$.estimate))
+)
+
+accuracy_diff_by_group <- accuracy_diff(group_column)
+accuracy_diff_by_group(data, truth, estimate)
+```
+
+**Use cases:**
+- Fairness analysis across demographic groups
+- Performance consistency across segments
+- Disparity quantification
+
+See [Groupwise Metrics](references/groupwise-metrics.md) for complete guide.
 
 ## Package Integration
 
