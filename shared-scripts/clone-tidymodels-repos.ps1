@@ -183,9 +183,9 @@ function Clone-Repository {
 # Main script
 function Main {
     Write-Host ""
-    Write-Host "═══════════════════════════════════════════════════════"
+    Write-Host "======================================================="
     Write-Host "  Tidymodels Repository Cloning Script"
-    Write-Host "═══════════════════════════════════════════════════════"
+    Write-Host "======================================================="
     Write-Host ""
 
     # Check if packages were provided
@@ -286,9 +286,9 @@ function Main {
     Write-Host ""
 
     # Success summary
-    Write-Host "═══════════════════════════════════════════════════════"
+    Write-Host "======================================================="
     Write-Success "Repository setup complete!"
-    Write-Host "═══════════════════════════════════════════════════════"
+    Write-Host "======================================================="
     Write-Host ""
     Write-Host "Cloned repositories:"
     foreach ($package in $packagesToClone) {
