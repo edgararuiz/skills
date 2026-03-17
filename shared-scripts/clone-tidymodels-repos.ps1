@@ -42,7 +42,7 @@
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromRemainingArguments=$true)]
+    [Parameter(Mandatory=$false, Position=0, ValueFromRemainingArguments=$true)]
     [string[]]$Packages
 )
 
@@ -187,6 +187,21 @@ function Main {
     Write-Host "  Tidymodels Repository Cloning Script"
     Write-Host "═══════════════════════════════════════════════════════"
     Write-Host ""
+
+    # Check if packages were provided
+    if (-not $Packages -or $Packages.Count -eq 0) {
+        Write-Error "No packages specified."
+        Write-Host ""
+        Write-Host "Usage: .\clone-tidymodels-repos.ps1 PACKAGE [PACKAGE ...]"
+        Write-Host "  Packages: yardstick, recipes, all"
+        Write-Host ""
+        Write-Host "Examples:"
+        Write-Host "  .\clone-tidymodels-repos.ps1 yardstick"
+        Write-Host "  .\clone-tidymodels-repos.ps1 recipes"
+        Write-Host "  .\clone-tidymodels-repos.ps1 yardstick recipes"
+        Write-Host "  .\clone-tidymodels-repos.ps1 all"
+        exit 1
+    }
 
     # Step 1: Check git installation
     Write-Info "Step 1/4: Checking git installation..."
