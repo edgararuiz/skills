@@ -61,9 +61,16 @@ Enhance the tidymodels skills system to provide automatic access to source code 
 
 ## Implementation Components
 
-### 1. Repository Cloning Logic
+### 1. Repository Cloning Scripts
 
-**Implementation**: Claude executes git commands directly during skill invocation
+**Implementation**: Standalone scripts in `shared-scripts/` directory that can be executed by Claude or run manually by users
+
+**Location**: `shared-scripts/` in skills-personal repository
+
+**Scripts** (platform-native approach):
+1. `shared-scripts/clone-tidymodels-repos.sh` - POSIX shell script (macOS, Linux, WSL, Git Bash)
+2. `shared-scripts/clone-tidymodels-repos.ps1` - PowerShell script (Windows native, preferred)
+3. `shared-scripts/clone-tidymodels-repos.py` - Python script (universal fallback for any platform)
 
 **Requirements**:
 - Work on macOS, Linux, Windows
@@ -71,6 +78,7 @@ Enhance the tidymodels skills system to provide automatic access to source code 
 - Handle existing clones (skip or offer to update)
 - Provide clear output/status messages
 - Handle errors gracefully
+- Update .gitignore and .Rbuildignore automatically
 
 **Repositories to clone**:
 | Package | Repository URL |
@@ -78,193 +86,193 @@ Enhance the tidymodels skills system to provide automatic access to source code 
 | yardstick | https://github.com/tidymodels/yardstick |
 | recipes | https://github.com/tidymodels/recipes |
 
-**Cloning logic**:
+**Bash Script Features** (`clone-tidymodels-repos.sh`):
 ```bash
-# 1. Check if git is installed
-git --version
+#!/bin/bash
+# Target: macOS, Linux, WSL, Git Bash on Windows
+# Check git installation
+# Accept package name as argument (yardstick, recipes, all)
+# Create repos/ directory if needed
+# Clone with --depth 1 (shallow clone)
+# Update .gitignore and .Rbuildignore
+# Handle errors with clear messages
+# Exit codes: 0 = success, 1 = git not found, 2 = clone failed, 3 = permission error
+```
 
-# 2. Create repos/ directory if needed
-mkdir -p repos
+**PowerShell Script Features** (`clone-tidymodels-repos.ps1`):
+```powershell
+# Target: Windows (PowerShell 5.1+, pre-installed on Windows 7+)
+# Check git installation (git.exe in PATH)
+# Accept package name as parameter (yardstick, recipes, all)
+# Create repos\ directory if needed
+# Clone with --depth 1 (shallow clone)
+# Update .gitignore and .Rbuildignore (handle CRLF line endings)
+# Handle errors with clear messages
+# Exit codes: 0 = success, 1 = git not found, 2 = clone failed, 3 = permission error
+```
 
-# 3. Check if repository already exists
-if [ -d "repos/yardstick" ]; then
-  # Ask user if they want to update (git pull)
-else
-  # Clone with --depth 1 (shallow clone for speed and disk space)
-  cd repos
-  git clone --depth 1 https://github.com/tidymodels/yardstick
-  cd ..
-fi
+**Python Script Features** (`clone-tidymodels-repos.py`):
+```python
+#!/usr/bin/env python3
+# Target: Universal fallback (requires Python 3.6+)
+# Same functionality as platform scripts
+# Uses subprocess for git commands
+# Works on all platforms (macOS, Linux, Windows)
+# Automatic line ending handling
+# More detailed error messages with color output
+```
 
-# 4. Update user's .gitignore and .Rbuildignore
-# Using R's usethis package:
-# usethis::use_git_ignore("repos/")
-# usethis::use_build_ignore("repos")
+**Script Usage**:
+
+**macOS/Linux/WSL:**
+```bash
+# Clone specific package
+./shared-scripts/clone-tidymodels-repos.sh yardstick
+
+# Clone multiple packages
+./shared-scripts/clone-tidymodels-repos.sh yardstick recipes
+
+# Clone all packages
+./shared-scripts/clone-tidymodels-repos.sh all
+```
+
+**Windows (PowerShell):**
+```powershell
+# Clone specific package
+.\shared-scripts\clone-tidymodels-repos.ps1 yardstick
+
+# Clone multiple packages
+.\shared-scripts\clone-tidymodels-repos.ps1 yardstick recipes
+
+# Clone all packages
+.\shared-scripts\clone-tidymodels-repos.ps1 all
+```
+
+**Any platform (Python fallback):**
+```bash
+# If native scripts don't work or Python is preferred
+python3 shared-scripts/clone-tidymodels-repos.py yardstick
+```
+
+**Script Selection Logic**:
+
+When Claude invokes repository cloning, use this decision tree:
+
+```
+Platform Detection
+        │
+        ├─ macOS/Linux/WSL → Use .sh script
+        ├─ Windows → Check PowerShell available?
+        │            ├─ Yes → Use .ps1 script (preferred)
+        │            └─ No → Use .py script (fallback)
+        └─ Unknown/Other → Use .py script (universal)
+```
+
+**Platform Detection**:
+- macOS: `uname` returns `Darwin`
+- Linux: `uname` returns `Linux`
+- WSL: `uname` contains `Microsoft` or `WSL`
+- Windows: `$env:OS` contains `Windows_NT` or `os.name == 'nt'`
+
+**PowerShell Availability Check** (Windows):
+```powershell
+# Check if PowerShell is available (should always be on Windows 7+)
+$PSVersionTable.PSVersion
+# If this returns version info, use .ps1 script
+# If PowerShell not found (rare), fallback to .py
 ```
 
 **Error handling**:
-- Git not installed → Inform user about git benefits
-- No write permissions → Suggest fallback to GitHub references
-- Network issues → Suggest trying again or using built-in references
-- Disk space issues → Report size requirements (~5-8 MB per repo)
+- Git not installed → Exit code 1, inform user with installation links
+- No write permissions → Exit code 3, suggest checking permissions
+- Network issues → Exit code 2, suggest retry or GitHub fallback
+- Disk space issues → Exit code 2, report size requirements (~5-8 MB per repo)
 
-### 2. Git Installation Check
+### 2. Centralized Repository Access Documentation
 
-**Before attempting to clone**, check if git is installed:
+**Location**: `tidymodels/skills/shared-references/repository-access.md`
 
-```python
-# Pseudo-code for git check
-def check_git_installed():
-    try:
-        result = run_command("git --version")
-        return result.returncode == 0
-    except:
-        return False
+**Purpose**: Single source of truth for repository access workflow, referenced by all skills
+
+**Content Structure**:
+1. **Overview** - Why repository access improves skill effectiveness
+2. **Prerequisites** - Git installation check and instructions
+3. **Quick Start** - Running the clone script
+4. **Step-by-Step Workflow**:
+   - Check git installation
+   - Check for existing repository
+   - Clone repository (using script)
+   - Verify setup
+5. **Using the Scripts**:
+   - Shell script usage
+   - Python script usage (fallback)
+   - Script output and exit codes
+6. **Manual Setup** - For users who prefer manual cloning
+7. **Troubleshooting**:
+   - Git not installed
+   - Permission errors
+   - Network issues
+   - Disk space issues
+8. **What Gets Modified**:
+   - repos/ directory structure
+   - .gitignore changes
+   - .Rbuildignore changes
+9. **FAQ**:
+   - Disk space requirements
+   - Update frequency
+   - Removing cloned repositories
+
+**Skills Reference**:
+Each skill (add-yardstick-metric, add-recipe-step) will have a brief section:
+```markdown
+## Repository Access (Optional but Recommended)
+
+For enhanced guidance with real implementation examples, see:
+[Repository Access Setup](../shared-references/repository-access.md)
+
+This will help clone the {package} source code to provide more accurate patterns.
 ```
 
-**If git is NOT installed**:
-```
-I notice git is not installed on your system. While I can help you create
-the metric/step using the built-in references, having access to the source
-code repository would improve effectiveness.
+### 3. Gitignore and Rbuildignore Updates (Handled by Scripts)
 
-If you'd like enhanced guidance with real examples from the package:
-1. Install git: https://git-scm.com/downloads
-2. Run this conversation again, and I can clone the repository for you
+**Scripts handle ignore file modifications automatically**:
 
-For now, I'll proceed using the built-in reference materials.
-```
-
-**If git IS installed**: Proceed to check for existing clone or offer to clone.
-
-### 3. Gitignore and Rbuildignore Updates (User's Package)
-
-When cloning repositories, the skill should modify the **user's package** .gitignore and .Rbuildignore files.
-
-**Add to user's `.gitignore`** (or create if doesn't exist):
-```
-# Repository clones for development reference
-repos/
-```
-
-**Add to user's `.Rbuildignore`** (or create if doesn't exist):
-```
-^repos$
-```
-
-**Implementation approach**:
-```r
-# R code to update user's package ignore files
-usethis::use_git_ignore("repos/")
-usethis::use_build_ignore("repos")
-```
-
-**Alternative - Direct file modification** (if usethis not available):
-```r
-# Add to .gitignore
-gitignore_path <- ".gitignore"
-gitignore_content <- if (file.exists(gitignore_path)) {
-  readLines(gitignore_path)
-} else {
-  character(0)
-}
-if (!"repos/" %in% gitignore_content) {
-  write("repos/", file = gitignore_path, append = TRUE)
-}
-
-# Add to .Rbuildignore
-rbuildignore_path <- ".Rbuildignore"
-rbuildignore_content <- if (file.exists(rbuildignore_path)) {
-  readLines(rbuildignore_path)
-} else {
-  character(0)
-}
-if (!"^repos$" %in% rbuildignore_content) {
-  write("^repos$", file = rbuildignore_path, append = TRUE)
-}
-```
+The clone scripts will:
+- Add `repos/` to `.gitignore` (or create if doesn't exist)
+- Add `^repos$` to `.Rbuildignore` (or create if doesn't exist)
+- Avoid duplicates with conditional checks
+- Provide clear output about what was modified
 
 **Important**: These modifications happen in the user's R package directory, NOT in the skills-personal repository.
 
-### 4. Skill Enhancement Pattern
+### 4. Skill Enhancement Pattern (Simplified)
 
-**At skill invocation**, Claude should follow this decision tree:
+**At skill invocation**, Claude should:
 
-```
-┌─────────────────────────────────┐
-│ Skill Invoked                   │
-└─────────────────────────────────┘
-                │
-                ▼
-┌─────────────────────────────────┐
-│ Check: Is git installed?        │
-└─────────────────────────────────┘
-        │              │
-        NO             YES
-        │              │
-        ▼              ▼
-┌─────────────┐  ┌─────────────────────────────────┐
-│ Inform user │  │ Check: repos/{package}/ exists? │
-│ about git   │  └─────────────────────────────────┘
-│ benefits    │          │              │
-└─────────────┘          NO             YES
-        │                │              │
-        │                ▼              ▼
-        │         ┌─────────────┐  ┌─────────────┐
-        │         │ Ask to      │  │ Use local   │
-        │         │ clone?      │  │ repository  │
-        │         └─────────────┘  └─────────────┘
-        │                │
-        ▼                ▼
-┌─────────────────────────────────┐
-│ Continue with built-in          │
-│ references only                 │
-└─────────────────────────────────┘
-```
+1. **Check if repository exists locally**: `ls repos/{package}/ 2>/dev/null`
 
-**Step 1: Check git installation**
-```bash
-git --version
-```
+2. **If repository EXISTS**: Use it for enhanced guidance
 
-**If git NOT installed**:
-```
-I notice git is not installed on your system. While I can help you create
-this metric/step using built-in references, having access to the {package}
-source code repository would significantly improve the quality and accuracy
-of my guidance.
+3. **If repository DOES NOT exist**: Present brief message with link to setup guide
+   ```
+   I notice you don't have the {package} source code locally. For enhanced
+   guidance with real implementation examples, see:
 
-If you'd like enhanced assistance with real examples from the package:
-- Install git: https://git-scm.com/downloads
-- Then we can clone the repository for reference
+   Repository Access Setup: shared-references/repository-access.md
 
-For now, I'll proceed using the built-in reference materials.
-```
+   Or run: shared-scripts/clone-tidymodels-repos.sh {package}
 
-**Step 2: If git IS installed, check for local repository**
-```bash
-# Check if repos/{package}/ exists
-ls repos/{package}/ 2>/dev/null
-```
+   I'll proceed using built-in references for now.
+   ```
 
-**If repository NOT found**, ask user:
-```
-I notice you don't have a local clone of {package}. Having access to the
-source code will help me provide more accurate guidance with real examples
-from the package.
+4. **Continue with skill workflow** (non-blocking)
 
-Would you like me to:
-1. Clone the repository locally (recommended) - stored in repos/{package}/
-2. Reference the code on GitHub as needed
-3. Continue without repository access (uses built-in references only)
-
-Note: If you choose option 1, I'll add 'repos/' to your .gitignore and
-.Rbuildignore files to prevent committing or building the cloned code.
-```
-
-**Step 3: Execute based on user choice**
-
-**Step 4: Remember choice** for session (don't re-ask)
+**Benefits of this approach**:
+- Skills stay concise
+- All setup logic centralized in one place
+- Scripts provide reproducible setup
+- Users can run scripts independently
+- Clear separation of concerns
 
 ### 5. File Path Reference Pattern
 
@@ -300,7 +308,7 @@ tests/testthat/test-{name}.R      # Test file reference
 - Works as GitHub reference if not cloned
 - More specific than "see existing implementations"
 
-### 6. Integration Points in Skills
+### 6. Integration Points in Skills (Minimal Approach)
 
 **Files to update** with repository references:
 
@@ -446,25 +454,57 @@ For a numeric metric, you'll need three functions following the
 standard pattern shown in the references/numeric-metrics.md guide...
 ```
 
-## Implementation Phases
+## Implementation Phases (Revised)
 
 ### Phase 1: Foundation (Week 1)
-- [ ] Implement git installation check logic
-- [ ] Create repository cloning logic (using git commands directly)
-- [ ] Implement .gitignore and .Rbuildignore modification for user's package
-- [ ] Test on macOS, Linux, Windows
-- [ ] Handle edge cases (no git, no write permissions, etc.)
+- [ ] **Create shared-scripts/ directory** in skills-personal
+- [ ] **Write clone-tidymodels-repos.sh** - POSIX shell script
+  - [ ] Check git installation
+  - [ ] Accept package name arguments
+  - [ ] Create repos/ directory
+  - [ ] Clone with --depth 1
+  - [ ] Update .gitignore and .Rbuildignore
+  - [ ] Error handling with exit codes
+- [ ] **Write clone-tidymodels-repos.py** - Python fallback
+  - [ ] Same functionality as shell script
+  - [ ] Windows compatibility
+  - [ ] Detailed error messages
+- [ ] **Test scripts on macOS**
+- [ ] **Test scripts on Linux** (if available)
+- [ ] **Test scripts on Windows** (if available)
 
-### Phase 2: Skill Enhancement (Week 2)
-- [ ] Add repository check logic to skill invocation pattern
-- [ ] Update `add-yardstick-metric/SKILL.md` with file references
-- [ ] Update yardstick reference files (numeric, class, probability)
-- [ ] Test file references work locally and on GitHub
+### Phase 2: Documentation and Integration (Week 2)
+- [ ] **Create shared-references/repository-access.md** - Centralized guide
+  - [ ] Overview and benefits
+  - [ ] Prerequisites (git check)
+  - [ ] Quick start with scripts
+  - [ ] Step-by-step workflow
+  - [ ] Script usage examples
+  - [ ] Manual setup instructions
+  - [ ] Comprehensive troubleshooting
+  - [ ] FAQ section
+- [ ] **Update add-yardstick-metric/SKILL.md** - Replace long section
+  - [ ] Remove detailed "Repository Access Setup" section
+  - [ ] Add brief "Repository Access (Optional)" section
+  - [ ] Link to shared-references/repository-access.md
+- [ ] **Update add-recipe-step/SKILL.md** - Replace long section
+  - [ ] Remove detailed "Repository Access Setup" section
+  - [ ] Add brief "Repository Access (Optional)" section
+  - [ ] Link to shared-references/repository-access.md
+- [ ] **Test documentation clarity** - Ensure users can follow setup
 
-### Phase 3: Expansion (Week 3)
-- [ ] Update `add-recipe-step/SKILL.md` with file references
-- [ ] Update recipes reference files (step types, patterns)
-- [ ] Add references to shared-references files
+### Phase 3: File References Enhancement (Week 3)
+- [ ] **Add file path references to yardstick skill**
+  - [ ] Update numeric-metrics.md with R/ file paths
+  - [ ] Update class-metrics.md with R/ file paths
+  - [ ] Update probability-metrics.md with R/ file paths
+  - [ ] Update test patterns with test file paths
+  - [ ] Balance reference density (avoid over-referencing)
+- [ ] **Add file path references to recipes skill**
+  - [ ] Update modify-in-place-steps.md with R/ file paths
+  - [ ] Update create-new-columns-steps.md with R/ file paths
+  - [ ] Update test patterns with test file paths
+  - [ ] Balance reference density
 
 ### Phase 4: Refinement (Week 4)
 - [ ] Test with real users
@@ -507,9 +547,17 @@ standard pattern shown in the references/numeric-metrics.md guide...
 - Windows: Check for git.exe in PATH, provide instructions if missing
 
 **Script compatibility**:
-- Bash script: Works on macOS, Linux, WSL, Git Bash (Windows)
-- Python script: Works everywhere Python 3 is installed
-- Fallback: Provide manual git commands if scripts fail
+- **Bash script**: Works on macOS, Linux, WSL, Git Bash (Windows)
+- **PowerShell script**: Works on Windows (PowerShell 5.1+, pre-installed on Windows 7+)
+  - Note: May require execution policy adjustment: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
+  - Alternative: Run with bypass flag: `powershell -ExecutionPolicy Bypass -File clone-tidymodels-repos.ps1`
+- **Python script**: Works everywhere Python 3.6+ is installed
+- **Fallback**: Provide manual git commands if all scripts fail
+
+**Line Ending Handling**:
+- Bash script: Creates files with LF (Unix) line endings
+- PowerShell script: Creates files with CRLF (Windows) line endings - appropriate for Windows
+- Python script: Uses platform-appropriate line endings automatically
 
 ## Success Metrics
 

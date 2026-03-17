@@ -1,161 +1,284 @@
-# Phase 1 Implementation Checklist
+# Phase 1 Implementation Checklist (Revised)
 
-**Goal**: Add repository access functionality to tidymodels skills with git check and cloning logic.
+**Goal**: Create standalone cloning scripts and centralized documentation for repository access functionality.
 
-## 1. Core Logic Implementation
+## 1. Create Scripts Directory and Files
 
-### 1.1 Git Installation Check
-- [x] Add git check instructions to skill workflow
-- [x] Define messaging for "git not installed" scenario
-- [x] Test git detection on macOS
-- [ ] Test git detection on Linux (if available)
-- [x] Document git installation links by platform
+### 1.1 Setup Scripts Directory
+- [ ] Create `shared-scripts/` directory in skills-personal root
+- [ ] Create README.md in shared-scripts/ explaining script purpose and usage
 
-### 1.2 Repository Cloning Logic
-- [x] Add repository existence check (`repos/{package}/`)
-- [x] Implement shallow clone command (`git clone --depth 1`)
-- [x] Add messaging for clone options (local vs GitHub vs none)
-- [x] Handle existing repository detection
-- [x] Add option to update existing clone (`git pull`)
+### 1.2 Write Bash Script: clone-tidymodels-repos.sh
+- [ ] Create file: `shared-scripts/clone-tidymodels-repos.sh`
+- [ ] Add shebang and script header documentation
+- [ ] Implement git installation check
+- [ ] Implement argument parsing (yardstick, recipes, all)
+- [ ] Implement repos/ directory creation
+- [ ] Implement repository existence check
+- [ ] Implement shallow clone (`git clone --depth 1`)
+- [ ] Implement .gitignore update logic (Unix line endings)
+- [ ] Implement .Rbuildignore update logic (Unix line endings)
+- [ ] Add error handling with appropriate exit codes:
+  - 0 = success
+  - 1 = git not found
+  - 2 = clone failed (network/disk space)
+  - 3 = permission error
+- [ ] Add clear progress messages
+- [ ] Make script executable (`chmod +x`)
 
-### 1.3 User Package Ignore Files Modification
-- [x] Implement .gitignore modification logic
-  - [x] Check if .gitignore exists
-  - [x] Add "repos/" if not present
-  - [x] Avoid duplicates
-- [x] Implement .Rbuildignore modification logic
-  - [x] Check if .Rbuildignore exists
-  - [x] Add "^repos$" if not present
-  - [x] Avoid duplicates
-- [x] Use usethis as primary approach
-- [x] Add fallback for direct file modification
+### 1.3 Write PowerShell Script: clone-tidymodels-repos.ps1
+- [ ] Create file: `shared-scripts/clone-tidymodels-repos.ps1`
+- [ ] Add script header documentation with .SYNOPSIS, .DESCRIPTION, .PARAMETER
+- [ ] Implement git installation check (Test-Path for git.exe)
+- [ ] Implement parameter parsing (yardstick, recipes, all)
+- [ ] Implement repos\ directory creation (New-Item if needed)
+- [ ] Implement repository existence check (Test-Path)
+- [ ] Implement shallow clone using git.exe
+- [ ] Implement .gitignore update logic (handle CRLF line endings)
+- [ ] Implement .Rbuildignore update logic (handle CRLF line endings)
+- [ ] Add error handling with appropriate exit codes
+- [ ] Use Write-Host for colored progress messages
+- [ ] Set execution policy recommendation in documentation
 
-## 2. Skill Integration
+### 1.4 Write Python Script: clone-tidymodels-repos.py
+- [ ] Create file: `shared-scripts/clone-tidymodels-repos.py`
+- [ ] Add shebang and script header documentation
+- [ ] Implement git installation check (shutil.which('git'))
+- [ ] Implement argument parsing using argparse (yardstick, recipes, all)
+- [ ] Implement repos/ directory creation (os.makedirs)
+- [ ] Implement repository existence check (os.path.exists)
+- [ ] Implement shallow clone using subprocess
+- [ ] Implement .gitignore update logic (automatic line ending handling)
+- [ ] Implement .Rbuildignore update logic (automatic line ending handling)
+- [ ] Add error handling with appropriate exit codes
+- [ ] Add colored progress messages (optional: colorama for Windows)
+- [ ] Test cross-platform compatibility (macOS, Linux, Windows)
 
-### 2.1 Add Workflow to add-yardstick-metric Skill
-- [x] Add "Repository Access Setup" section to SKILL.md
-- [x] Include git check workflow
-- [x] Include repository cloning workflow
-- [x] Include ignore files modification
-- [x] Add clear user messaging at each step
+## 2. Create Centralized Documentation
 
-### 2.2 Add Workflow to add-recipe-step Skill
-- [x] Add "Repository Access Setup" section to SKILL.md
-- [x] Include git check workflow
-- [x] Include repository cloning workflow
-- [x] Include ignore files modification
-- [x] Add clear user messaging at each step
+### 2.1 Create Repository Access Reference
+- [ ] Create file: `tidymodels/skills/shared-references/repository-access.md`
+- [ ] Write "Overview" section - Benefits of repository access
+- [ ] Write "Prerequisites" section - Git installation check and links
+- [ ] Write "Quick Start" section - Running the clone script
+- [ ] Write "Step-by-Step Workflow" section - Detailed process
+- [ ] Write "Using the Scripts" section:
+  - [ ] Bash script usage examples (macOS/Linux)
+  - [ ] PowerShell script usage examples (Windows)
+  - [ ] Python script usage examples (universal fallback)
+  - [ ] Script selection guide by platform
+  - [ ] Script output explanation
+  - [ ] Exit codes reference
+- [ ] Write "Manual Setup" section - For users who prefer manual cloning
+- [ ] Write "Troubleshooting" section:
+  - [ ] Git not installed
+  - [ ] Permission errors
+  - [ ] Network issues
+  - [ ] Disk space issues
+  - [ ] Repository already exists
+- [ ] Write "What Gets Modified" section:
+  - [ ] repos/ directory structure
+  - [ ] .gitignore changes
+  - [ ] .Rbuildignore changes
+- [ ] Write "FAQ" section:
+  - [ ] Disk space requirements
+  - [ ] Update frequency
+  - [ ] Removing cloned repositories
+  - [ ] Why not use git submodules?
 
-## 3. Testing
+## 3. Update Skills (Simplify)
 
-### 3.1 Test Git Check Logic
-- [x] Test with git installed (macOS) - git version 2.50.1 detected
-- [ ] Test with git not installed (simulate) - workflow handles with messaging
-- [x] Verify appropriate messaging - included in skill workflows
+### 3.1 Update add-yardstick-metric Skill
+- [ ] Remove long "Repository Access Setup" section from SKILL.md
+- [ ] Add brief "Repository Access (Optional but Recommended)" section
+- [ ] Link to shared-references/repository-access.md
+- [ ] Mention script location: shared-scripts/clone-tidymodels-repos.sh
 
-### 3.2 Test Cloning Logic
-- [x] Test fresh clone of yardstick - command defined in workflow
-- [x] Test fresh clone of recipes - command defined in workflow
-- [x] Test detection of existing clone - ls repos/{package}/ command included
-- [x] Test update of existing clone - git pull option documented
-- [x] Verify shallow clone (check .git/shallow file) - --depth 1 flag included
-- [x] Verify repository contents - checked repos/yardstick/R/ and repos/recipes/R/
+### 3.2 Update add-recipe-step Skill
+- [ ] Remove long "Repository Access Setup" section from SKILL.md
+- [ ] Add brief "Repository Access (Optional but Recommended)" section
+- [ ] Link to shared-references/repository-access.md
+- [ ] Mention script location: shared-scripts/clone-tidymodels-repos.sh
 
-### 3.3 Test Ignore File Modifications
-- [x] Test creating new .gitignore - logic included in workflow
-- [x] Test appending to existing .gitignore - logic included in workflow
-- [x] Test avoiding duplicates in .gitignore - conditional check included
-- [x] Test creating new .Rbuildignore - logic included in workflow
-- [x] Test appending to existing .Rbuildignore - logic included in workflow
-- [x] Test avoiding duplicates in .Rbuildignore - conditional check included
+## 4. Testing Scripts
 
-### 3.4 Cross-Platform Testing
-- [x] Test on macOS (current platform) - verified git detection
-- [ ] Test on Linux (if available) - requires access to Linux system
-- [ ] Test on Windows (if available) - requires access to Windows system
-- [x] Document platform-specific issues - git installation links provided per platform
+### 4.1 Test Bash Script on macOS
+- [ ] Test with git installed - verify detection
+- [ ] Test clone single package: `./clone-tidymodels-repos.sh yardstick`
+- [ ] Test clone multiple packages: `./clone-tidymodels-repos.sh yardstick recipes`
+- [ ] Test clone all: `./clone-tidymodels-repos.sh all`
+- [ ] Test with existing repository - verify skip behavior
+- [ ] Verify .gitignore created/updated correctly (Unix line endings)
+- [ ] Verify .Rbuildignore created/updated correctly (Unix line endings)
+- [ ] Verify no duplicates added to ignore files
+- [ ] Verify shallow clone (check .git/shallow file)
+- [ ] Verify appropriate exit codes
+- [ ] Test error messages are clear
 
-## 4. Edge Cases & Error Handling
+### 4.2 Test PowerShell Script on Windows (if available)
+- [ ] Test with git installed - verify detection (git.exe in PATH)
+- [ ] Test clone single package: `.\clone-tidymodels-repos.ps1 yardstick`
+- [ ] Test clone multiple packages: `.\clone-tidymodels-repos.ps1 yardstick recipes`
+- [ ] Test clone all: `.\clone-tidymodels-repos.ps1 all`
+- [ ] Test with existing repository - verify skip behavior
+- [ ] Verify .gitignore created/updated correctly (CRLF line endings)
+- [ ] Verify .Rbuildignore created/updated correctly (CRLF line endings)
+- [ ] Verify no duplicates added to ignore files
+- [ ] Verify shallow clone (check .git/shallow file)
+- [ ] Verify appropriate exit codes
+- [ ] Test error messages are clear and colored
+- [ ] Test execution policy handling
 
-### 4.1 Git Not Installed
-- [x] Provide clear installation instructions - included in workflow
-- [x] Include platform-specific git download links - macOS, Linux, Windows links provided
-- [x] Allow workflow to continue without git - option 3 available
+### 4.3 Test Python Script (Universal)
+- [ ] Test on macOS: `python3 clone-tidymodels-repos.py yardstick`
+- [ ] Test on Linux (if available)
+- [ ] Test on Windows (if available)
+- [ ] Test clone single package
+- [ ] Test clone multiple packages
+- [ ] Test clone all packages
+- [ ] Test with existing repository
+- [ ] Verify ignore file modifications (correct line endings per platform)
+- [ ] Verify appropriate exit codes
+- [ ] Test error messages are clear
 
-### 4.2 No Write Permissions
-- [x] Detect permission errors - error handling section included
-- [x] Suggest checking directory permissions - message in error handling
-- [x] Offer GitHub reference fallback - option 2/3 suggested
+### 4.4 Cross-Platform Testing Summary
+- [ ] Bash script verified on macOS
+- [ ] Bash script verified on Linux (if available)
+- [ ] PowerShell script verified on Windows (if available)
+- [ ] Python script verified on at least 2 platforms
+- [ ] Document any platform-specific issues or workarounds
 
-### 4.3 Network Issues
-- [x] Detect network/clone failures - error handling section included
-- [x] Provide retry instructions - message in error handling
-- [x] Offer GitHub reference fallback - option 2/3 suggested
+### 4.5 Test Without Git (All Scripts)
+- [ ] Bash: Simulate git not installed
+- [ ] PowerShell: Simulate git.exe not in PATH
+- [ ] Python: Simulate git not found by shutil.which
+- [ ] Verify all scripts exit with code 1
+- [ ] Verify clear error messages with installation instructions
 
-### 4.4 Disk Space Issues
-- [x] Mention space requirements (~5-8 MB per repo) - specified in clone messages
-- [x] Detect disk space errors if possible - error handling section included
-- [x] Suggest cleanup options - message in error handling
+## 5. Edge Cases & Script Error Handling
 
-### 4.5 Repository Already Exists
-- [x] Detect existing repos/ directory - ls repos/{package}/ command
-- [x] Ask user if they want to update - optional git pull mentioned
-- [x] Skip gracefully if user declines - uses existing clone
+### 5.1 Git Not Installed
+- [ ] Script detects missing git binary
+- [ ] Exit code 1
+- [ ] Clear error message with platform-specific installation links:
+  - macOS: Xcode Command Line Tools or https://git-scm.com/downloads
+  - Linux: Package manager instructions (apt-get, yum, etc.)
+  - Windows: https://git-scm.com/downloads
 
-## 5. Documentation
+### 5.2 No Write Permissions
+- [ ] Script detects permission errors when creating repos/
+- [ ] Exit code 3
+- [ ] Clear error message: "Unable to create repos/ directory. Please check write permissions."
 
-### 5.1 Update Main README
-- [ ] Document repository access feature
-- [ ] Explain disk space requirements
-- [ ] Link to git installation resources
+### 5.3 Network Issues
+- [ ] Script detects git clone failures
+- [ ] Exit code 2
+- [ ] Clear error message: "Unable to clone repository. Please check internet connection and try again."
 
-### 5.2 Create Helper Documentation
-- [ ] Create troubleshooting guide for git issues
-- [ ] Document manual clone instructions (fallback)
-- [ ] Add FAQ section
+### 5.4 Disk Space Issues
+- [ ] Script detects disk space errors (if possible)
+- [ ] Exit code 2
+- [ ] Error message mentions space requirements (~5 MB yardstick, ~8 MB recipes)
 
-## 6. Validation
+### 5.5 Repository Already Exists
+- [ ] Script detects existing repos/{package}/ directory
+- [ ] Skip cloning with informative message
+- [ ] Optionally offer to update (git pull) - future enhancement
+- [ ] Exit code 0 (success, using existing)
 
-### 6.1 End-to-End Testing
-- [ ] Test complete workflow: git check → clone → modify ignores → use skill
-- [ ] Test with yardstick metric creation
-- [ ] Test with recipes step creation
-- [ ] Verify file references work with cloned repo
+## 6. Documentation
 
-### 6.2 User Experience Review
-- [ ] Review all user-facing messages
-- [ ] Ensure messages are clear and helpful
-- [ ] Verify no blocking errors for users without git
-- [ ] Check that workflow feels natural
+### 6.1 Update Main README
+- [ ] Add "Repository Access" section
+- [ ] Link to shared-references/repository-access.md
+- [ ] Briefly explain benefits (enhanced guidance with real examples)
+- [ ] Mention scripts location
+
+### 6.2 Scripts README
+- [ ] Create shared-scripts/README.md
+- [ ] Explain purpose of clone scripts
+- [ ] Show usage examples
+- [ ] Document exit codes
+- [ ] Link to full documentation in shared-references/
+
+### 6.3 Update .github Files
+- [ ] Update .Rbuildignore pattern if needed (shared-scripts shouldn't be in package builds)
+
+## 7. Validation
+
+### 7.1 Script Validation
+- [ ] Verify scripts are executable
+- [ ] Verify scripts work in fresh directory
+- [ ] Verify scripts handle all error cases gracefully
+- [ ] Verify output messages are clear and actionable
+
+### 7.2 Documentation Validation
+- [ ] Verify shared-references/repository-access.md is comprehensive
+- [ ] Verify all links work correctly
+- [ ] Verify instructions are clear for different user types:
+  - Users comfortable with command line
+  - Users who prefer manual setup
+  - Users who want to skip repository access
+
+### 7.3 End-to-End Validation
+- [ ] Create test R package in temp directory
+- [ ] Run script: `./shared-scripts/clone-tidymodels-repos.sh yardstick`
+- [ ] Verify repos/yardstick/ exists
+- [ ] Verify .gitignore includes repos/
+- [ ] Verify .Rbuildignore includes ^repos$
+- [ ] Invoke skill and verify it can reference cloned files
+- [ ] Clean up test package
+
+### 7.4 User Experience Review
+- [ ] Skills are concise (long details moved to centralized doc)
+- [ ] Scripts provide clear feedback at each step
+- [ ] Error messages are actionable
+- [ ] Non-blocking: users can skip repository access and still use skills
 
 ---
 
 ## Progress Tracking
 
-**Started**: 2026-03-17
+**Started**: 2026-03-17 (initial approach)
+**Revised**: 2026-03-17 (script-based approach)
 **Target Completion**: Week 1
-**Status**: Phase 1 Core Implementation Complete ✓
+**Status**: Ready to Execute (Awaiting Review)
 
-## Summary
+## Revised Approach Summary
 
-### Completed
-- ✅ Git installation check workflow
-- ✅ Repository cloning logic with shallow clone
-- ✅ Ignore files modification (usethis + fallback)
-- ✅ Integration into add-yardstick-metric skill
-- ✅ Integration into add-recipe-step skill
-- ✅ Error handling for all edge cases
-- ✅ User messaging for all scenarios
-- ✅ Testing on macOS
+### Changes from Initial Implementation
+- ❌ **Removed**: Long "Repository Access Setup" sections in each skill
+- ✅ **Added**: Standalone scripts in shared-scripts/ directory
+- ✅ **Added**: Centralized documentation in shared-references/repository-access.md
+- ✅ **Simplified**: Skills now have brief links to centralized docs
+- ✅ **Improved**: Reproducible setup with executable scripts
+- ✅ **Better**: Clear separation of concerns
 
-### Pending (requires additional systems)
-- ⏳ Linux testing (requires Linux access)
-- ⏳ Windows testing (requires Windows access)
-- ⏳ Documentation updates (Phase 1, Section 5)
-- ⏳ End-to-end testing with real users (Phase 1, Section 6)
+### What Will Be Created
+1. **Scripts** (platform-native approach):
+   - `shared-scripts/clone-tidymodels-repos.sh` (Bash for macOS/Linux/WSL)
+   - `shared-scripts/clone-tidymodels-repos.ps1` (PowerShell for Windows)
+   - `shared-scripts/clone-tidymodels-repos.py` (Python universal fallback)
+   - `shared-scripts/README.md` (usage guide with platform selection)
 
-### Next Steps
-1. Test the workflow in a real scenario (create a test package and trigger skill)
-2. Update main README with repository access feature
-3. Gather user feedback on messaging and workflow
-4. Move to Phase 2: Add file path references to skill documentation
+2. **Documentation**:
+   - `tidymodels/skills/shared-references/repository-access.md` (comprehensive guide)
+
+3. **Skill Updates**:
+   - Simplified section in `add-yardstick-metric/SKILL.md`
+   - Simplified section in `add-recipe-step/SKILL.md`
+
+### Benefits of This Approach
+- **Reproducible**: Users can run scripts independently
+- **Maintainable**: Single source of truth for setup logic
+- **Concise**: Skills stay focused on their core purpose
+- **Flexible**: Scripts can be run manually or by Claude
+- **Platform-native**: Bash for Unix-like, PowerShell for Windows, Python as universal fallback
+- **No dependencies**: Uses tools native to each platform (no Python required on Windows)
+
+### Next Steps (Awaiting Approval)
+1. Review this revised checklist
+2. Review updated plan in .github/REPOSITORY_ACCESS_PLAN.md
+3. If approved, execute Phase 1 tasks in order
+4. Test scripts thoroughly
+5. Validate with end-to-end test
