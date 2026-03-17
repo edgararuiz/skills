@@ -93,7 +93,6 @@ function Test-GitInstalled {
 
     $gitVersion = git --version
     Write-Success "Git is installed ($gitVersion)"
-    return $true
 }
 
 # Function to update .gitignore
@@ -160,24 +159,23 @@ function Clone-Repository {
     # Clone repository with shallow clone
     Write-Info "Cloning $RepoName from $RepoUrl..."
 
-    try {
-        $output = git clone --depth 1 $RepoUrl $repoPath 2>&1
-        $output | ForEach-Object { Write-Host "  $_" }
+    $output = git clone --depth 1 $RepoUrl $repoPath 2>&1
+    $output | ForEach-Object { Write-Host "  $_" }
 
-        Write-Success "Cloned $RepoName to $repoPath"
-
-        # Verify shallow clone
-        $shallowFile = Join-Path $repoPath ".git\shallow"
-        if (Test-Path $shallowFile) {
-            Write-Success "Shallow clone verified (.git\shallow exists)"
-        }
-
-        return $true
-    }
-    catch {
+    if ($LASTEXITCODE -ne 0) {
         Write-Error "Failed to clone $RepoName"
         return $false
     }
+
+    Write-Success "Cloned $RepoName to $repoPath"
+
+    # Verify shallow clone
+    $shallowFile = Join-Path $repoPath ".git\shallow"
+    if (Test-Path $shallowFile) {
+        Write-Success "Shallow clone verified (.git\shallow exists)"
+    }
+
+    return $true
 }
 
 # Main script
