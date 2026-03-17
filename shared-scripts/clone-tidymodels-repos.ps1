@@ -232,7 +232,7 @@ function Main {
     if ($packagesToClone.Count -eq 0) {
         Write-Error "No valid packages specified"
         Write-Host ""
-        Write-Host "Usage: .\clone-tidymodels-repos.ps1 <package> [<package> ...]"
+        Write-Host "Usage: .\clone-tidymodels-repos.ps1 PACKAGE [PACKAGE ...]"
         Write-Host "  Packages: yardstick, recipes, all"
         Write-Host ""
         Write-Host "Examples:"
@@ -278,13 +278,13 @@ function Main {
     Write-Host "Cloned repositories:"
     foreach ($package in $packagesToClone) {
         if (Test-Path "repos\$package") {
-            Write-Host "  ✓ repos\$package\"
+            Write-Host "  - repos\$package\"
         }
     }
     Write-Host ""
     Write-Host "Modified files:"
-    Write-Host "  ✓ .gitignore (added 'repos/')"
-    Write-Host "  ✓ .Rbuildignore (added '^repos$')"
+    Write-Host "  - .gitignore (added 'repos/')"
+    Write-Host "  - .Rbuildignore (added '^repos$')"
     Write-Host ""
     Write-Info "These repositories are now available for reference during development."
     Write-Host ""

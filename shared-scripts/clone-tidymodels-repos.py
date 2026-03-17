@@ -61,22 +61,22 @@ if not sys.stdout.isatty() or os.environ.get("NO_COLOR"):
 
 def print_info(message):
     """Print info message with blue color."""
-    print(f"{COLORS['BLUE']}ℹ{COLORS['NC']} {message}")
+    print(f"{COLORS['BLUE']}[INFO]{COLORS['NC']} {message}")
 
 
 def print_success(message):
     """Print success message with green color."""
-    print(f"{COLORS['GREEN']}✓{COLORS['NC']} {message}")
+    print(f"{COLORS['GREEN']}[OK]{COLORS['NC']} {message}")
 
 
 def print_warning(message):
     """Print warning message with yellow color."""
-    print(f"{COLORS['YELLOW']}⚠{COLORS['NC']} {message}")
+    print(f"{COLORS['YELLOW']}[WARN]{COLORS['NC']} {message}")
 
 
 def print_error(message):
     """Print error message with red color."""
-    print(f"{COLORS['RED']}✗{COLORS['NC']} {message}")
+    print(f"{COLORS['RED']}[ERROR]{COLORS['NC']} {message}")
 
 
 def check_git():
@@ -231,9 +231,9 @@ def main():
     args = parser.parse_args()
 
     print()
-    print("═══════════════════════════════════════════════════════")
+    print("=" * 55)
     print("  Tidymodels Repository Cloning Script")
-    print("═══════════════════════════════════════════════════════")
+    print("=" * 55)
     print()
 
     # Step 1: Check git installation
@@ -301,19 +301,19 @@ def main():
     print()
 
     # Success summary
-    print("═══════════════════════════════════════════════════════")
+    print("=" * 55)
     print_success("Repository setup complete!")
-    print("═══════════════════════════════════════════════════════")
+    print("=" * 55)
     print()
     print("Cloned repositories:")
     for package in packages_to_clone:
         repo_path = Path("repos") / package
         if repo_path.exists():
-            print(f"  ✓ {repo_path}/")
+            print(f"  - {repo_path}/")
     print()
     print("Modified files:")
-    print("  ✓ .gitignore (added 'repos/')")
-    print("  ✓ .Rbuildignore (added '^repos$')")
+    print("  - .gitignore (added 'repos/')")
+    print("  - .Rbuildignore (added '^repos$')")
     print()
     print_info("These repositories are now available for reference during development.")
     print()
