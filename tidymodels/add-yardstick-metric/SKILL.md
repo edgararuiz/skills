@@ -69,13 +69,13 @@ Run from your R package directory:
 
 ```bash
 # macOS/Linux/WSL
-./path/to/skills-personal/tidymodels/skills/shared-scripts/clone-tidymodels-repos.sh yardstick
+./path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repos.sh yardstick
 
 # Windows (PowerShell)
-.\path\to\skills-personal\tidymodels\skills\shared-scripts\clone-tidymodels-repos.ps1 yardstick
+.\path\to\skills-personal\tidymodels\shared-scripts\clone-tidymodels-repos.ps1 yardstick
 
 # Any platform (Python)
-python3 /path/to/skills-personal/tidymodels/skills/shared-scripts/clone-tidymodels-repos.py yardstick
+python3 /path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repos.py yardstick
 ```
 
 **For complete instructions**, see: [Repository Access Setup](../shared-references/repository-access.md)

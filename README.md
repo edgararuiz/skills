@@ -6,8 +6,8 @@ A curated collection of [Claude Code skills](https://code.claude.com/docs/en/ski
 
 | Skill | Description |
 |-------|-------------|
-| [add-yardstick-metric](tidymodels/skills/add-yardstick-metric/SKILL.md) | Create new yardstick performance metrics (numeric, class, probability) with templates for implementation functions, testing patterns, and optional visualization support |
-| [add-recipe-step](tidymodels/skills/add-recipe-step/SKILL.md) | Build preprocessing steps for the recipes package with templates for modify-in-place, create-new-columns, and row-operation steps |
+| [add-yardstick-metric](tidymodels/add-yardstick-metric/SKILL.md) | Create new yardstick performance metrics (numeric, class, probability) with templates for implementation functions, testing patterns, and optional visualization support |
+| [add-recipe-step](tidymodels/add-recipe-step/SKILL.md) | Build preprocessing steps for the recipes package with templates for modify-in-place, create-new-columns, and row-operation steps |
 
 ## Installation
 

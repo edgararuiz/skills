@@ -14,8 +14,8 @@
       "source": "./",
       "strict": false,
       "skills": [
-        "./tidymodels/skills/add-yardstick-metric",
-        "./tidymodels/skills/add-recipe-step"
+        "./tidymodels/add-yardstick-metric",
+        "./tidymodels/add-recipe-step"
       ]
     }
   ]
