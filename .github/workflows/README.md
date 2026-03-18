@@ -11,7 +11,7 @@ This workflow tests all three cloning scripts (`clone-tidymodels-repos.sh`, `clo
 ### Triggers
 
 - **Push**: When changes are pushed to `main` or `updates` branches affecting:
-  - `tidymodels/skills/shared-scripts/**`
+  - `tidymodels/shared-scripts/**`
   - `.github/workflows/test-clone-scripts.yml`
 - **Pull Request**: When PRs target `main` branch with changes to the above paths
 - **Manual**: Via GitHub Actions UI (workflow_dispatch)
@@ -119,7 +119,7 @@ If tests fail:
    ```bash
    # macOS/Linux
    cd /tmp && mkdir test && cd test
-   ./tidymodels/skills/shared-scripts/clone-tidymodels-repos.sh yardstick
+   ./tidymodels/shared-scripts/clone-tidymodels-repos.sh yardstick
 
    # Windows (PowerShell)
    cd $env:TEMP; New-Item -ItemType Directory test; cd test
@@ -167,5 +167,5 @@ Potential improvements:
 
 - [Test Clone Scripts Workflow](.github/workflows/test-clone-scripts.yml)
 - [Phase 1 Summary](.github/PHASE_1_SUMMARY.md)
-- [Repository Access Guide](../tidymodels/skills/shared-references/repository-access.md)
-- [Scripts README](../tidymodels/skills/shared-scripts/README.md)
+- [Repository Access Guide](../tidymodels/shared-references/repository-access.md)
+- [Scripts README](../tidymodels/shared-scripts/README.md)
