@@ -7,6 +7,41 @@ description: Create a new preprocessing step for the recipes package following t
 
 Guide for developing new preprocessing steps that extend the recipes package. This skill provides best practices, complete code templates, and testing patterns for creating custom recipe steps.
 
+## Two Development Contexts
+
+This skill supports **two distinct development contexts**:
+
+### 🆕 Extension Development (Default)
+**Creating a new R package** that extends recipes with custom steps.
+
+- ✅ Use this for: New packages, standalone steps, CRAN submissions
+- 📦 Package detection: No `recipes` in DESCRIPTION's `Package:` field
+- ⚠️ **Constraint**: Must use `recipes::` prefix for all functions
+- 📖 **Guide**: [Extension Development Guide](extension-guide.md)
+
+### 🔧 Source Development (Advanced)
+**Contributing directly to recipes** via pull requests.
+
+- ✅ Use this for: Contributing to tidymodels/recipes repository
+- 📦 Package detection: `Package: recipes` in DESCRIPTION
+- ✨ **Benefit**: Can use internal functions directly (no prefix needed)
+- 📖 **Guide**: [Source Development Guide](source-guide.md)
+
+**This main guide shows extension development patterns.** If you're contributing to recipes itself, see the [Source Development Guide](source-guide.md) for package-specific details.
+
+---
+
+## Quick Start
+
+**Choose your context:**
+
+- **Creating a new package?** → Follow this guide, then see [Extension Development Guide](extension-guide.md)
+- **Contributing to recipes?** → Clone repository, then see [Source Development Guide](source-guide.md)
+
+**Not sure which?** If you're in the `tidymodels/recipes` repository, use source development. Otherwise, use extension development.
+
+---
+
 ## Overview
 
 Creating a custom recipe step provides:
@@ -49,6 +84,10 @@ python3 /path/to/skills-personal/tidymodels/skills/shared-scripts/clone-tidymode
 
 ## Quick Navigation
 
+**Development Guides:**
+- [Extension Development Guide](extension-guide.md) - Creating new packages that extend recipes
+- [Source Development Guide](source-guide.md) - Contributing PRs to recipes itself
+
 **Reference Files:**
 - [Step Architecture](references/step-architecture.md) - Three-function pattern, prep/bake workflow, step types
 - [Modify-in-Place Steps](references/modify-in-place-steps.md) - Transform existing columns
@@ -57,14 +96,19 @@ python3 /path/to/skills-personal/tidymodels/skills/shared-scripts/clone-tidymode
 - [Optional Methods](references/optional-methods.md) - tunable(), required_pkgs(), sparsity methods
 - [Helper Functions](references/helper-functions.md) - recipes helper function reference
 
-**Shared References:**
+**Shared References (Extension Development):**
 - [R Package Setup](../shared-references/r-package-setup.md) - Package initialization and structure
 - [Development Workflow](../shared-references/development-workflow.md) - Fast iteration cycle
-- [Testing Patterns](../shared-references/testing-patterns.md) - Comprehensive test guide
+- [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) - Extension testing guide
 - [Roxygen Documentation](../shared-references/roxygen-documentation.md) - Documentation templates
 - [Package Imports](../shared-references/package-imports.md) - Managing dependencies
-- [Best Practices](../shared-references/best-practices.md) - Code style and patterns
-- [Troubleshooting](../shared-references/troubleshooting.md) - Common issues and solutions
+- [Best Practices (Extension)](../shared-references/best-practices-extension.md) - Extension code style
+- [Troubleshooting (Extension)](../shared-references/troubleshooting-extension.md) - Extension issues
+
+**Source Development Specific:**
+- [Testing Patterns (Source)](testing-patterns-source.md) - Using internal helpers
+- [Best Practices (Source)](best-practices-source.md) - Using internal functions
+- [Troubleshooting (Source)](troubleshooting-source.md) - Source-specific issues
 
 ## Prerequisites
 
@@ -208,7 +252,9 @@ Choose the appropriate template based on what your step does:
 
 ## Complete Example: Modify-in-Place Step (Centering)
 
-This example shows all required components for a modify-in-place step.
+This example shows all required components for a modify-in-place step **using extension development patterns** (with `recipes::` prefix).
+
+**For source development**, see [Source Development Guide](source-guide.md) for examples using internal functions directly.
 
 **Reference implementation:** `R/center.R` in recipes repository
 
@@ -622,7 +668,7 @@ See [Roxygen Documentation](../shared-references/roxygen-documentation.md) for c
 
 ## Testing
 
-See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensive guide.
+See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) for comprehensive guide.
 
 **Required test categories:**
 1. **Correctness**: Step transforms data correctly
@@ -632,9 +678,68 @@ See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensi
 5. **Infrastructure**: Works in full recipe pipeline
 6. **Edge cases**: Empty data, all same values, etc.
 
+## Package-Specific Patterns (Source Development)
+
+If you're contributing to recipes itself, you have access to internal functions and conventions not available in extension development.
+
+### File Naming Conventions
+
+Recipes organizes steps by category:
+- Normalization: `R/center.R`, `R/scale.R`, `R/normalize.R`
+- Encoding: `R/dummy.R`, `R/novel.R`, `R/other.R`
+- Dimension reduction: `R/pca.R`, `R/ica.R`
+- Row operations: `R/filter.R`, `R/sample.R`
+- Tests: `tests/testthat/test-center.R`
+
+### Internal Functions Available
+
+When developing recipes itself, you can use functions directly (no `recipes::` prefix):
+- `recipes_eval_select()` - Variable selection
+- `get_case_weights()`, `are_weights_used()` - Case weight handling
+- `check_type()` - Column type validation
+- `check_new_data()` - Verify columns exist in new data
+- `remove_original_cols()` - Handle keep_original_cols
+- `print_step()` - Standard printing
+- `sel2char()` - Convert selections to strings
+
+### Documentation Patterns
+
+Recipes uses extensive parameter inheritance:
+```r
+#' @inheritParams step_normalize
+#' @template step-return
+#' @template case-weights-unsupervised
+```
+
+### The Three-Function Pattern (Source)
+
+```r
+# 1. Constructor (exported)
+step_center <- function(recipe, ..., role = NA, ...) {
+  add_step(recipe, step_center_new(...))
+}
+
+# 2. Initialization (internal)
+step_center_new <- function(terms, role, trained, ...) {
+  step(subclass = "center", ...)
+}
+
+# 3. Methods (all exported)
+prep.step_center <- function(x, training, info = NULL, ...) {
+  # Use internal functions directly
+  col_names <- recipes_eval_select(x$terms, training, info)
+  check_type(training[, col_names], types = c("double", "integer"))
+  # ...
+}
+```
+
+**Complete source development guide:** [Source Development Guide](source-guide.md)
+
+---
+
 ## Best Practices
 
-See [Best Practices](../shared-references/best-practices.md) for complete guide.
+See [Best Practices](../shared-references/best-practices-extension.md) for complete guide.
 
 **Key principles:**
 - Use base pipe `|>` not magrittr pipe `%>%`
@@ -645,7 +750,7 @@ See [Best Practices](../shared-references/best-practices.md) for complete guide.
 
 ## Troubleshooting
 
-See [Troubleshooting](../shared-references/troubleshooting.md) for complete guide.
+See [Troubleshooting (Extension)](../shared-references/troubleshooting-extension.md) for complete guide.
 
 **Common issues:**
 - "No visible global function definition" → Add to package imports
@@ -655,11 +760,23 @@ See [Troubleshooting](../shared-references/troubleshooting.md) for complete guid
 
 ## Next Steps
 
-1. **Understand architecture:** Read [Step Architecture](references/step-architecture.md)
-2. **Choose step type:** [Modify-in-Place](references/modify-in-place-steps.md), [Create-New-Columns](references/create-new-columns-steps.md), or [Row-Operation](references/row-operation-steps.md)
-3. **Follow the template:** Use complete examples from reference files
-4. **Learn helpers:** See [Helper Functions](references/helper-functions.md)
-5. **Add optional methods:** See [Optional Methods](references/optional-methods.md) if needed
-6. **Test thoroughly:** See [Testing Patterns](../shared-references/testing-patterns.md)
-7. **Document completely:** See [Roxygen Documentation](../shared-references/roxygen-documentation.md)
-8. **Run final check:** `devtools::check()` before publishing
+**For Extension Development (creating new packages):**
+
+1. **Choose your context:** [Extension Development Guide](extension-guide.md)
+2. **Understand architecture:** Read [Step Architecture](references/step-architecture.md)
+3. **Choose step type:** [Modify-in-Place](references/modify-in-place-steps.md), [Create-New-Columns](references/create-new-columns-steps.md), or [Row-Operation](references/row-operation-steps.md)
+4. **Follow the template:** Use complete examples from reference files
+5. **Learn helpers:** See [Helper Functions](references/helper-functions.md)
+6. **Add optional methods:** See [Optional Methods](references/optional-methods.md) if needed
+7. **Test thoroughly:** See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md)
+8. **Document completely:** See [Roxygen Documentation](../shared-references/roxygen-documentation.md)
+9. **Run final check:** `devtools::check()` before publishing
+
+**For Source Development (contributing to recipes):**
+
+1. **Start here:** [Source Development Guide](source-guide.md)
+2. **Clone repository:** See [Repository Access](../shared-references/repository-access.md)
+3. **Study existing steps:** Browse `R/center.R`, `R/dummy.R`, `R/pca.R`, etc.
+4. **Follow package conventions:** File naming, internal functions, three-function pattern
+5. **Test with internal helpers:** See [Testing Patterns (Source)](testing-patterns-source.md)
+6. **Submit PR:** See [Source Development Guide](source-guide.md) for PR process

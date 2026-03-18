@@ -7,6 +7,41 @@ description: Guide for creating new yardstick metrics. Use when a developer need
 
 Guide for developing new metrics that extend the yardstick package. This skill provides best practices, code templates, and testing patterns for creating custom performance metrics.
 
+## Two Development Contexts
+
+This skill supports **two distinct development contexts**:
+
+### 🆕 Extension Development (Default)
+**Creating a new R package** that extends yardstick with custom metrics.
+
+- ✅ Use this for: New packages, standalone metrics, CRAN submissions
+- 📦 Package detection: No `yardstick` in DESCRIPTION's `Package:` field
+- ⚠️ **Constraint**: Can only use exported functions (no `:::`)
+- 📖 **Guide**: [Extension Development Guide](extension-guide.md)
+
+### 🔧 Source Development (Advanced)
+**Contributing directly to yardstick** via pull requests.
+
+- ✅ Use this for: Contributing to tidymodels/yardstick repository
+- 📦 Package detection: `Package: yardstick` in DESCRIPTION
+- ✨ **Benefit**: Can use internal functions and package infrastructure
+- 📖 **Guide**: [Source Development Guide](source-guide.md)
+
+**This main guide shows extension development patterns.** If you're contributing to yardstick itself, see the [Source Development Guide](source-guide.md) for package-specific details.
+
+---
+
+## Quick Start
+
+**Choose your context:**
+
+- **Creating a new package?** → Follow this guide, then see [Extension Development Guide](extension-guide.md)
+- **Contributing to yardstick?** → Clone repository, then see [Source Development Guide](source-guide.md)
+
+**Not sure which?** If you're in the `tidymodels/yardstick` repository, use source development. Otherwise, use extension development.
+
+---
+
 ## Overview
 
 Creating a custom yardstick metric provides:
@@ -49,6 +84,10 @@ python3 /path/to/skills-personal/tidymodels/skills/shared-scripts/clone-tidymode
 
 ## Quick Navigation
 
+**Development Guides:**
+- [Extension Development Guide](extension-guide.md) - Creating new packages that extend yardstick
+- [Source Development Guide](source-guide.md) - Contributing PRs to yardstick itself
+
 **Reference Files:**
 - [Metric System Architecture](references/metric-system.md) - How new_*_metric() works, .estimator column, design considerations
 - [Combining Metrics](references/metric-set.md) - Using metric_set() to combine multiple metrics
@@ -66,14 +105,19 @@ python3 /path/to/skills-personal/tidymodels/skills/shared-scripts/clone-tidymode
 - [Case Weights](references/case-weights.md) - Handling weighted observations
 - [Autoplot Support](references/autoplot.md) - Optional visualization (curves, confusion matrices)
 
-**Shared References:**
+**Shared References (Extension Development):**
 - [R Package Setup](../shared-references/r-package-setup.md) - Package initialization and structure
 - [Development Workflow](../shared-references/development-workflow.md) - Fast iteration cycle
-- [Testing Patterns](../shared-references/testing-patterns.md) - Comprehensive test guide
+- [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) - Extension testing guide
 - [Roxygen Documentation](../shared-references/roxygen-documentation.md) - Documentation templates
 - [Package Imports](../shared-references/package-imports.md) - Managing dependencies
-- [Best Practices](../shared-references/best-practices.md) - Code style and patterns
-- [Troubleshooting](../shared-references/troubleshooting.md) - Common issues and solutions
+- [Best Practices (Extension)](../shared-references/best-practices-extension.md) - Extension code style
+- [Troubleshooting (Extension)](../shared-references/troubleshooting-extension.md) - Extension issues
+
+**Source Development Specific:**
+- [Testing Patterns (Source)](testing-patterns-source.md) - Using internal test helpers
+- [Best Practices (Source)](best-practices-source.md) - Using internal functions
+- [Troubleshooting (Source)](troubleshooting-source.md) - Source-specific issues
 
 ## Prerequisites
 
@@ -186,7 +230,9 @@ See [Development Workflow](../shared-references/development-workflow.md) for com
 
 ## Complete Example: Numeric Metric (MAE)
 
-This example shows all required components for a numeric metric.
+This example shows all required components for a numeric metric **using extension development patterns** (exported functions only).
+
+**For source development**, see [Source Development Guide](source-guide.md) for examples using internal functions.
 
 **Reference implementation:** `R/num-mae.R` in yardstick repository
 
@@ -346,7 +392,7 @@ test_that("mae works with case weights", {
 
 **Reference test pattern:** `tests/testthat/test-num-mae.R` in yardstick repository
 
-See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensive testing guide.
+See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) for comprehensive testing guide.
 
 ## Implementation Guide by Metric Type
 
@@ -527,7 +573,7 @@ See [Roxygen Documentation](../shared-references/roxygen-documentation.md) for c
 
 ## Testing
 
-See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensive guide.
+See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) for comprehensive guide.
 
 **Required test categories:**
 1. **Correctness**: Metric calculates correctly
@@ -623,6 +669,48 @@ accuracy_diff_by_group(data, truth, estimate)
 
 See [Groupwise Metrics](references/groupwise-metrics.md) for complete guide.
 
+## Package-Specific Patterns (Source Development)
+
+If you're contributing to yardstick itself, you have access to internal functions and conventions not available in extension development.
+
+### File Naming Conventions
+
+Yardstick uses strict naming patterns:
+- Numeric: `R/num-[name].R` → `R/num-mae.R`
+- Class: `R/class-[name].R` → `R/class-accuracy.R`
+- Probability: `R/prob-[name].R` → `R/prob-roc_auc.R`
+- Tests: `tests/testthat/test-num-mae.R`
+
+### Internal Functions Available
+
+When developing yardstick itself, you can use:
+- `yardstick_mean()` - Weighted mean with case weight handling
+- `finalize_estimator_internal()` - Estimator selection for multiclass
+- `check_numeric_metric()`, `check_class_metric()`, `check_prob_metric()` - Validation
+- Test helpers: `data_altman()`, `data_three_class()`, `data_hpc_cv1()`
+
+### Documentation Templates
+
+Yardstick uses templates in `man-roxygen/`:
+```r
+#' @templateVar fn mae
+#' @template return
+#' @template event_first
+```
+
+### Snapshot Testing
+
+Yardstick uses `testthat::expect_snapshot()` extensively:
+```r
+test_that("mae returns correct structure", {
+  expect_snapshot(mae(df, truth, estimate))
+})
+```
+
+**Complete source development guide:** [Source Development Guide](source-guide.md)
+
+---
+
 ## Package Integration
 
 ### Package-level documentation
@@ -652,7 +740,7 @@ mae <- function(data, ...) {
 
 ## Best Practices
 
-See [Best Practices](../shared-references/best-practices.md) for complete guide.
+See [Best Practices (Extension)](../shared-references/best-practices-extension.md) for complete guide.
 
 **Key principles:**
 - Use base pipe `|>` not magrittr pipe `%>%`
@@ -663,7 +751,7 @@ See [Best Practices](../shared-references/best-practices.md) for complete guide.
 
 ## Troubleshooting
 
-See [Troubleshooting](../shared-references/troubleshooting.md) for complete guide.
+See [Troubleshooting (Extension)](../shared-references/troubleshooting-extension.md) for complete guide.
 
 **Common issues:**
 - "No visible global function definition" → Add to package imports
@@ -673,13 +761,25 @@ See [Troubleshooting](../shared-references/troubleshooting.md) for complete guid
 
 ## Next Steps
 
-1. **Understand the system:** Read [Metric System](references/metric-system.md)
-2. **Choose metric type:**
+**For Extension Development (creating new packages):**
+
+1. **Choose your context:** [Extension Development Guide](extension-guide.md)
+2. **Understand the system:** Read [Metric System](references/metric-system.md)
+3. **Choose metric type:**
    - Regression: [Numeric](references/numeric-metrics.md)
    - Classification: [Class](references/class-metrics.md), [Probability](references/probability-metrics.md), [Ordered Probability](references/ordered-probability-metrics.md)
    - Survival: [Static](references/static-survival-metrics.md), [Dynamic](references/dynamic-survival-metrics.md), [Integrated](references/integrated-survival-metrics.md), [Linear Predictor](references/linear-predictor-survival-metrics.md)
    - Quantile: [Quantile](references/quantile-metrics.md)
-3. **Follow the template:** Use complete examples from reference files
-4. **Test thoroughly:** See [Testing Patterns](../shared-references/testing-patterns.md)
-5. **Document completely:** See [Roxygen Documentation](../shared-references/roxygen-documentation.md)
-6. **Run final check:** `devtools::check()` before publishing
+4. **Follow the template:** Use complete examples from reference files
+5. **Test thoroughly:** See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md)
+6. **Document completely:** See [Roxygen Documentation](../shared-references/roxygen-documentation.md)
+7. **Run final check:** `devtools::check()` before publishing
+
+**For Source Development (contributing to yardstick):**
+
+1. **Start here:** [Source Development Guide](source-guide.md)
+2. **Clone repository:** See [Repository Access](../shared-references/repository-access.md)
+3. **Study existing metrics:** Browse `R/num-*.R`, `R/class-*.R`, etc.
+4. **Follow package conventions:** File naming, internal functions, templates
+5. **Test with internal helpers:** See [Testing Patterns (Source)](testing-patterns-source.md)
+6. **Submit PR:** See [Source Development Guide](source-guide.md) for PR process

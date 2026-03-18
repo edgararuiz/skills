@@ -245,6 +245,74 @@ test_that("complex output matches", {
 })
 ```
 
+## Git Workflow (Source Development)
+
+If you're contributing to tidymodels packages (recipes, yardstick, etc.), you'll also need basic git workflow.
+
+### Initial Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/tidymodels/recipes.git
+cd recipes
+
+# Create a feature branch
+git checkout -b feature/add-step-name
+```
+
+### During Development
+
+```r
+# Your fast iteration cycle (unchanged)
+devtools::document()
+devtools::load_all()
+devtools::test()
+```
+
+### Committing Changes
+
+```bash
+# Check what changed
+git status
+git diff
+
+# Add your changes
+git add R/step_name.R tests/testthat/test-step_name.R
+
+# Commit with descriptive message
+git commit -m "Add step_name() for [brief description]"
+
+# Push to your fork
+git push origin feature/add-step-name
+```
+
+### Before Submitting PR
+
+1. Run full check: `devtools::check()`
+2. Update `NEWS.md` with your changes
+3. Ensure all tests pass
+4. Push final commits
+
+### Common Git Commands
+
+```bash
+# See current branch
+git branch
+
+# Switch branches
+git checkout main
+
+# Update from upstream
+git pull origin main
+
+# View commit history
+git log --oneline
+```
+
+**Note:** This is a minimal git guide. For complete git documentation, see the official Git documentation or GitHub guides.
+
+---
+
 ## Next Steps
 
 - Learn testing patterns: [testing-patterns-extension.md](testing-patterns-extension.md)

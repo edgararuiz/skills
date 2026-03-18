@@ -1,43 +1,96 @@
 # Phase 2 Implementation Checklist
 
 **Date:** 2026-03-18
-**Status:** In Progress - Stages 1-2 Complete
+**Status:** In Progress - Stages 1-5 Complete
 **Estimated Time:** 10-15 hours
-**Time Spent:** ~4-5 hours
+**Time Spent:** ~8-10 hours
 
 ## Progress Tracking
 
 - [x] **Stage 1:** Rename Extension Reference Files (15 minutes) ✅ COMPLETE
 - [x] **Stage 2:** Create Package-Specific Source Files (4-5 hours) ✅ COMPLETE
 - [x] **Stage 3:** Create Extension/Source Guides (4-5 hours) ✅ COMPLETE
-- [ ] **Stage 4:** Update Main SKILL.md Files (3-4 hours)
-- [ ] **Stage 5:** Update Shared References (1-2 hours)
+- [x] **Stage 4:** Update Main SKILL.md Files (3-4 hours) ✅ COMPLETE
+- [x] **Stage 5:** Update Shared References (1-2 hours) ✅ COMPLETE
 - [ ] **Stage 6:** Minor Updates to Existing References (1-2 hours)
 
-## Completion Summary (Stages 1-2)
+## Completion Summary (Stages 1-3)
 
 **Completed:** 2026-03-18
 
-### Files Created/Modified
+### Files Created/Modified (Stages 1-3)
 - **3 files renamed** in shared-references/ with -extension suffix
 - **4 cross-reference files updated** (r-package-setup, development-workflow, package-imports, roxygen-documentation)
 - **6 new source files created:**
   - 3 for yardstick (testing-patterns, best-practices, troubleshooting)
   - 3 for recipes (testing-patterns, best-practices, troubleshooting)
+- **4 new guide files created:**
+  - yardstick extension-guide.md and source-guide.md
+  - recipes extension-guide.md and source-guide.md
 
 ### Documentation Volume
 - Extension files (renamed): ~37K
 - Yardstick source files (new): ~36K
 - Recipes source files (new): ~43K
-- **Total: ~116K of documentation**
+- Guide files (new): ~59K
+- **Total: ~175K of documentation**
 
 ### Key Achievements
 ✅ Clear distinction between extension and source development
 ✅ Package-specific guidance for yardstick vs recipes
 ✅ Comprehensive internal function documentation
+✅ Complete step-by-step guides for both contexts
 ✅ All cross-references updated and working
 
-See [stages-1-2-completion.md](stages-1-2-completion.md) for detailed summary.
+---
+
+## Completion Summary (Stages 4-5)
+
+**Completed:** 2026-03-18
+
+### Files Modified (Stages 4-5)
+- **2 main SKILL.md files updated:**
+  - add-yardstick-metric/SKILL.md
+  - add-recipe-step/SKILL.md
+- **1 shared reference updated:**
+  - development-workflow.md
+
+### Changes Made
+
+#### Both SKILL.md Files:
+- ✅ Added "Two Development Contexts" section at top with auto-detection explanation
+- ✅ Added "Quick Start" section linking to both guides
+- ✅ Added "Development Guides" to navigation
+- ✅ Split shared references into extension/source sections
+- ✅ Updated all links to -extension suffix versions
+- ✅ Added "Package-Specific Patterns" section for source development
+- ✅ Updated Complete Example sections with context notes
+- ✅ Updated Next Steps to show both extension and source paths
+
+#### Yardstick-Specific:
+- File naming conventions (num-, class-, prob-, surv-)
+- Internal functions: yardstick_mean(), finalize_estimator_internal()
+- Snapshot testing patterns
+- Documentation templates (@templateVar, @template)
+
+#### Recipes-Specific:
+- File naming by category (center, dummy, pca, filter)
+- Internal functions: recipes_eval_select(), check_type(), get_case_weights()
+- Three-function pattern for source development
+- Documentation patterns (@inheritParams, @template)
+
+#### development-workflow.md:
+- ✅ Added "Git Workflow (Source Development)" section
+- ✅ Minimal git guide (clone, branch, commit, push, PR)
+- ✅ Kept focused on essentials
+- ✅ Note that it's minimal, not comprehensive
+
+### Key Achievements
+✅ Main SKILL.md files now support both contexts seamlessly
+✅ Clear guidance on choosing extension vs source development
+✅ Package-specific patterns documented for source contributors
+✅ All navigation updated with proper links
+✅ Git workflow added for source development without overwhelming extension users
 
 ---
 
@@ -358,122 +411,135 @@ See [stages-1-2-completion.md](stages-1-2-completion.md) for detailed summary.
 
 ---
 
-## Stage 4: Update Main SKILL.md Files
+## Stage 4: Update Main SKILL.md Files ✅ COMPLETE
 
-### 4.1 Update add-yardstick-metric/SKILL.md
-
-#### Add Auto-Detection Section
-- [ ] Add at top of file (after front matter)
-- [ ] Add section: "Context Detection"
-- [ ] Explain detection logic:
-  - [ ] Check for yardstick DESCRIPTION
-  - [ ] Check for other package
-  - [ ] Check for non-package project
-  - [ ] Empty directory handling
-- [ ] Show detected context
-- [ ] Add clear visual indicators
-
-#### Add Quick Start Section
-- [ ] Add after context detection
-- [ ] Link to extension-guide.md
-- [ ] Link to source-guide.md
-- [ ] Clear call-to-action for each path
-
-#### Update Overview Section
-- [ ] Keep common overview content
-- [ ] Add notes about context differences
-- [ ] Link to appropriate guides
-
-#### Update Prerequisites Section
-- [ ] Make context-aware
-- [ ] Extension: link to extension guide
-- [ ] Source: link to source guide
-
-#### Keep Common Sections
-- [ ] Choosing Your Metric Type (unchanged)
-- [ ] Complete Example (add context notes)
-- [ ] Implementation Guide by Type (add context notes)
-- [ ] Documentation (add context notes)
-- [ ] Testing (link to split references)
-
-#### Add Package-Specific Section
-- [ ] Add section: "Yardstick Package Patterns"
-- [ ] File naming conventions
-- [ ] Documentation patterns
-- [ ] Testing patterns
-- [ ] Internal functions overview
-
-#### Update Navigation
-- [ ] Update all links to split references
-- [ ] Add links to new guides
-- [ ] Verify all cross-references
-
-### 4.2 Update add-recipe-step/SKILL.md
+### 4.1 Update add-yardstick-metric/SKILL.md ✅
 
 #### Add Auto-Detection Section
-- [ ] Add at top of file
-- [ ] Add section: "Context Detection"
-- [ ] Explain detection logic (same as yardstick)
-- [ ] Show detected context
+- [x] Add at top of file (after front matter)
+- [x] Add section: "Two Development Contexts"
+- [x] Explain detection logic:
+  - [x] Check for yardstick DESCRIPTION
+  - [x] Extension vs source development
+  - [x] Package detection patterns
+- [x] Show detected context with visual indicators
+- [x] Add clear call-to-action for each path
 
 #### Add Quick Start Section
-- [ ] Link to extension-guide.md
-- [ ] Link to source-guide.md
+- [x] Add after context detection
+- [x] Link to extension-guide.md
+- [x] Link to source-guide.md
+- [x] Clear call-to-action for each path
 
 #### Update Overview Section
-- [ ] Make context-aware
-- [ ] Add context notes
+- [x] Keep common overview content
+- [x] Add notes about context differences
+- [x] Link to appropriate guides
 
 #### Update Prerequisites Section
-- [ ] Make context-aware
-- [ ] Link to appropriate guides
+- [x] Keep existing content (already context-neutral)
 
 #### Keep Common Sections
-- [ ] Understanding Recipe Steps (unchanged)
-- [ ] Step Type Decision Tree (unchanged)
-- [ ] Complete Example (add context notes)
-- [ ] Implementation Guide by Type (add context notes)
+- [x] Choosing Your Metric Type (unchanged)
+- [x] Complete Example (added context notes)
+- [x] Implementation Guide by Type (context notes added)
+- [x] Documentation (unchanged)
+- [x] Testing (updated links to split references)
 
 #### Add Package-Specific Section
-- [ ] Add section: "Recipes Package Patterns"
-- [ ] File naming conventions
-- [ ] Documentation patterns
-- [ ] Testing patterns
-- [ ] Internal functions overview
+- [x] Add section: "Package-Specific Patterns (Source Development)"
+- [x] File naming conventions
+- [x] Documentation templates
+- [x] Snapshot testing patterns
+- [x] Internal functions overview
+- [x] Link to source-guide.md
 
 #### Update Navigation
-- [ ] Update all links to split references
-- [ ] Add links to new guides
-- [ ] Verify all cross-references
+- [x] Add development guides section
+- [x] Split shared references into extension/source
+- [x] Update all links to split references (-extension suffix)
+- [x] Add links to new guides
+- [x] Verify all cross-references
+- [x] Update Next Steps to show both paths
+
+### 4.2 Update add-recipe-step/SKILL.md ✅
+
+#### Add Auto-Detection Section
+- [x] Add at top of file
+- [x] Add section: "Two Development Contexts"
+- [x] Explain detection logic (same as yardstick)
+- [x] Show detected context with visual indicators
+- [x] Add clear call-to-action for each path
+
+#### Add Quick Start Section
+- [x] Add after context detection
+- [x] Link to extension-guide.md
+- [x] Link to source-guide.md
+- [x] Clear guidance for choosing
+
+#### Update Overview Section
+- [x] Keep common overview content
+- [x] Add context awareness
+
+#### Update Prerequisites Section
+- [x] Keep existing (already context-neutral)
+
+#### Keep Common Sections
+- [x] Understanding Recipe Steps (unchanged)
+- [x] Step Type Decision Tree (unchanged)
+- [x] Complete Example (added context notes)
+- [x] Implementation Guide by Type (context notes added)
+
+#### Add Package-Specific Section
+- [x] Add section: "Package-Specific Patterns (Source Development)"
+- [x] File naming conventions by category
+- [x] Internal functions directly accessible
+- [x] Documentation patterns (@inheritParams, @template)
+- [x] Three-function pattern for source
+- [x] Link to source-guide.md
+
+#### Update Navigation
+- [x] Add development guides section
+- [x] Split shared references into extension/source
+- [x] Update all links to split references
+- [x] Add links to new guides
+- [x] Verify all cross-references
+- [x] Update Next Steps to show both paths
 
 ---
 
-## Stage 5: Update Shared References
+## Stage 5: Update Shared References ✅ COMPLETE
 
-### 5.1 Update development-workflow.md
+### 5.1 Update development-workflow.md ✅
 
-- [ ] Add section: "Git Workflow (Source Development)"
-  - [ ] Keep it minimal
-  - [ ] Create branch
-  - [ ] Commit changes
-  - [ ] Push and create PR
-  - [ ] Note: Tidymodels developers know this
-- [ ] Update cross-references if needed
-- [ ] Verify navigation
+- [x] Add section: "Git Workflow (Source Development)"
+  - [x] Keep it minimal (as planned)
+  - [x] Initial setup (clone, create branch)
+  - [x] During development (unchanged fast cycle)
+  - [x] Committing changes (git add, commit, push)
+  - [x] Before submitting PR (check, NEWS.md, tests)
+  - [x] Common git commands reference
+  - [x] Note: This is minimal git guide
+- [x] Cross-references already correct
+- [x] Navigation verified
 
-### 5.2 Update Cross-References Across Files
+### 5.2 Update Cross-References Across Files ✅
 
-#### Files to check and update:
-- [ ] r-package-setup.md
-  - [ ] Links to testing-patterns → split versions
-  - [ ] Links to best-practices → split versions
-  - [ ] Links to troubleshooting → split versions
-- [ ] roxygen-documentation.md
-  - [ ] Update any cross-references
-- [ ] package-imports.md
-  - [ ] Update any cross-references
-- [ ] repository-access.md
-  - [ ] Update any cross-references
+#### Files checked and updated:
+- [x] r-package-setup.md
+  - [x] Already updated in Stage 1
+  - [x] Links to testing-patterns-extension.md
+  - [x] Links to best-practices-extension.md
+  - [x] Links to troubleshooting-extension.md
+- [x] roxygen-documentation.md
+  - [x] Already updated in Stage 1
+  - [x] All cross-references correct
+- [x] package-imports.md
+  - [x] Already updated in Stage 1
+  - [x] Cross-references verified
+- [x] repository-access.md
+  - [x] No cross-references to update
+  - [x] Content remains unchanged
 
 ---
 
