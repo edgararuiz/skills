@@ -493,20 +493,27 @@ standard pattern shown in the references/numeric-metrics.md guide...
   - [ ] Link to shared-references/repository-access.md
 - [ ] **Test documentation clarity** - Ensure users can follow setup
 
-### Phase 3: File References Enhancement (Week 3)
-- [ ] **Add file path references to yardstick skill**
-  - [ ] Review and update SKILL.md with repo file references
-  - [ ] Update numeric-metrics.md with R/ file paths
-  - [ ] Update class-metrics.md with R/ file paths
-  - [ ] Update probability-metrics.md with R/ file paths
-  - [ ] Update test patterns with test file paths
-  - [ ] Balance reference density (avoid over-referencing)
-- [ ] **Add file path references to recipes skill**
-  - [ ] Review and update SKILL.md with repo file references
-  - [ ] Update modify-in-place-steps.md with R/ file paths
-  - [ ] Update create-new-columns-steps.md with R/ file paths
-  - [ ] Update test patterns with test file paths
-  - [ ] Balance reference density
+### Phase 3: File References Enhancement (Week 3) ✅ COMPLETE
+- [x] **Add file path references to yardstick skill**
+  - [x] Review and update SKILL.md with repo file references
+  - [x] Update numeric-metrics.md with R/ file paths
+  - [x] Update class-metrics.md with R/ file paths
+  - [x] Update probability-metrics.md with R/ file paths
+  - [x] Update test patterns with test file paths
+  - [x] Balance reference density (avoid over-referencing)
+- [x] **Add file path references to recipes skill**
+  - [x] Review and update SKILL.md with repo file references
+  - [x] Update modify-in-place-steps.md with R/ file paths
+  - [x] Update create-new-columns-steps.md with R/ file paths
+  - [x] Update test patterns with test file paths
+  - [x] Balance reference density
+
+**Summary:**
+- 16 files updated with file path references
+- 2-4 canonical examples per section (balanced density)
+- All paths verified to exist in repositories
+- Consistent format: `R/filename.R` and `tests/testthat/test-filename.R`
+- References enhance navigation without cluttering documentation
 
 ### Phase 4: Refinement (Week 4)
 - [ ] Test with real users
