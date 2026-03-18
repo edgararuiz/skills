@@ -516,6 +516,44 @@ bake.step_yourname <- function(object, new_data, ...) {
 }
 ```
 
+## Internal Helpers (Source Development Only)
+
+When contributing to recipes itself, all the helpers listed above can be used **without the `recipes::` prefix**. They're internal functions available directly in the package environment.
+
+### Additional Internal Helpers
+
+When developing recipes source code, you may also encounter:
+
+- **Variable selection internals**: Functions that support `recipes_eval_select()`
+- **Type checking internals**: Extended validation beyond `check_type()`
+- **Column name utilities**: Functions for managing column names and conflicts
+- **Role management**: Functions for assigning and updating column roles
+
+### Usage in Source Development
+
+```r
+# Extension development (requires recipes:: prefix)
+col_names <- recipes::recipes_eval_select(x$terms, training, info)
+recipes::check_type(training[, col_names], types = c("double", "integer"))
+
+# Source development (no prefix needed)
+col_names <- recipes_eval_select(x$terms, training, info)
+check_type(training[, col_names], types = c("double", "integer"))
+```
+
+### When to Create New Internal Helpers
+
+If contributing to recipes and you find yourself duplicating logic across multiple steps:
+
+1. **Check existing internals first**: Browse `R/aaa-*.R` and `R/utils-*.R` files
+2. **Consider generalization**: Will this helper be useful for other steps?
+3. **Document thoroughly**: Use `@keywords internal` and `@noRd`
+4. **Don't export**: Internal helpers should not be in `NAMESPACE`
+
+See the [Source Development Guide](../source-guide.md) for complete patterns and examples.
+
+---
+
 ## Next Steps
 
 - Understand step architecture: [step-architecture.md](step-architecture.md)
@@ -523,4 +561,4 @@ bake.step_yourname <- function(object, new_data, ...) {
 - Implement create-new-columns steps: [create-new-columns-steps.md](create-new-columns-steps.md)
 - Implement row-operation steps: [row-operation-steps.md](row-operation-steps.md)
 - Add optional methods: [optional-methods.md](optional-methods.md)
-- Review best practices: [../../shared-references/best-practices.md](../../shared-references/best-practices.md)
+- Review best practices: [../../shared-references/best-practices-extension.md](../../shared-references/best-practices-extension.md)

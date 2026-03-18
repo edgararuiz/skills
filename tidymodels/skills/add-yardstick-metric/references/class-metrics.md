@@ -80,6 +80,9 @@ miss_rate_multiclass <- function(data, estimator) {
 }
 ```
 
+> **Source Development:** When contributing to yardstick itself, you can use `finalize_estimator_internal()` to handle estimator selection and validation. This internal helper manages binary, macro, micro, and macro_weighted estimators automatically. See [Best Practices (Source)](../best-practices-source.md).
+```
+
 **Estimator types:**
 - **macro**: Calculate per-class, average with equal weights
 - **macro_weighted**: Calculate per-class, average weighted by class frequency

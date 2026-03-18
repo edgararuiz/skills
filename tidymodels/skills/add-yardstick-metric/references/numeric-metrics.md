@@ -55,6 +55,8 @@ mse_impl <- function(truth, estimate, case_weights = NULL) {
 - Use `weighted.mean()` for weighted calculations
 - Handle hardhat weight classes by converting to numeric
 
+> **Source Development:** When contributing to yardstick itself, you can use `yardstick_mean()` instead of manually handling case weights. This internal helper automatically handles hardhat weights and unweighted cases. See [Best Practices (Source)](../best-practices-source.md).
+
 ## Step 2: Create the vector function
 
 ```r

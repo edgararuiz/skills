@@ -2,6 +2,8 @@
 
 Before implementing a recipe step, understand the recipe step architecture and workflow.
 
+> **Note for Source Development:** If you're contributing directly to the recipes package, you can use internal helper functions like `recipes_eval_select()`, `check_type()`, and `get_case_weights()` without the `recipes::` prefix. See the [Source Development Guide](../source-guide.md) for details.
+
 **Reference implementations showing complete architecture:**
 - Simple steps: `R/center.R`, `R/scale.R` (modify-in-place pattern)
 - Complex steps: `R/dummy.R`, `R/pca.R` (create-new-columns pattern)

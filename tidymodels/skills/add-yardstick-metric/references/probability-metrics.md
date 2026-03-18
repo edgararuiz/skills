@@ -2,6 +2,8 @@
 
 Probability metrics evaluate predicted probabilities rather than hard classifications. These metrics are used when your model outputs probability estimates for each class.
 
+> **Note for Source Development:** If contributing to yardstick, you can use internal validation and helper functions. See the [Source Development Guide](../source-guide.md) for yardstick-specific patterns.
+
 ## Overview
 
 Probability metrics work with continuous probability values rather than discrete class predictions. Examples include:

@@ -20,6 +20,8 @@ Create-new-columns steps:
 - Encoding tests: `tests/testthat/test-dummy.R`
 - Dimension reduction: `tests/testthat/test-pca.R`
 
+> **Source Development:** When contributing to recipes itself, use internal helpers directly: `recipes_eval_select()`, `remove_original_cols()`, `check_name()`, etc. No `recipes::` prefix needed. See [Best Practices (Source)](../best-practices-source.md).
+
 ## Key Differences from Modify-in-Place
 
 1. **`role` default is `"predictor"`** (not `NA`)
