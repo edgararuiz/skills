@@ -18,36 +18,38 @@ We provide three platform-native scripts for the best user experience:
 
 ## Quick Start
 
+**Note:** These examples assume you're running from the `skills-personal` repository root. If running from elsewhere, adjust the path accordingly.
+
 ### macOS / Linux / WSL
 
 ```bash
 # Clone yardstick
-./shared-scripts/clone-tidymodels-repos.sh yardstick
+./tidymodels/skills/shared-scripts/clone-tidymodels-repos.sh yardstick
 
 # Clone recipes
-./shared-scripts/clone-tidymodels-repos.sh recipes
+./tidymodels/skills/shared-scripts/clone-tidymodels-repos.sh recipes
 
 # Clone multiple packages
-./shared-scripts/clone-tidymodels-repos.sh yardstick recipes
+./tidymodels/skills/shared-scripts/clone-tidymodels-repos.sh yardstick recipes
 
 # Clone all packages
-./shared-scripts/clone-tidymodels-repos.sh all
+./tidymodels/skills/shared-scripts/clone-tidymodels-repos.sh all
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
 # Clone yardstick
-.\shared-scripts\clone-tidymodels-repos.ps1 yardstick
+.\tidymodels\skills\shared-scripts\clone-tidymodels-repos.ps1 yardstick
 
 # Clone recipes
-.\shared-scripts\clone-tidymodels-repos.ps1 recipes
+.\tidymodels\skills\shared-scripts\clone-tidymodels-repos.ps1 recipes
 
 # Clone multiple packages
-.\shared-scripts\clone-tidymodels-repos.ps1 yardstick recipes
+.\tidymodels\skills\shared-scripts\clone-tidymodels-repos.ps1 yardstick recipes
 
 # Clone all packages
-.\shared-scripts\clone-tidymodels-repos.ps1 all
+.\tidymodels\skills\shared-scripts\clone-tidymodels-repos.ps1 all
 ```
 
 **PowerShell Execution Policy Note:**
@@ -59,17 +61,17 @@ If you encounter execution policy errors, run one of these commands:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 # Option 2: Run with bypass flag (one-time)
-powershell -ExecutionPolicy Bypass -File .\shared-scripts\clone-tidymodels-repos.ps1 yardstick
+powershell -ExecutionPolicy Bypass -File .\tidymodels\skills\shared-scripts\clone-tidymodels-repos.ps1 yardstick
 ```
 
 ### Any Platform (Python)
 
 ```bash
 # macOS/Linux
-python3 shared-scripts/clone-tidymodels-repos.py yardstick
+python3 tidymodels/skills/shared-scripts/clone-tidymodels-repos.py yardstick
 
 # Windows
-python shared-scripts/clone-tidymodels-repos.py yardstick
+python tidymodels/skills/shared-scripts/clone-tidymodels-repos.py yardstick
 ```
 
 ## What the Scripts Do
