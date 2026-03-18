@@ -2,6 +2,11 @@
 
 Before implementing a recipe step, understand the recipe step architecture and workflow.
 
+**Reference implementations showing complete architecture:**
+- Simple steps: `R/center.R`, `R/scale.R` (modify-in-place pattern)
+- Complex steps: `R/dummy.R`, `R/pca.R` (create-new-columns pattern)
+- Row operations: `R/filter.R`, `R/sample.R` (skip behavior)
+
 ## The Three-Function Pattern
 
 Every recipe step consists of three functions:

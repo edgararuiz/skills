@@ -10,6 +10,16 @@ Modify-in-place steps:
 - Preserve column names and roles
 - Examples: `step_center`, `step_scale`, `step_normalize`, `step_log`
 
+**Canonical implementations in recipes:**
+- Simple location/scale: `R/center.R`, `R/scale.R`, `R/normalize.R`
+- Math transformations: `R/log.R`, `R/sqrt.R`, `R/logit.R`, `R/invlogit.R`
+- Power transformations: `R/BoxCox.R` (Box-Cox with lambda parameter)
+- Trigonometric: `R/hyperbolic.R`, `R/harmonic.R`
+
+**Test patterns:**
+- Basic transformations: `tests/testthat/test-center.R`, `tests/testthat/test-scale.R`
+- Parameterized steps: `tests/testthat/test-normalize.R`
+
 ## Characteristics
 
 - **`role = NA`**: Preserves existing column roles
@@ -18,6 +28,8 @@ Modify-in-place steps:
 - **Simpler than create-new-columns**: Fewer parameters to handle
 
 ## Complete Template
+
+This template follows the same pattern as `R/center.R` in the recipes repository.
 
 ```r
 #' Title for your preprocessing step
@@ -155,6 +167,7 @@ step_yourname_new <- function(terms, role, trained, your_param, columns,
 #' @export
 prep.step_yourname <- function(x, training, info = NULL, ...) {
   # 1. Resolve variable selections to actual column names
+  # Reference: R/center.R, R/scale.R for standard prep() patterns
   col_names <- recipes::recipes_eval_select(x$terms, training, info)
 
   # 2. Validate column types (adjust types as needed for your step)

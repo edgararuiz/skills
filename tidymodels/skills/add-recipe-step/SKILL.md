@@ -18,6 +18,35 @@ Creating a custom recipe step provides:
 - Proper handling of grouped data frames
 - Sparse data support (when applicable)
 
+## Repository Access (Optional but Recommended)
+
+For enhanced guidance with real implementation examples from the recipes package, you can clone the source code repository locally.
+
+**Benefits:**
+- See actual step implementations
+- Reference real test patterns
+- Search through source code
+- Understand package architecture
+
+**Quick Setup:**
+
+Run from your R package directory:
+
+```bash
+# macOS/Linux/WSL
+./path/to/skills-personal/tidymodels/skills/shared-scripts/clone-tidymodels-repos.sh recipes
+
+# Windows (PowerShell)
+.\path\to\skills-personal\tidymodels\skills\shared-scripts\clone-tidymodels-repos.ps1 recipes
+
+# Any platform (Python)
+python3 /path/to/skills-personal/tidymodels/skills/shared-scripts/clone-tidymodels-repos.py recipes
+```
+
+**For complete instructions**, see: [Repository Access Setup](../shared-references/repository-access.md)
+
+**Note:** Repository access is optional. This skill works with built-in references if you choose not to clone.
+
 ## Quick Navigation
 
 **Reference Files:**
@@ -180,6 +209,8 @@ Choose the appropriate template based on what your step does:
 ## Complete Example: Modify-in-Place Step (Centering)
 
 This example shows all required components for a modify-in-place step.
+
+**Reference implementation:** `R/center.R` in recipes repository
 
 ### 1. Step constructor
 
@@ -480,6 +511,8 @@ test_that("centering works with case weights", {
 })
 ```
 
+**Reference test pattern:** `tests/testthat/test-center.R` in recipes repository
+
 See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensive testing guide.
 
 ## Implementation Guide by Step Type
@@ -500,6 +533,11 @@ See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensi
 
 **Examples:** center, scale, normalize, log
 
+**Reference implementations:**
+- Simple transformations: `R/center.R`, `R/scale.R`, `R/normalize.R`
+- Math transformations: `R/log.R`, `R/sqrt.R`, `R/logit.R`
+- With parameters: `R/BoxCox.R` (power transformation with lambda)
+
 ### Create-New-Columns Steps
 
 **Use for:** Generate new columns from existing ones.
@@ -516,6 +554,11 @@ See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensi
 
 **Examples:** dummy, pca, interact, poly
 
+**Reference implementations:**
+- Encoding: `R/dummy.R` (one-hot encoding)
+- Dimension reduction: `R/pca.R`, `R/ica.R`
+- Feature engineering: `R/interact.R`, `R/poly.R`
+
 ### Row-Operation Steps
 
 **Use for:** Filter or remove rows from data.
@@ -531,6 +574,11 @@ See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensi
 - Respect skip parameter in bake()
 
 **Examples:** filter, sample, naomit, slice
+
+**Reference implementations:**
+- Filtering: `R/filter.R`, `R/filter_missing.R`
+- Sampling: `R/sample.R`
+- Row removal: `R/naomit.R`, `R/slice.R`
 
 ## Helper Functions
 
