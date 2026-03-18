@@ -210,6 +210,8 @@ Choose the appropriate template based on what your step does:
 
 This example shows all required components for a modify-in-place step.
 
+**Reference implementation:** `R/center.R` in recipes repository
+
 ### 1. Step constructor
 
 ```r
@@ -509,6 +511,8 @@ test_that("centering works with case weights", {
 })
 ```
 
+**Reference test pattern:** `tests/testthat/test-center.R` in recipes repository
+
 See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensive testing guide.
 
 ## Implementation Guide by Step Type
@@ -529,6 +533,11 @@ See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensi
 
 **Examples:** center, scale, normalize, log
 
+**Reference implementations:**
+- Simple transformations: `R/center.R`, `R/scale.R`, `R/normalize.R`
+- Math transformations: `R/log.R`, `R/sqrt.R`, `R/logit.R`
+- With parameters: `R/BoxCox.R` (power transformation with lambda)
+
 ### Create-New-Columns Steps
 
 **Use for:** Generate new columns from existing ones.
@@ -545,6 +554,11 @@ See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensi
 
 **Examples:** dummy, pca, interact, poly
 
+**Reference implementations:**
+- Encoding: `R/dummy.R` (one-hot encoding)
+- Dimension reduction: `R/pca.R`, `R/ica.R`
+- Feature engineering: `R/interact.R`, `R/poly.R`
+
 ### Row-Operation Steps
 
 **Use for:** Filter or remove rows from data.
@@ -560,6 +574,11 @@ See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensi
 - Respect skip parameter in bake()
 
 **Examples:** filter, sample, naomit, slice
+
+**Reference implementations:**
+- Filtering: `R/filter.R`, `R/filter_missing.R`
+- Sampling: `R/sample.R`
+- Row removal: `R/naomit.R`, `R/slice.R`
 
 ## Helper Functions
 

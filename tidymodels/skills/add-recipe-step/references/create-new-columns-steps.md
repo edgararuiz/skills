@@ -10,6 +10,16 @@ Create-new-columns steps:
 - Assign roles to new columns
 - Examples: `step_dummy`, `step_pca`, `step_interact`, `step_poly`
 
+**Canonical implementations in recipes:**
+- Encoding: `R/dummy.R` (one-hot encoding), `R/bin2factor.R`
+- Dimension reduction: `R/pca.R`, `R/ica.R`, `R/kpca.R`
+- Feature engineering: `R/interact.R`, `R/poly.R`, `R/bs.R` (basis splines)
+- Date features: `R/date.R`, `R/holiday.R`
+
+**Test patterns:**
+- Encoding tests: `tests/testthat/test-dummy.R`
+- Dimension reduction: `tests/testthat/test-pca.R`
+
 ## Key Differences from Modify-in-Place
 
 1. **`role` default is `"predictor"`** (not `NA`)
@@ -19,6 +29,8 @@ Create-new-columns steps:
 5. **`tidy()` returns column names created**, not just input columns
 
 ## Complete Template
+
+This template follows the same pattern as `R/dummy.R` and `R/interact.R` in the recipes repository.
 
 ```r
 #' Title for your step that creates new columns

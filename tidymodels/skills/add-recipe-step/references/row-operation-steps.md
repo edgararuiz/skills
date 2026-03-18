@@ -10,6 +10,15 @@ Row-operation steps:
 - Typically have `skip = TRUE` by default
 - Examples: `step_filter`, `step_sample`, `step_naomit`, `step_slice`
 
+**Canonical implementations in recipes:**
+- Filtering: `R/filter.R` (conditional filtering), `R/filter_missing.R`
+- Sampling: `R/sample.R` (random sampling)
+- Row removal: `R/naomit.R` (remove NAs), `R/slice.R` (select rows by position)
+
+**Test patterns:**
+- Skip behavior: `tests/testthat/test-filter.R`
+- Sampling: `tests/testthat/test-sample.R`
+
 ## Key Characteristics
 
 1. **`skip = TRUE` default**: Most row operations should not be applied to new data during `bake()`
@@ -45,6 +54,8 @@ Rare cases where row operations should apply to new data:
 **Use skip = FALSE cautiously** - usually better to handle at the data preparation stage.
 
 ## Complete Template
+
+This template follows the same pattern as `R/filter.R` and `R/sample.R` in the recipes repository.
 
 ```r
 #' Title for your row operation step
