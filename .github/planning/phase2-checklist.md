@@ -6,138 +6,165 @@
 
 ## Progress Tracking
 
-- [ ] **Stage 1:** Create Split Reference Files (3-4 hours)
-- [ ] **Stage 2:** Create Extension/Source Guides (4-5 hours)
-- [ ] **Stage 3:** Update Main SKILL.md Files (3-4 hours)
-- [ ] **Stage 4:** Update Shared References (2-3 hours)
-- [ ] **Stage 5:** Minor Updates to Existing References (1-2 hours)
+- [ ] **Stage 1:** Rename Extension Reference Files (15 minutes)
+- [ ] **Stage 2:** Create Package-Specific Source Files (4-5 hours)
+- [ ] **Stage 3:** Create Extension/Source Guides (4-5 hours)
+- [ ] **Stage 4:** Update Main SKILL.md Files (3-4 hours)
+- [ ] **Stage 5:** Update Shared References (1-2 hours)
+- [ ] **Stage 6:** Minor Updates to Existing References (1-2 hours)
 
 ---
 
-## Stage 1: Create Split Reference Files
+## Stage 1: Rename Extension Reference Files
 
-### 1.1 Split testing-patterns.md
+### 1.1 Rename existing files in shared-references/
+- [ ] Rename `testing-patterns.md` → `testing-patterns-extension.md`
+- [ ] Rename `best-practices.md` → `best-practices-extension.md`
+- [ ] Rename `troubleshooting.md` → `troubleshooting-extension.md`
 
-#### Create testing-patterns-extension.md
-- [ ] Copy relevant sections from testing-patterns.md
-- [ ] Focus on creating test data from scratch
-- [ ] Add section: "Never Use Internal Functions"
-- [ ] Add section: "Creating Test Data"
-  - [ ] Simple data frames
-  - [ ] Binary classification data
-  - [ ] Multiclass data
-  - [ ] Standard datasets (mtcars, iris, modeldata)
-- [ ] Add section: "Standard Test Categories"
-  - [ ] Correctness tests
-  - [ ] NA handling
-  - [ ] Input validation
-  - [ ] Case weights
-  - [ ] Edge cases
-- [ ] Add examples for each test type
-- [ ] Remove any references to internal functions
-- [ ] Update cross-references to other extension files
+### 1.2 Update content in renamed files
+- [ ] Add note at top: "This guide is for extension development"
+- [ ] Explicitly state "never use internal functions"
+- [ ] Keep all existing content (already focused on avoiding internals)
 
-#### Create testing-patterns-source.md
-- [ ] Copy relevant sections from testing-patterns.md
+### 1.3 Update cross-references in other shared-references files
+- [ ] Update references in r-package-setup.md
+- [ ] Update references in development-workflow.md
+- [ ] Update references in roxygen-documentation.md
+- [ ] Update references in package-imports.md
+- [ ] Update references in repository-access.md
+
+---
+
+## Stage 2: Create Package-Specific Source Files
+
+### 2.1 Create Yardstick Source Files
+
+#### Create add-yardstick-metric/testing-patterns-source.md
+- [ ] Add front matter and title
 - [ ] Add section: "When to Use Internal Test Helpers"
-- [ ] Add section: "Yardstick Test Helpers"
-  - [ ] List: `data_altman()`, `data_three_class()`, etc.
-  - [ ] When to use each
-- [ ] Add section: "Recipes Test Helpers"
-  - [ ] List internal test data/functions
-- [ ] Add section: "Snapshot Testing"
-  - [ ] `expect_snapshot()` patterns
-  - [ ] When to use snapshots
-- [ ] Add section: "Package-Specific Test Structure"
-  - [ ] File naming conventions
-  - [ ] Test organization
-- [ ] Add examples matching actual package tests
-- [ ] Update cross-references to other source files
+- [ ] Add section: "Yardstick Internal Test Helpers"
+  - [ ] `data_altman()` - Binary classification
+  - [ ] `data_three_class()` - Multiclass
+  - [ ] `data_hpc_cv1()` - Cross-validation
+  - [ ] Other internal helpers
+- [ ] Add section: "Snapshot Testing in Yardstick"
+  - [ ] When to use `expect_snapshot()`
+  - [ ] Example snapshot tests
+- [ ] Add section: "File Naming Conventions"
+  - [ ] `test-num-*.R` for numeric metrics
+  - [ ] `test-class-*.R` for class metrics
+  - [ ] `test-prob-*.R` for probability metrics
+- [ ] Add section: "Test Organization"
+  - [ ] Matching existing test structure
+  - [ ] Standard test categories
+- [ ] Add examples from actual yardstick tests
+- [ ] Link to testing-patterns-extension.md for common patterns
 
-### 1.2 Split best-practices.md
-
-#### Create best-practices-extension.md
-- [ ] Copy relevant sections from best-practices.md
-- [ ] Add section: "Exported Functions Only"
-  - [ ] Why internal functions are off-limits
-  - [ ] How to find exported functions
-  - [ ] Base R alternatives
-- [ ] Add section: "Code Style"
-  - [ ] Base pipe
-  - [ ] For-loops over map
-  - [ ] Minimal comments
-- [ ] Add section: "Error Messages"
-  - [ ] Using cli functions
-  - [ ] Clear error messages
-- [ ] Add section: "Self-Contained Implementations"
-  - [ ] When to reimplement vs. depend
-- [ ] Remove any internal function examples
-- [ ] Update cross-references
-
-#### Create best-practices-source.md
-- [ ] Copy relevant sections from best-practices.md
-- [ ] Add section: "Using Internal Functions"
-  - [ ] When appropriate
+#### Create add-yardstick-metric/best-practices-source.md
+- [ ] Add front matter and title
+- [ ] Add section: "Using Internal Functions in Yardstick"
+  - [ ] `yardstick_mean()` - Weighted mean helper
+  - [ ] `finalize_estimator_internal()` - Estimator helper
+  - [ ] `check_metric()` - Validation helper
   - [ ] When to create new internals
-  - [ ] How to document internals
-  - [ ] Checking for existing internals
-- [ ] Add section: "Following Package Conventions"
-  - [ ] Match existing code style
-  - [ ] File organization
-  - [ ] Naming conventions
-- [ ] Add section: "Yardstick Conventions"
-  - [ ] Metric file naming (num-, class-, prob-)
-  - [ ] Documentation templates
-  - [ ] Test organization
-- [ ] Add section: "Recipes Conventions"
-  - [ ] Step file naming
-  - [ ] Helper function patterns
-  - [ ] Documentation inheritance
-- [ ] Add examples with internal functions
-- [ ] Update cross-references
+- [ ] Add section: "File Naming Conventions"
+  - [ ] `R/num-[name].R` for numeric metrics
+  - [ ] `R/class-[name].R` for class metrics
+  - [ ] `R/prob-[name].R` for probability metrics
+- [ ] Add section: "Documentation Patterns"
+  - [ ] Using `@template`
+  - [ ] Using `@templateVar`
+  - [ ] Matching existing metric docs
+- [ ] Add section: "Code Style Specifics"
+  - [ ] Yardstick-specific conventions
+  - [ ] Consistency with existing metrics
+- [ ] Link to best-practices-extension.md for common patterns
 
-### 1.3 Split troubleshooting.md
-
-#### Create troubleshooting-extension.md
-- [ ] Copy relevant sections from troubleshooting.md
-- [ ] Add section: "Package Setup Issues"
-- [ ] Add section: "Namespace and Import Issues"
-  - [ ] "No visible global function definition"
-  - [ ] "No visible binding for global variable"
-- [ ] Add section: "Dependency Management"
-- [ ] Add section: "Common Errors with External Functions"
-- [ ] Add section: "Testing Issues"
-- [ ] Remove any source-specific troubleshooting
-- [ ] Update cross-references
-
-#### Create troubleshooting-source.md
-- [ ] Copy relevant sections from troubleshooting.md
-- [ ] Add section: "Working with Package Internals"
+#### Create add-yardstick-metric/troubleshooting-source.md
+- [ ] Add front matter and title
+- [ ] Add section: "Working with Yardstick Internals"
   - [ ] Finding internal functions
-  - [ ] When internal functions change
+  - [ ] When internals change
+- [ ] Add section: "Common Yardstick Issues"
+  - [ ] Estimator-related errors
+  - [ ] metric_set() integration
+  - [ ] Case weight handling
 - [ ] Add section: "Package Check Issues"
-  - [ ] Package-specific checks
+  - [ ] Yardstick-specific checks
   - [ ] Integration testing
-- [ ] Add section: "Git/Branch Issues" (minimal)
-  - [ ] Merge conflicts
-  - [ ] Branch synchronization
-- [ ] Add section: "PR Submission Issues" (minimal)
-  - [ ] Common review feedback
-- [ ] Add section: "Yardstick-Specific Issues"
-- [ ] Add section: "Recipes-Specific Issues"
-- [ ] Update cross-references
+- [ ] Add section: "Git/PR Issues" (minimal)
+  - [ ] Branch conflicts
+  - [ ] Review process
+- [ ] Link to troubleshooting-extension.md for common issues
 
-### 1.4 Verify Split Files
-- [ ] Check all cross-references work
-- [ ] Ensure no duplication between extension/source
-- [ ] Verify both files are complete
+### 2.2 Create Recipes Source Files
+
+#### Create add-recipe-step/testing-patterns-source.md
+- [ ] Add front matter and title
+- [ ] Add section: "Using Internal Test Helpers in Recipes"
+  - [ ] Internal test recipes
+  - [ ] Internal test data
+- [ ] Add section: "Testing prep/bake Workflow"
+  - [ ] Testing prep() behavior
+  - [ ] Testing bake() behavior
+  - [ ] Integration testing
+- [ ] Add section: "File Naming Conventions"
+  - [ ] `test-*.R` for steps
+- [ ] Add section: "Test Organization in Recipes"
+  - [ ] Matching existing structure
+  - [ ] Standard test categories for steps
+- [ ] Add examples from actual recipes tests
+- [ ] Link to testing-patterns-extension.md for common patterns
+
+#### Create add-recipe-step/best-practices-source.md
+- [ ] Add front matter and title
+- [ ] Add section: "Using Internal Functions in Recipes"
+  - [ ] `recipes_eval_select()` - Variable selection
+  - [ ] `get_case_weights()` - Case weights
+  - [ ] `check_type()` - Type validation
+  - [ ] `check_new_data()` - Data validation
+  - [ ] When to create new internals
+- [ ] Add section: "File Naming Conventions"
+  - [ ] `R/[step_name].R` for steps
+- [ ] Add section: "Documentation Patterns"
+  - [ ] Heavy use of `@inheritParams`
+  - [ ] Cross-referencing steps
+  - [ ] Matching existing step docs
+- [ ] Add section: "Code Style Specifics"
+  - [ ] Recipes-specific conventions
+  - [ ] Consistency with existing steps
+- [ ] Link to best-practices-extension.md for common patterns
+
+#### Create add-recipe-step/troubleshooting-source.md
+- [ ] Add front matter and title
+- [ ] Add section: "Working with Recipes Internals"
+  - [ ] Finding internal functions
+  - [ ] When internals change
+- [ ] Add section: "Common Recipes Issues"
+  - [ ] Variable selection errors
+  - [ ] prep/bake debugging
+  - [ ] Case weight handling
+- [ ] Add section: "Package Check Issues"
+  - [ ] Recipes-specific checks
+  - [ ] Integration testing
+- [ ] Add section: "Git/PR Issues" (minimal)
+  - [ ] Branch conflicts
+  - [ ] Review process
+- [ ] Link to troubleshooting-extension.md for common issues
+
+### 2.3 Verify Package-Specific Files
+- [ ] Check all yardstick files are complete
+- [ ] Check all recipes files are complete
+- [ ] Verify cross-references work
+- [ ] Ensure package-specific nuances are captured
 - [ ] Test navigation between files
 
 ---
 
-## Stage 2: Create Extension/Source Guides
+## Stage 3: Create Extension/Source Guides
 
-### 2.1 Create add-yardstick-metric/extension-guide.md
+### 3.1 Create add-yardstick-metric/extension-guide.md
 
 - [ ] Add front matter and title
 - [ ] Add section: "When to Use This Guide"
@@ -173,7 +200,7 @@
   - [ ] troubleshooting-extension.md
 - [ ] Add links to reference files
 
-### 2.2 Create add-yardstick-metric/source-guide.md
+### 3.2 Create add-yardstick-metric/source-guide.md
 
 - [ ] Add front matter and title
 - [ ] Add section: "When to Use This Guide"
@@ -233,7 +260,7 @@
   - [ ] troubleshooting-source.md
 - [ ] Add links to reference files
 
-### 2.3 Create add-recipe-step/extension-guide.md
+### 3.3 Create add-recipe-step/extension-guide.md
 
 - [ ] Add front matter and title
 - [ ] Add section: "When to Use This Guide"
@@ -260,7 +287,7 @@
 - [ ] Add navigation to extension references
 - [ ] Add links to step type references
 
-### 2.4 Create add-recipe-step/source-guide.md
+### 3.4 Create add-recipe-step/source-guide.md
 
 - [ ] Add front matter and title
 - [ ] Add section: "When to Use This Guide"
@@ -305,9 +332,9 @@
 
 ---
 
-## Stage 3: Update Main SKILL.md Files
+## Stage 4: Update Main SKILL.md Files
 
-### 3.1 Update add-yardstick-metric/SKILL.md
+### 4.1 Update add-yardstick-metric/SKILL.md
 
 #### Add Auto-Detection Section
 - [ ] Add at top of file (after front matter)
@@ -355,7 +382,7 @@
 - [ ] Add links to new guides
 - [ ] Verify all cross-references
 
-### 3.2 Update add-recipe-step/SKILL.md
+### 4.2 Update add-recipe-step/SKILL.md
 
 #### Add Auto-Detection Section
 - [ ] Add at top of file
@@ -395,9 +422,9 @@
 
 ---
 
-## Stage 4: Update Shared References
+## Stage 5: Update Shared References
 
-### 4.1 Update development-workflow.md
+### 5.1 Update development-workflow.md
 
 - [ ] Add section: "Git Workflow (Source Development)"
   - [ ] Keep it minimal
@@ -408,7 +435,7 @@
 - [ ] Update cross-references if needed
 - [ ] Verify navigation
 
-### 4.2 Update Cross-References Across Files
+### 5.2 Update Cross-References Across Files
 
 #### Files to check and update:
 - [ ] r-package-setup.md
@@ -424,9 +451,9 @@
 
 ---
 
-## Stage 5: Minor Updates to Existing References
+## Stage 6: Minor Updates to Existing References
 
-### 5.1 Update Metric Type References
+### 6.1 Update Metric Type References
 
 For each file, add minimal notes about internal functions:
 
@@ -450,7 +477,7 @@ For each file, add minimal notes about internal functions:
 - [ ] Add 1-2 sentence notes where relevant
 - [ ] Keep patterns unchanged
 
-### 5.2 Update Step Type References
+### 6.2 Update Step Type References
 
 #### step-architecture.md
 - [ ] Add note about internal helpers in source development

@@ -72,6 +72,9 @@ tidymodels/skills/
 │   ├── SKILL.md                              # Main entry point with auto-detection
 │   ├── extension-guide.md                    # NEW: Extension-specific deep dive
 │   ├── source-guide.md                       # NEW: Source-specific deep dive
+│   ├── testing-patterns-source.md            # NEW: Yardstick-specific source testing
+│   ├── best-practices-source.md              # NEW: Yardstick-specific source practices
+│   ├── troubleshooting-source.md             # NEW: Yardstick-specific source issues
 │   └── references/                           # Mostly unchanged
 │       ├── metric-system.md
 │       ├── numeric-metrics.md
@@ -82,6 +85,9 @@ tidymodels/skills/
 │   ├── SKILL.md                              # Main entry point with auto-detection
 │   ├── extension-guide.md                    # NEW: Extension-specific deep dive
 │   ├── source-guide.md                       # NEW: Source-specific deep dive
+│   ├── testing-patterns-source.md            # NEW: Recipes-specific source testing
+│   ├── best-practices-source.md              # NEW: Recipes-specific source practices
+│   ├── troubleshooting-source.md             # NEW: Recipes-specific source issues
 │   └── references/                           # Mostly unchanged
 │       ├── step-architecture.md
 │       ├── ... (other step types)
@@ -92,38 +98,36 @@ tidymodels/skills/
     ├── development-workflow.md               # Minor updates (minimal git guidance)
     ├── roxygen-documentation.md              # Unchanged
     ├── repository-access.md                  # Unchanged
-    ├── testing-patterns-extension.md         # NEW: Split from testing-patterns.md
-    ├── testing-patterns-source.md            # NEW: Split from testing-patterns.md
-    ├── best-practices-extension.md           # NEW: Split from best-practices.md
-    ├── best-practices-source.md              # NEW: Split from best-practices.md
-    ├── troubleshooting-extension.md          # NEW: Split from troubleshooting.md
-    └── troubleshooting-source.md             # NEW: Split from troubleshooting.md
+    ├── testing-patterns-extension.md         # RENAME from testing-patterns.md
+    ├── best-practices-extension.md           # RENAME from best-practices.md
+    └── troubleshooting-extension.md          # RENAME from troubleshooting.md
 ```
 
 ### Files to Create (New)
 
 1. `add-yardstick-metric/extension-guide.md`
 2. `add-yardstick-metric/source-guide.md`
-3. `add-recipe-step/extension-guide.md`
-4. `add-recipe-step/source-guide.md`
-5. `shared-references/testing-patterns-extension.md`
-6. `shared-references/testing-patterns-source.md`
-7. `shared-references/best-practices-extension.md`
-8. `shared-references/best-practices-source.md`
-9. `shared-references/troubleshooting-extension.md`
-10. `shared-references/troubleshooting-source.md`
+3. `add-yardstick-metric/testing-patterns-source.md` (yardstick-specific)
+4. `add-yardstick-metric/best-practices-source.md` (yardstick-specific)
+5. `add-yardstick-metric/troubleshooting-source.md` (yardstick-specific)
+6. `add-recipe-step/extension-guide.md`
+7. `add-recipe-step/source-guide.md`
+8. `add-recipe-step/testing-patterns-source.md` (recipes-specific)
+9. `add-recipe-step/best-practices-source.md` (recipes-specific)
+10. `add-recipe-step/troubleshooting-source.md` (recipes-specific)
+
+### Files to Rename
+
+1. `shared-references/testing-patterns.md` → `testing-patterns-extension.md`
+2. `shared-references/best-practices.md` → `best-practices-extension.md`
+3. `shared-references/troubleshooting.md` → `troubleshooting-extension.md`
 
 ### Files to Modify
 
 1. `add-yardstick-metric/SKILL.md` - Add auto-detection, split sections
 2. `add-recipe-step/SKILL.md` - Add auto-detection, split sections
 3. `shared-references/development-workflow.md` - Add minimal git guidance
-
-### Files to Archive/Remove
-
-1. `shared-references/testing-patterns.md` → Split into extension/source
-2. `shared-references/best-practices.md` → Split into extension/source
-3. `shared-references/troubleshooting.md` → Split into extension/source
+4. Update cross-references in other shared-references files
 
 ---
 
@@ -165,96 +169,75 @@ tidymodels/skills/
 
 ## Detailed Implementation Plan
 
-### Stage 1: Create Split Reference Files (3-4 hours)
+### Stage 1: Rename Extension Reference Files (15 minutes)
 
-#### 1.1 Split testing-patterns.md
+Rename the existing shared-references files to have -extension suffix:
 
-**testing-patterns-extension.md:**
-- Focus on creating test data from scratch
-- Avoid any internal functions
-- Use standard datasets (mtcars, iris, modeldata)
-- Basic testthat patterns
-- Standard test categories: correctness, NA handling, validation, case weights
-
-**testing-patterns-source.md:**
-- CAN use internal test helpers
-- Reference existing test files in package
-- Include snapshot testing patterns
-- More comprehensive edge cases to match package standards
-- Package-specific test structure
-
-**Key Differences to Highlight:**
-```markdown
-## When to Use Internal Test Helpers
-
-### Extension Development
-❌ **Don't use:** `yardstick:::data_altman()` - Not exported
-✅ **Do use:** Create your own test data
-
-### Source Development
-✅ **Can use:** `yardstick:::data_altman()` - You're developing yardstick
-✅ **Can use:** Any internal function for testing
+```bash
+cd tidymodels/skills/shared-references/
+mv testing-patterns.md testing-patterns-extension.md
+mv best-practices.md best-practices-extension.md
+mv troubleshooting.md troubleshooting-extension.md
 ```
 
-#### 1.2 Split best-practices.md
+**Extension files remain universal** - same patterns apply whether extending yardstick or recipes.
 
-**best-practices-extension.md:**
-- Focus on clean, self-contained code
-- Emphasize exported function usage
-- Document when functionality is missing
-- Use base R alternatives
+**Content updates needed:**
+- Update cross-references in other shared-references files
+- Explicitly note these are for extension development
+- Keep all existing content (already focused on avoiding internals)
 
-**best-practices-source.md:**
-- Internal functions are acceptable when appropriate
-- Check if internal helper already exists before reimplementing
-- Follow package conventions exactly
-- Match existing code style in package
+### Stage 2: Create Package-Specific Source Files (4-5 hours)
 
-**Key Differences to Highlight:**
-```markdown
-## Using Internal Functions
+#### 2.1 Create Yardstick Source Files (2-2.5 hours)
 
-### Extension Development
-**Never use internal functions.** They are:
-- Not guaranteed to be stable
-- Not documented
-- May change without notice
-- Will cause CRAN check failures
+**add-yardstick-metric/testing-patterns-source.md:**
+- Using internal test helpers: `data_altman()`, `data_three_class()`, etc.
+- Snapshot testing conventions in yardstick
+- File naming: `test-num-*.R`, `test-class-*.R`, `test-prob-*.R`
+- Yardstick test organization and structure
+- When to use snapshots vs assertions
 
-Use base R alternatives or exported functions.
+**add-yardstick-metric/best-practices-source.md:**
+- Internal helpers: `yardstick_mean()`, `finalize_estimator_internal()`, etc.
+- File naming conventions: `num-*.R`, `class-*.R`, `prob-*.R`
+- Documentation templates: `@template`, `@templateVar`
+- When to create new internal helpers
+- Yardstick code style preferences
 
-### Source Development
-**Internal functions are part of the package.** You can:
-- Use existing internal helpers
-- Create new internal helpers when needed
-- Refactor internals (with care)
-- Document internals with roxygen but don't export
+**add-yardstick-metric/troubleshooting-source.md:**
+- Common issues when working in yardstick
+- Package-specific check failures
+- Integration with `metric_set()`
+- Estimator-related issues
+- Internal function changes
 
-**When to use:**
-- ✅ Shared logic between multiple functions
-- ✅ Complex calculations used repeatedly
-- ✅ Helper functions for testing
-- ❌ Don't overuse - sometimes duplication is clearer
-```
+#### 2.2 Create Recipes Source Files (2-2.5 hours)
 
-#### 1.3 Split troubleshooting.md
+**add-recipe-step/testing-patterns-source.md:**
+- Using internal test data/recipes
+- Step testing conventions in recipes
+- File naming: `test-*.R`
+- Recipes test organization
+- Testing prep/bake workflow
 
-**troubleshooting-extension.md:**
-- Focus on namespace/import issues
-- Package setup problems
-- Dependency management
-- External function usage
+**add-recipe-step/best-practices-source.md:**
+- Internal helpers: `recipes_eval_select()`, `get_case_weights()`, `check_type()`
+- Step file naming conventions
+- Documentation patterns: heavy use of `@inheritParams`
+- When to use internal helpers vs exported
+- Recipes code style preferences
 
-**troubleshooting-source.md:**
-- Working with package internals
-- Git/branch issues (minimal)
-- Integration testing
-- Package-specific checks
-- PR submission issues (minimal)
+**add-recipe-step/troubleshooting-source.md:**
+- Common issues when working in recipes
+- Step-specific errors
+- Variable selection issues
+- prep/bake debugging
+- Internal function changes
 
-### Stage 2: Create Extension/Source Guides (4-5 hours)
+### Stage 3: Create Extension/Source Guides (4-5 hours)
 
-#### 2.1 Create extension-guide.md (yardstick)
+#### 3.1 Create extension-guide.md (yardstick)
 
 **Content:**
 ```markdown
@@ -300,7 +283,7 @@ Complete guide for creating new packages that extend yardstick.
 → See [Troubleshooting (Extension)](../shared-references/troubleshooting-extension.md)
 ```
 
-#### 2.2 Create source-guide.md (yardstick)
+#### 3.2 Create source-guide.md (yardstick)
 
 **Content:**
 ```markdown
@@ -370,15 +353,15 @@ check_result <- yardstick:::check_metric(...)
 
 ## Testing
 
-→ See [Testing Patterns (Source)](../shared-references/testing-patterns-source.md)
+→ See [Testing Patterns (Source)](testing-patterns-source.md)
 
 ## Best Practices
 
-→ See [Best Practices (Source)](../shared-references/best-practices-source.md)
+→ See [Best Practices (Source)](best-practices-source.md)
 
 ## Troubleshooting
 
-→ See [Troubleshooting (Source)](../shared-references/troubleshooting-source.md)
+→ See [Troubleshooting (Source)](troubleshooting-source.md)
 
 ## PR Submission (Minimal)
 
@@ -388,20 +371,20 @@ check_result <- yardstick:::check_metric(...)
 4. Tidymodels team will review
 ```
 
-#### 2.3 Create extension-guide.md (recipes)
+#### 3.3 Create extension-guide.md (recipes)
 
 Similar structure to yardstick extension guide but for recipe steps.
 
-#### 2.4 Create source-guide.md (recipes)
+#### 3.4 Create source-guide.md (recipes)
 
 Similar structure to yardstick source guide but with recipes-specific patterns:
 - Internal helpers: `recipes:::get_case_weights()`, `recipes:::check_type()`
 - File naming: `R/[step_name].R`
 - Documentation: Heavy use of `@inheritParams`
 
-### Stage 3: Update Main SKILL.md Files (3-4 hours)
+### Stage 4: Update Main SKILL.md Files (3-4 hours)
 
-#### 3.1 Update add-yardstick-metric/SKILL.md
+#### 4.1 Update add-yardstick-metric/SKILL.md
 
 **Changes:**
 
@@ -461,13 +444,13 @@ Similar structure to yardstick source guide but with recipes-specific patterns:
 - Source Development: [Complete Source Guide](source-guide.md)
 ```
 
-#### 3.2 Update add-recipe-step/SKILL.md
+#### 4.2 Update add-recipe-step/SKILL.md
 
 Similar changes to yardstick SKILL.md but for recipe steps.
 
-### Stage 4: Update Shared References (2-3 hours)
+### Stage 5: Update Shared References (1-2 hours)
 
-#### 4.1 Update development-workflow.md
+#### 5.1 Update development-workflow.md
 
 **Add section:**
 ```markdown
@@ -484,16 +467,20 @@ When contributing to tidymodels packages:
 Keep git workflow minimal - tidymodels developers are familiar with this process.
 ```
 
-#### 4.2 Update reference navigation
+#### 5.2 Update reference navigation
 
-Update all files to point to split references:
-- `testing-patterns.md` → `testing-patterns-extension.md` or `testing-patterns-source.md`
-- `best-practices.md` → `best-practices-extension.md` or `best-practices-source.md`
-- `troubleshooting.md` → `troubleshooting-extension.md` or `troubleshooting-source.md`
+Update all files to point to renamed extension references:
+- `testing-patterns.md` → `testing-patterns-extension.md`
+- `best-practices.md` → `best-practices-extension.md`
+- `troubleshooting.md` → `troubleshooting-extension.md`
 
-### Stage 5: Minor Updates to Existing References (1-2 hours)
+For source guides, references point to skill-specific files:
+- Yardstick: `add-yardstick-metric/testing-patterns-source.md`
+- Recipes: `add-recipe-step/testing-patterns-source.md`
 
-#### 5.1 Add notes to metric/step references
+### Stage 6: Minor Updates to Existing References (1-2 hours)
+
+#### 6.1 Add notes to metric/step references
 
 Add small callouts where internal functions are mentioned:
 
@@ -624,13 +611,14 @@ See [phase2-checklist.md](phase2-checklist.md) for detailed task tracking.
 ## Timeline
 
 ### Week 1: Core Infrastructure
-- **Days 1-2:** Create split reference files (Stage 1)
-- **Days 3-4:** Create extension/source guides for yardstick (Stage 2.1-2.2)
+- **Day 1 (30 min):** Rename extension reference files (Stage 1)
+- **Days 1-2:** Create package-specific source files (Stage 2)
+- **Days 3-4:** Create extension/source guides for yardstick (Stage 3.1-3.2)
 
 ### Week 2: Completion
-- **Days 1-2:** Create extension/source guides for recipes (Stage 2.3-2.4)
-- **Days 3-4:** Update main SKILL.md files (Stage 3)
-- **Day 5:** Final updates and testing (Stages 4-5)
+- **Days 1-2:** Create extension/source guides for recipes (Stage 3.3-3.4)
+- **Days 3-4:** Update main SKILL.md files (Stage 4)
+- **Day 5:** Final updates and testing (Stages 5-6)
 
 ### Total Time: 10-15 hours (2 weeks part-time)
 
