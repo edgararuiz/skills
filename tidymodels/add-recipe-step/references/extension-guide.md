@@ -22,17 +22,13 @@ Complete guide for creating new packages that extend recipes with custom preproc
 
 ### Package Setup Required
 
-**⚠️ IMPORTANT**: Before implementing recipe steps, complete the package setup:
+**⚠️ IMPORTANT**: Before implementing recipe steps, you MUST complete the package setup:
 
-👉 **[R Package Setup Guide](../../shared-references/r-package-setup.md)**
+👉 **[R Package Setup Guide](../../shared-references/r-package-setup.md)** (REQUIRED)
 
-This guide includes critical steps like:
-- Package initialization with `usethis::create_package()`
-- Optional `use_claude_code()` integration (must run BEFORE adding dependencies)
-- Adding required dependencies (recipes, rlang, cli, etc.)
-- Setting up testing infrastructure
+Complete all steps in the setup guide and ensure the verification script passes.
 
-**After completing setup, return here to implement your recipe step.**
+**After setup verification passes, return here to implement your recipe step.**
 
 ---
 

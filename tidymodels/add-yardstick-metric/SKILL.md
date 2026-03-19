@@ -9,32 +9,23 @@ Guide for developing new metrics that extend the yardstick package. This skill p
 
 ---
 
-## 🛑 CLAUDE: RUN VERIFICATION FIRST
+## Prerequisites
 
-**Before implementing ANY metrics, run this verification script from the user's package directory:**
+**Before implementing any metrics, you MUST complete the package setup:**
 
-```bash
-cd /path/to/user/package
-Rscript -e 'source("~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/<commit>/tidymodels/shared-scripts/verify-setup.R")'
-```
+👉 **[R Package Setup Guide](../shared-references/r-package-setup.md)** (REQUIRED)
 
-**How to find the script path:**
-- This skill is loaded from the plugin cache at `~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/<commit-hash>/tidymodels/`
-- The verify-setup.R script is at `../shared-scripts/verify-setup.R` relative to this SKILL.md
-- Use the absolute plugin cache path shown above, replacing `<commit>` with the actual commit hash from where this skill was loaded
+This guide provides a step-by-step checklist for:
+- Package initialization
+- Claude Code integration
+- Repository cloning for reference implementations
+- Dependency management
+- Testing infrastructure setup
+- **Verification script** (mandatory final step)
 
-**What the script checks:**
-- Package structure (DESCRIPTION, R/, tests/testthat/)
-- Claude Code integration (usethis version, .claude/CLAUDE.md)
-- Repository access (repos/yardstick/)
-- Dependencies (yardstick, rlang, cli)
+**ALL verification checks must pass before proceeding with metric implementation.**
 
-**If there are ANY warnings:**
-1. Guide the user through fixing them using suggested commands
-2. Do NOT proceed with implementation until all checks pass
-3. Critical blockers require user action first
-
-**When to run:** After initial package setup, BEFORE implementing any metrics.
+After completing setup, return here for implementation guidance.
 
 ---
 
@@ -83,35 +74,6 @@ Creating a custom yardstick metric provides:
 - Grouped data frame support
 - Integration with `metric_set()`
 - Optional autoplot support for visualization (curves and confusion matrices)
-
-## Repository Access
-
-Clone the yardstick source repository for reference implementations and examples.
-
-**Benefits:**
-- See actual metric implementations
-- Reference real test patterns
-- Search through source code
-- Understand package architecture
-
-**Setup:**
-
-Run from your R package directory:
-
-```bash
-# macOS/Linux/WSL
-~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-scripts/clone-tidymodels-repos.sh yardstick
-
-# Windows (PowerShell)
-~\.claude\plugins\cache\tidymodels-skills\tidymodels-dev\*\tidymodels\shared-scripts\clone-tidymodels-repos.ps1 yardstick
-
-# Any platform (Python)
-python3 ~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-scripts/clone-tidymodels-repos.py yardstick
-```
-
-**Note:** The `*` wildcard matches the commit hash. The shell will expand it to the actual path.
-
-**For complete instructions**, see: [Repository Access Setup](../shared-references/repository-access.md)
 
 ## Quick Navigation
 
