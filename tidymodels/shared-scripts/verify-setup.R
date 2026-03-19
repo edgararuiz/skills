@@ -312,10 +312,23 @@ if (results$all_passed) {
   } else {
     cat("\u2713 All checks passed!\n")
   }
+  cat("\n")
+  if (use_cli) {
+    cli::cli_alert_success("You can now proceed with development")
+  } else {
+    cat("\u2713 You can now proceed with development\n")
+  }
 } else {
   cat("Summary: ", results$warning_count, " warning",
       if (results$warning_count != 1) "s" else "", " found\n", sep = "")
-  cat("Review warnings above and run suggested commands\n")
+  cat("\n")
+  if (use_cli) {
+    cli::cli_alert_warning("REQUIRED: After addressing deficiencies, re-run this script")
+  } else {
+    cat("\u26A0 REQUIRED: After addressing deficiencies, re-run this script\n")
+  }
+  cat("\nTo re-run:\n")
+  cat("  Rscript -e 'source(\"~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-scripts/verify-setup.R\")'\n")
 }
 
 cat("========================================\n\n")
