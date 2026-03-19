@@ -42,39 +42,29 @@ This skill supports **two distinct development contexts**:
 
 ---
 
-## 🛑 MANDATORY SETUP SEQUENCE
+## 🛑 MANDATORY FIRST STEP
 
-**INSTRUCTIONS FOR CLAUDE:** You MUST complete these steps in order before implementing any recipe steps. Do NOT skip or proceed without explicit user confirmation.
-
-### Step 1: Package Setup
-**ACTION REQUIRED:** Ask user to run package setup:
+**INSTRUCTIONS FOR CLAUDE:** Before any development work, you MUST have the user run this verification script:
 
 ```r
-# Check if package exists
-file.exists("DESCRIPTION")
+source("path/to/skills-personal/tidymodels/shared-scripts/verify-setup.R")
 ```
 
-- If **FALSE** (new package): User must complete [R Package Setup Guide](../shared-references/r-package-setup.md) including:
-  - `usethis::create_package()`
-  - `use_claude_code()` if available (BEFORE other dependencies)
-  - Adding dependencies
+This programmatically checks:
+- Package structure (DESCRIPTION, R/, tests/testthat/)
+- Claude Code integration (usethis version, .claude/CLAUDE.md)
+- Repository access (repos/recipes/)
+- Dependencies (recipes, rlang, tibble, vctrs, cli)
 
-- If **TRUE** (existing package): Verify dependencies are installed
+**Read the output carefully.** If there are warnings:
+1. Direct the user to run the suggested commands
+2. Point to the relevant documentation links shown in the output
+3. Wait for the user to fix issues before proceeding
 
-**VERIFICATION CHECKPOINT:** Use `AskUserQuestion` to confirm:
-- "Have you completed the package setup from r-package-setup.md?"
-  - If NO: Stop and direct user to complete setup first
-  - If YES: Continue to Step 2
-
-### Step 2: Repository Access
-**ACTION REQUIRED:** Offer to clone recipes repository for reference implementations.
-
-**VERIFICATION CHECKPOINT:** Use `AskUserQuestion`:
-- "Should I clone the recipes repository for reference implementations?"
-  - If YES: Provide clone command (see Repository Access section below)
-  - If NO: Continue without repository access
-
-**DO NOT PROCEED** to implementation until both checkpoints are complete.
+**DO NOT PROCEED** with implementation if there are warnings about:
+- Missing DESCRIPTION → Must create package first
+- Missing .claude/CLAUDE.md → Must run use_claude_code() first (only if usethis 3.2.1.9000+ is installed)
+- Missing repository → Offer to help clone it
 
 ---
 

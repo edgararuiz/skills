@@ -200,9 +200,25 @@ usethis::use_package("package_name")
 
 **Solution:** See [roxygen-documentation.md](roxygen-documentation.md) for `@importFrom` usage
 
+## Verify Your Setup
+
+After completing all setup steps, verify everything is configured correctly:
+
+```r
+source("path/to/skills-personal/tidymodels/shared-scripts/verify-setup.R")
+```
+
+This will check:
+- Package structure (DESCRIPTION, R/, tests/testthat/)
+- Claude Code integration (usethis version, .claude/CLAUDE.md)
+- Repository access (for extension development)
+- Dependencies (recipes/yardstick, rlang, cli, etc.)
+
+**All checks should pass.** If you see warnings, follow the suggested commands to fix them.
+
 ## Next Steps
 
-After setup is complete:
+After setup is complete and verified:
 1. Review [development-workflow.md](development-workflow.md) for iteration cycle
 2. Start implementing your functions
 3. Write tests following [testing-patterns-extension.md](testing-patterns-extension.md)
