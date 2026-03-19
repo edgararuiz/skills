@@ -213,169 +213,23 @@ See [Development Workflow](../shared-references/development-workflow.md) for com
 
 ## Complete Example: Numeric Metric (MAE)
 
-This example shows all required components for a numeric metric **using extension development patterns** (exported functions only).
+For a complete, step-by-step implementation of a numeric metric (MAE), see the comprehensive example with all required components in:
 
-**For source development**, see [Source Development Guide](references/source-guide.md) for examples using internal functions.
+👉 **[Numeric Metrics Reference](references/numeric-metrics.md)**
 
-**Reference implementation:** `R/num-mae.R` in yardstick repository
+This reference includes:
+- Implementation function (`mae_impl`) with case weights handling
+- Vector interface (`mae_vec`) with validation and NA handling
+- Data frame method with `new_numeric_metric()` wrapper
+- Complete test suite covering correctness, NA handling, input validation, and case weights
+- Working examples you can adapt for your own metrics
 
-### 1. Implementation function
+**Quick preview of the pattern:**
+- `_impl()` function: Core calculation logic
+- `_vec()` function: Validation and NA handling
+- `.data.frame()` method: Integration with yardstick system
 
-```r
-# R/mae.R
-
-mae_impl <- function(truth, estimate, case_weights = NULL) {
-  errors <- abs(truth - estimate)
-
-  if (is.null(case_weights)) {
-    mean(errors)
-  } else {
-    # Handle hardhat weights
-    wts <- if (inherits(case_weights, c("hardhat_importance_weights",
-                                        "hardhat_frequency_weights"))) {
-      as.double(case_weights)
-    } else {
-      case_weights
-    }
-    weighted.mean(errors, w = wts)
-  }
-}
-```
-
-### 2. Vector interface
-
-```r
-#' @export
-mae_vec <- function(truth, estimate, na_rm = TRUE, case_weights = NULL, ...) {
-  # Validate na_rm parameter
-  if (!is.logical(na_rm) || length(na_rm) != 1) {
-    cli::cli_abort("{.arg na_rm} must be a single logical value.")
-  }
-
-  # Validate inputs
-  yardstick::check_numeric_metric(truth, estimate, case_weights)
-
-  # Handle missing values
-  if (na_rm) {
-    result <- yardstick::yardstick_remove_missing(truth, estimate, case_weights)
-    truth <- result$truth
-    estimate <- result$estimate
-    case_weights <- result$case_weights
-  } else if (yardstick::yardstick_any_missing(truth, estimate, case_weights)) {
-    return(NA_real_)
-  }
-
-  # Call implementation
-  mae_impl(truth, estimate, case_weights)
-}
-```
-
-### 3. Data frame method
-
-```r
-#' Mean Absolute Error
-#'
-#' Calculate the mean absolute error between truth and estimate.
-#'
-#' @family numeric metrics
-#' @family accuracy metrics
-#' @templateVar fn mae
-#' @template return
-#' @template event_first
-#'
-#' @inheritParams rmse
-#'
-#' @author Your Name
-#'
-#' @export
-mae <- function(data, ...) {
-  UseMethod("mae")
-}
-
-mae <- yardstick::new_numeric_metric(
-  mae,
-  direction = "minimize",
-  range = c(0, Inf)
-)
-
-#' @export
-#' @rdname mae
-mae.data.frame <- function(data, truth, estimate, na_rm = TRUE,
-                           case_weights = NULL, ...) {
-  yardstick::numeric_metric_summarizer(
-    name = "mae",
-    fn = mae_vec,
-    data = data,
-    truth = !!rlang::enquo(truth),
-    estimate = !!rlang::enquo(estimate),
-    na_rm = na_rm,
-    case_weights = !!rlang::enquo(case_weights)
-  )
-}
-```
-
-### 4. Tests
-
-```r
-# tests/testthat/test-mae.R
-
-test_that("mae works correctly", {
-  df <- data.frame(
-    truth = c(1, 2, 3, 4, 5),
-    estimate = c(1.5, 2.5, 2.5, 3.5, 4.5)
-  )
-
-  result <- mae(df, truth, estimate)
-
-  # Expected: mean(abs(c(0.5, 0.5, 0.5, 0.5, 0.5))) = 0.5
-  expect_equal(result$.estimate, 0.5)
-  expect_equal(result$.metric, "mae")
-  expect_equal(result$.estimator, "standard")
-})
-
-test_that("mae handles NA correctly", {
-  df <- data.frame(
-    truth = c(1, 2, NA, 4, 5),
-    estimate = c(1.5, 2.5, 2.5, 3.5, 4.5)
-  )
-
-  # With na_rm = TRUE (default)
-  result_remove <- mae(df, truth, estimate, na_rm = TRUE)
-  expect_false(is.na(result_remove$.estimate))
-
-  # With na_rm = FALSE
-  result_keep <- mae(df, truth, estimate, na_rm = FALSE)
-  expect_true(is.na(result_keep$.estimate))
-})
-
-test_that("mae validates inputs", {
-  df <- data.frame(
-    truth = c(1, 2, 3),
-    estimate = c("a", "b", "c")  # Wrong type
-  )
-
-  expect_error(mae(df, truth, estimate))
-})
-
-test_that("mae works with case weights", {
-  df <- data.frame(
-    truth = c(1, 2, 3),
-    estimate = c(1.5, 2.5, 3.5),
-    weights = c(1, 2, 1)
-  )
-
-  # Calculate expected weighted value
-  # errors = abs(c(0.5, 0.5, 0.5))
-  # weighted mean = (1*0.5 + 2*0.5 + 1*0.5) / (1+2+1) = 0.5
-
-  result <- mae(df, truth, estimate, case_weights = weights)
-  expect_equal(result$.estimate, 0.5)
-})
-```
-
-**Reference test pattern:** `tests/testthat/test-num-mae.R` in yardstick repository
-
-See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) for comprehensive testing guide.
+See also [Extension Development Guide](references/extension-guide.md) for the complete implementation walkthrough.
 
 ## Implementation Guide by Metric Type
 

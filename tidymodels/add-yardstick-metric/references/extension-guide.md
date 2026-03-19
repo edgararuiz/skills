@@ -20,52 +20,19 @@ Complete guide for creating new packages that extend yardstick with custom metri
 
 ## Prerequisites
 
-### Quick Package Setup
+### Package Setup Required
 
-See [R Package Setup](../../shared-references/r-package-setup.md) for complete details, including optional Claude Code setup.
+**⚠️ IMPORTANT**: Before implementing yardstick metrics, complete the package setup:
 
-```r
-# Check if this is a new package or existing package
-if (!file.exists("DESCRIPTION")) {
-  # New package - create full structure
-  usethis::create_package(".", open = FALSE)
+👉 **[R Package Setup Guide](../../shared-references/r-package-setup.md)**
 
-  # Set up Claude Code integration immediately (if available)
-  if (packageVersion("usethis") >= "3.2.1.9000") {
-    usethis::use_claude_code()
-    message("\n========================================")
-    message("✓ Claude Code setup complete!")
-    message("✓ Created .claude/CLAUDE.md")
-    message("✓ Created .claude/skills/ with tidyverse patterns")
-    message("========================================\n")
-  }
+This guide includes critical steps like:
+- Package initialization with `usethis::create_package()`
+- Optional `use_claude_code()` integration (must run BEFORE adding dependencies)
+- Adding required dependencies (yardstick, rlang, cli, etc.)
+- Setting up testing infrastructure
 
-  # Continue with package setup
-  usethis::use_mit_license()
-  usethis::use_package("yardstick")
-  usethis::use_package("rlang")
-  usethis::use_package("cli")
-  usethis::use_testthat()
-} else {
-  # Existing package - ensure dependencies
-  usethis::use_package("yardstick")
-  usethis::use_package("rlang")
-  usethis::use_package("cli")
-  if (!dir.exists("tests/testthat")) {
-    usethis::use_testthat()
-  }
-}
-```
-
-**INSTRUCTIONS FOR CLAUDE:** After the user runs this code, if `use_claude_code()` was executed:
-
-1. Use `AskUserQuestion` to prompt: "The package setup created `.claude/CLAUDE.md` with R package development instructions. Should I read this file now?"
-   - Option 1: "Yes, read CLAUDE.md now (Recommended)"
-   - Option 2: "Skip for now"
-
-2. If user chooses "Yes", read `.claude/CLAUDE.md` using the Read tool
-
-3. Continue with yardstick metric implementation following any instructions from CLAUDE.md
+**After completing setup, return here to implement your metric.**
 
 ---
 

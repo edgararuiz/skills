@@ -1,12 +1,17 @@
 # Tidymodels Skills - News
 
-- **Architecture: Single Source of Truth** (2026-03-19)
+- **Architecture: Single Source of Truth & Code Duplication Remediation** (2026-03-19)
   - **BREAKING**: Removed all code blocks from SKILL.md files to eliminate duplication
   - SKILL.md is now purely navigational (overview + links to references)
-  - All setup instructions live exclusively in r-package-setup.md
+  - Removed duplicated package setup code from extension-guide.md files (both recipe and yardstick)
+  - Setup code now exists only in r-package-setup.md (single source of truth)
+  - Removed duplicate MAE implementation from add-yardstick-metric SKILL.md
+  - Complete MAE example now lives only in numeric-metrics.md reference
+  - Prevents users from following incomplete/stale setup instructions
   - Prevents inconsistency where users follow abbreviated "Quick setup" and miss critical steps
   - Documented as #1 anti-pattern in SKILL_IMPLEMENTATION_GUIDE.md
   - Makes skills maintainable: one place to update, no synchronization needed
+  - Part of systematic review to eliminate all code duplication across tidymodels skills
 
 - **Claude Code Integration** (2026-03-19)
   - Added support for `usethis::use_claude_code()` in extension setup workflow
