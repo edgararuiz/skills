@@ -42,29 +42,31 @@ This skill supports **two distinct development contexts**:
 
 ---
 
-## 🛑 MANDATORY FIRST STEP
+## 🛑 MANDATORY VERIFICATION STEP - FOR CLAUDE
 
-**INSTRUCTIONS FOR CLAUDE:** Before any development work, you MUST have the user run this verification script:
+**INSTRUCTIONS FOR CLAUDE:** Before creating ANY functions in R/, you MUST run this verification script using the Bash tool:
 
-```r
-source("path/to/skills-personal/tidymodels/shared-scripts/verify-setup.R")
+```bash
+cd /path/to/user/package
+Rscript -e 'source("path/to/skills-personal/tidymodels/shared-scripts/verify-setup.R")'
 ```
 
-This programmatically checks:
+**This verifies YOU didn't skip setup steps.** The script checks:
 - Package structure (DESCRIPTION, R/, tests/testthat/)
 - Claude Code integration (usethis version, .claude/CLAUDE.md)
 - Repository access (repos/yardstick/)
 - Dependencies (yardstick, rlang, cli)
 
-**Read the output carefully.** If there are warnings:
-1. Direct the user to run the suggested commands
-2. Point to the relevant documentation links shown in the output
-3. Wait for the user to fix issues before proceeding
+**If there are ANY warnings:**
+1. YOU must guide the user through fixing them using the suggested commands shown in the output
+2. Do NOT proceed with implementation until all checks pass
+3. Critical blockers:
+   - Missing DESCRIPTION → Guide user through usethis::create_package()
+   - Missing .claude/CLAUDE.md (if usethis 3.2.1.9000+) → Guide user through use_claude_code(), then read CLAUDE.md
+   - Missing repos/yardstick/ → Offer to clone repository for reference implementations
+   - Missing dependencies → Guide user through adding them
 
-**DO NOT PROCEED** with implementation if there are warnings about:
-- Missing DESCRIPTION → Must create package first
-- Missing .claude/CLAUDE.md → Must run use_claude_code() first (only if usethis 3.2.1.9000+ is installed)
-- Missing repository → Offer to help clone it
+**Run this verification AFTER guiding the user through initial setup but BEFORE implementing any metrics.**
 
 ---
 
