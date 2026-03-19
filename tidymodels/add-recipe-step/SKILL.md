@@ -42,6 +42,42 @@ This skill supports **two distinct development contexts**:
 
 ---
 
+## 🛑 MANDATORY SETUP SEQUENCE
+
+**INSTRUCTIONS FOR CLAUDE:** You MUST complete these steps in order before implementing any recipe steps. Do NOT skip or proceed without explicit user confirmation.
+
+### Step 1: Package Setup
+**ACTION REQUIRED:** Ask user to run package setup:
+
+```r
+# Check if package exists
+file.exists("DESCRIPTION")
+```
+
+- If **FALSE** (new package): User must complete [R Package Setup Guide](../shared-references/r-package-setup.md) including:
+  - `usethis::create_package()`
+  - `use_claude_code()` if available (BEFORE other dependencies)
+  - Adding dependencies
+
+- If **TRUE** (existing package): Verify dependencies are installed
+
+**VERIFICATION CHECKPOINT:** Use `AskUserQuestion` to confirm:
+- "Have you completed the package setup from r-package-setup.md?"
+  - If NO: Stop and direct user to complete setup first
+  - If YES: Continue to Step 2
+
+### Step 2: Repository Access
+**ACTION REQUIRED:** Offer to clone recipes repository for reference implementations.
+
+**VERIFICATION CHECKPOINT:** Use `AskUserQuestion`:
+- "Should I clone the recipes repository for reference implementations?"
+  - If YES: Provide clone command (see Repository Access section below)
+  - If NO: Continue without repository access
+
+**DO NOT PROCEED** to implementation until both checkpoints are complete.
+
+---
+
 ## Overview
 
 Creating a custom recipe step provides:
@@ -53,9 +89,9 @@ Creating a custom recipe step provides:
 - Proper handling of grouped data frames
 - Sparse data support (when applicable)
 
-## Repository Access (Optional but Recommended)
+## Repository Access
 
-For enhanced guidance with real implementation examples from the recipes package, you can clone the source code repository locally.
+Clone the recipes source repository for reference implementations and examples.
 
 **Benefits:**
 - See actual step implementations
@@ -63,7 +99,7 @@ For enhanced guidance with real implementation examples from the recipes package
 - Search through source code
 - Understand package architecture
 
-**Quick Setup:**
+**Setup:**
 
 Run from your R package directory:
 
@@ -79,8 +115,6 @@ python3 /path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repo
 ```
 
 **For complete instructions**, see: [Repository Access Setup](../shared-references/repository-access.md)
-
-**Note:** Repository access is optional. This skill works with built-in references if you choose not to clone.
 
 ## Quick Navigation
 
@@ -109,16 +143,6 @@ python3 /path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repo
 - [Testing Patterns (Source)](references/testing-patterns-source.md) - Using internal helpers
 - [Best Practices (Source)](references/best-practices-source.md) - Using internal functions
 - [Troubleshooting (Source)](references/troubleshooting-source.md) - Source-specific issues
-
-## Prerequisites
-
-**⚠️ IMPORTANT**: Before implementing recipe steps, complete the package setup sequence:
-
-👉 **[R Package Setup Guide](../shared-references/r-package-setup.md)**
-
-This guide includes critical steps like `use_claude_code()` (if available) that must run BEFORE adding dependencies. Following the complete sequence ensures proper package initialization and Claude Code integration.
-
-After completing package setup, return here to implement your recipe step.
 
 ## Development Workflow
 
