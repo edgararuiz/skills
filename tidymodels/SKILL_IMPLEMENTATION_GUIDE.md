@@ -2,7 +2,7 @@
 
 **Purpose:** Guide for creating new skills in the tidymodels skill system (e.g., add-parsnip-model, add-dials-parameter).
 
-**Last Updated:** 2026-03-18
+**Last Updated:** 2026-03-19
 
 ---
 
@@ -93,6 +93,56 @@ tidymodels/shared-scripts/
 
 ---
 
+## Core Principle: Avoid Code Duplication
+
+**The #1 rule for skill architecture: Each piece of content should exist in exactly ONE place.**
+
+### Why This Matters
+
+Code duplication causes:
+- **Inconsistency**: Different versions of the same instructions get out of sync
+- **User confusion**: Users follow incomplete/outdated version
+- **Maintenance burden**: Must update multiple places when things change
+- **Trust erosion**: Users discover conflicting information
+
+### How to Maintain Single Source of Truth
+
+**SKILL.md:**
+- ❌ No code blocks (no "Quick setup", no examples)
+- ✅ Overview + navigation links only
+- ✅ Links to references for all actual content
+
+**extension-guide.md / source-guide.md:**
+- ❌ No setup code (link to r-package-setup.md)
+- ❌ No testing patterns (link to testing-patterns-*.md)
+- ✅ Step-by-step implementation specific to the feature
+- ✅ Links to references for universal patterns
+
+**references/*.md:**
+- ✅ Deep-dive content on specific topics
+- ✅ Complete, self-contained examples
+- ✅ Links to shared-references for universal patterns
+
+**shared-references/*.md:**
+- ✅ Universal patterns that apply to all R packages
+- ✅ Content used by multiple skills
+- ✅ The canonical source for general R package development
+
+### When You're Tempted to Duplicate
+
+**❌ "But users need a quick reference in SKILL.md!"**
+→ ✅ Add a prominent link with clear description instead
+
+**❌ "But this example would help here too!"**
+→ ✅ Link to the reference that has the example
+
+**❌ "But I need to show just this one setup step!"**
+→ ✅ Link to the full setup guide, users need the complete sequence anyway
+
+**The test:** If you're pasting code from one file to another, STOP. Create or link to a reference instead.
+
+---
+
 ## File-by-File Implementation Guide
 
 ### 1. SKILL.md (Main Entry Point)
@@ -179,11 +229,17 @@ This skill supports **two distinct development contexts**:
 
 ## Prerequisites
 
-[Standard prerequisites section - see shared-references/r-package-setup.md]
+**⚠️ IMPORTANT**: Before implementing [features], complete the package setup sequence:
+
+👉 **[R Package Setup Guide](../shared-references/r-package-setup.md)**
+
+This guide includes critical steps like `use_claude_code()` (if available) that must run BEFORE adding dependencies. Following the complete sequence ensures proper package initialization and Claude Code integration.
+
+After completing package setup, return here to implement your [feature].
 
 ## Development Workflow
 
-[Standard workflow section - see shared-references/development-workflow.md]
+[Link to shared-references/development-workflow.md - do NOT duplicate code here]
 
 ## Complete Example: [Primary Use Case]
 
@@ -229,6 +285,9 @@ If you're contributing to [package] itself, you have access to internal function
 - Link extensively to other documents
 - Keep main content focused on extension development
 - Reference source guide for package-specific patterns
+- **NEVER duplicate code across SKILL.md and reference files** - SKILL.md should only link to references, not repeat their content
+- Prerequisites section should link to r-package-setup.md, NOT include abbreviated setup code
+- Single source of truth: all setup instructions live in shared-references/r-package-setup.md
 
 ---
 
@@ -1148,24 +1207,33 @@ When you add a new skill, update related skills:
 ## Common Pitfalls to Avoid
 
 ### ❌ Don't:
-1. **Mix extension and source patterns in examples** - Choose one context per example
-2. **Assume `:::` access in extension examples** - Always use exported functions
-3. **Put package-specific content in shared-references** - Keep universal
-4. **Show code fragments without context** - Provide complete examples
-5. **Forget to update cross-references** - Keep links bidirectional
-6. **Skip the context discrimination section** - Always clarify extension vs source
-7. **Use generic error messages** - Be specific to the context
-8. **Leave broken links** - Test all cross-references
+1. **DUPLICATE CODE BETWEEN SKILL.md AND REFERENCES** - This is the #1 anti-pattern
+   - ❌ NEVER include setup code blocks in SKILL.md (e.g., "Quick setup")
+   - ❌ NEVER include abbreviated versions of reference content
+   - ✅ ALWAYS link to the full reference (e.g., r-package-setup.md)
+   - **Why:** Creates inconsistency, users follow incomplete instructions, maintenance nightmare
+   - **Example of the problem:** User follows "Quick setup" in SKILL.md, misses `use_claude_code()` from r-package-setup.md
+2. **Mix extension and source patterns in examples** - Choose one context per example
+3. **Assume `:::` access in extension examples** - Always use exported functions
+4. **Put package-specific content in shared-references** - Keep universal
+5. **Show code fragments without context** - Provide complete examples
+6. **Forget to update cross-references** - Keep links bidirectional
+7. **Skip the context discrimination section** - Always clarify extension vs source
+8. **Use generic error messages** - Be specific to the context
+9. **Leave broken links** - Test all cross-references
 
 ### ✅ Do:
-1. **Start with SKILL.md structure from existing skills** - Copy, then adapt
-2. **Test all code examples** - They should run as shown
-3. **Link generously** - Help users navigate
-4. **Be explicit about constraints** - Extension development has limits
-5. **Provide both extension and source examples** - When patterns differ significantly
-6. **Update related skills** - Add cross-references when appropriate
-7. **Follow naming conventions** - Consistent with existing skills
-8. **Include troubleshooting** - Anticipate common problems
+1. **Use references as single source of truth** - SKILL.md links, references contain content
+2. **Make SKILL.md purely navigational** - Overview + links, no duplicated code blocks
+3. **Link to r-package-setup.md for ALL setup instructions** - Never abbreviate or duplicate
+4. **Start with SKILL.md structure from existing skills** - Copy, then adapt
+5. **Test all code examples** - They should run as shown
+6. **Link generously** - Help users navigate
+7. **Be explicit about constraints** - Extension development has limits
+8. **Provide both extension and source examples** - When patterns differ significantly
+9. **Update related skills** - Add cross-references when appropriate
+10. **Follow naming conventions** - Consistent with existing skills
+11. **Include troubleshooting** - Anticipate common problems
 
 ---
 
@@ -1461,14 +1529,20 @@ The `r-package-setup.md` file now includes a section on `use_claude_code()`:
 
 ### Key Principles
 
-1. **Dual Context:** Always support extension and source development
-2. **Extension First:** Main examples use extension patterns (most users)
-3. **Complete Examples:** Show full working code, not fragments
-4. **Cross-Reference Heavily:** Help users navigate
-5. **Test All Code:** Examples must work as shown
-6. **Consistent Structure:** Follow established patterns
-7. **Clear Constraints:** Be explicit about extension limitations
-8. **Package-Specific Details:** In skill directories, not shared-references
+1. **No Code Duplication:** Avoid duplicating code across files at all costs
+   - Each piece of content should exist in exactly one place
+   - SKILL.md links to references, never duplicates their content
+   - References link to shared-references for universal patterns
+   - If you find yourself copying code, create a reference and link to it instead
+   - **Why:** Prevents inconsistency, reduces maintenance burden, ensures single source of truth
+2. **Dual Context:** Always support extension and source development
+3. **Extension First:** Main examples use extension patterns (most users)
+4. **Complete Examples:** Show full working code, not fragments
+5. **Cross-Reference Heavily:** Help users navigate
+6. **Test All Code:** Examples must work as shown
+7. **Consistent Structure:** Follow established patterns
+8. **Clear Constraints:** Be explicit about extension limitations
+9. **Package-Specific Details:** In skill directories, not shared-references
 
 ### Quick Start for New Skill
 
@@ -1492,6 +1566,6 @@ A skill is complete when:
 
 ---
 
-**Last Updated:** 2026-03-18
+**Last Updated:** 2026-03-19
 
 For questions or feedback about this guide, review the planning documents in `.github/planning/` or examine existing skills for examples.

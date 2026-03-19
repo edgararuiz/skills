@@ -121,30 +121,13 @@ python3 /path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repo
 
 ## Prerequisites
 
-See [R Package Setup](../shared-references/r-package-setup.md) for complete details.
+**⚠️ IMPORTANT**: Before implementing metrics, complete the package setup sequence:
 
-**Quick setup:**
+👉 **[R Package Setup Guide](../shared-references/r-package-setup.md)**
 
-```r
-# Check if this is a new package or existing package
-if (!file.exists("DESCRIPTION")) {
-  # New package - create full structure
-  usethis::create_package(".", open = FALSE)
-  usethis::use_mit_license()
-  usethis::use_package("yardstick")
-  usethis::use_package("rlang")
-  usethis::use_package("cli")
-  usethis::use_testthat()
-} else {
-  # Existing package - ensure dependencies
-  usethis::use_package("yardstick")
-  usethis::use_package("rlang")
-  usethis::use_package("cli")
-  if (!dir.exists("tests/testthat")) {
-    usethis::use_testthat()
-  }
-}
-```
+This guide includes critical steps like `use_claude_code()` (if available) that must run BEFORE adding dependencies. Following the complete sequence ensures proper package initialization and Claude Code integration.
+
+After completing package setup, return here to implement your metric.
 
 ## Development Workflow
 
