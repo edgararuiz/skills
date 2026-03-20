@@ -68,17 +68,17 @@ Clone the source repository to access reference implementations:
 
 **For yardstick metrics:**
 ```bash
-~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-scripts/clone-tidymodels-repos.sh yardstick
+~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-references/scripts/clone-tidymodels-repos.sh yardstick
 ```
 
 **For recipe steps:**
 ```bash
-~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-scripts/clone-tidymodels-repos.sh recipes
+~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-references/scripts/clone-tidymodels-repos.sh recipes
 ```
 
 **For both:**
 ```bash
-~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-scripts/clone-tidymodels-repos.sh all
+~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-references/scripts/clone-tidymodels-repos.sh all
 ```
 
 **Why this matters:**
@@ -143,7 +143,7 @@ This creates:
 Run the verification script to check all setup components:
 
 ```bash
-Rscript -e 'source(Sys.glob(path.expand("~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-scripts/verify-setup.R"))[1])'
+Rscript -e 'source(Sys.glob(path.expand("~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-references/scripts/verify-setup.R"))[1])'
 ```
 
 **What it checks:**
@@ -447,10 +447,10 @@ Rscript -e 'usethis::use_package("ggplot2", type = "Suggests")'    # For plottin
 After verification passes, you MUST proceed to the Extension Development Guide:
 
 **For yardstick metrics:**
-→ **[Extension Development Guide](../../add-yardstick-metric/references/extension-guide.md)** - Start implementing your metric
+→ **[Extension Development Guide](../add-yardstick-metric/references/extension-guide.md)** - Start implementing your metric
 
 **For recipe steps:**
-→ **[Extension Development Guide](extension-guide.md)** - Start implementing your step
+→ **[Extension Development Guide](../add-recipe-step/references/extension-guide.md)** - Start implementing your step
 
 **DO NOT** skip the Extension Development Guide. It contains critical implementation patterns and step-by-step instructions.
 

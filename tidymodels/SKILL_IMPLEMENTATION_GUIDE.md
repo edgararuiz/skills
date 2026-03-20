@@ -82,7 +82,7 @@ tidymodels/
 ### Shared Scripts (Optional)
 
 ```
-tidymodels/shared-scripts/
+tidymodels/shared-references/scripts/
 ├── README.md
 ├── clone-tidymodels-repos.sh    # Bash script
 ├── clone-tidymodels-repos.ps1   # PowerShell script
@@ -1139,7 +1139,7 @@ How to clone tidymodels repositories (optional but recommended).
 - `package-extension-requirements.md#testing-requirements`
 - `package-extension-requirements.md#common-issues-solutions`
 
-**Shared script files** (in `shared-scripts/`):
+**Shared script files** (in `shared-references/scripts/`):
 - `clone-tidymodels-repos.sh`
 - `clone-tidymodels-repos.ps1`
 - `clone-tidymodels-repos.py`
@@ -1158,7 +1158,7 @@ cd tidymodels
 ./localize-shared-files.sh
 ```
 
-This script copies the updated files from `shared-references/` and `shared-scripts/` to each skill's `references/` folder, ensuring all skills stay in sync.
+This script copies the updated files from `shared-references/` and `shared-references/scripts/` to each skill's `references/` folder, ensuring all skills stay in sync.
 
 **Workflow:**
 ```

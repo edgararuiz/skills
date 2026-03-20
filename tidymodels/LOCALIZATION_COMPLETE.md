@@ -2,7 +2,7 @@
 
 ## Summary
 
-Successfully copied shared-references and shared-scripts into each skill's references/ folder, eliminating "../shared-references" paths that Claude was treating as optional documentation.
+Successfully copied shared-references and shared-references/scripts into each skill's references/ folder, eliminating "../shared-references" paths that Claude was treating as optional documentation.
 
 ---
 
@@ -16,7 +16,7 @@ Successfully copied shared-references and shared-scripts into each skill's refer
 
 **Actions**:
 - Copies all `shared-references/*.md` → `[skill]/references/`
-- Copies all `shared-scripts/*` → `[skill]/references/scripts/`
+- Copies all `shared-references/scripts/*` → `[skill]/references/scripts/`
 - Executed for both add-yardstick-metric and add-recipe-step
 
 ---
@@ -30,7 +30,7 @@ tidymodels/
 │   ├── package-extension-prerequisites.md
 │   ├── package-development-workflow.md
 │   └── ...
-├── shared-scripts/
+├── shared-references/scripts/
 │   ├── verify-setup.R
 │   ├── clone-tidymodels-repos.sh
 │   └── ...
@@ -49,7 +49,7 @@ tidymodels/
 tidymodels/
 ├── shared-references/      (still exists, but not referenced)
 │   └── ...
-├── shared-scripts/         (still exists, but not referenced)
+├── shared-references/scripts/         (still exists, but not referenced)
 │   └── ...
 ├── add-yardstick-metric/
 │   └── references/
@@ -123,7 +123,7 @@ All references to shared files have been updated to use local paths:
 
 **Before**:
 ```bash
-~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-scripts/verify-setup.R
+~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/tidymodels/shared-references/scripts/verify-setup.R
 ```
 
 **After**:
@@ -204,7 +204,7 @@ By putting setup docs in the SAME location, we leverage the pattern Claude alrea
 
 ### When to Update Shared Files
 
-The original `shared-references/` and `shared-scripts/` still exist. If you update them:
+The original `shared-references/` and `shared-references/scripts/` still exist. If you update them:
 
 1. Run the localization script again: `./localize-shared-files.sh`
 2. This will copy updated files to both skills
