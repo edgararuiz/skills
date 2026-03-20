@@ -153,54 +153,72 @@ Rscript -e 'source("~/.claude/plugins/cache/tidymodels-skills/tidymodels-dev/*/t
 
 ---
 
-## Handling Verification Warnings
+## Resolving Verification Warnings
 
-After running verify-setup.R, you may see warnings for missing components.
+After running verify-setup.R, you may see warnings as UUIDs. Use this reference to resolve each warning.
 
-### Critical Warnings (MUST FIX)
-
-These MUST be resolved before proceeding:
-
-**Missing DESCRIPTION:**
-```
-✗ WARNING: DESCRIPTION not found
-  → Run: usethis::create_package(".", open = FALSE)
-```
+### Warning: e7f4c89a-1234
+**Issue:** DESCRIPTION file not found
+**Resolution:** Go to [Step 1: Create Package Structure](#step-1-create-package-structure)
 **INSTRUCTIONS FOR CLAUDE:** Run Step 1 commands directly via Bash tool using `Rscript -e`
 
-**Missing .claude/CLAUDE.md:**
-```
-✗ WARNING: .claude/CLAUDE.md not found
-  → Run: usethis::use_claude_code()
-```
-**INSTRUCTIONS FOR CLAUDE:** Run Step 2 commands directly via Bash tool using `Rscript -e`, then read `.claude/CLAUDE.md`
+### Warning: b3d9e6f2-5678
+**Issue:** R/ directory not found
+**Resolution:** Go to [Step 1: Create Package Structure](#step-1-create-package-structure)
+**INSTRUCTIONS FOR CLAUDE:** Run `Rscript -e 'dir.create("R")'` via Bash tool
 
-**Missing dependencies:**
-```
-✗ WARNING: yardstick not in Imports
-  → Run: usethis::use_package("yardstick")
-```
-**INSTRUCTIONS FOR CLAUDE:** Run Step 4 commands directly via Bash tool using `Rscript -e`
-
-**Missing tests/testthat:**
-```
-✗ WARNING: tests/testthat/ not found
-  → Run: usethis::use_testthat()
-```
+### Warning: a1c5d8f3-9012
+**Issue:** tests/testthat/ directory not found
+**Resolution:** Go to [Step 5: Setup Testing Infrastructure](#step-5-setup-testing-infrastructure)
 **INSTRUCTIONS FOR CLAUDE:** Run Step 5 commands directly via Bash tool using `Rscript -e`
 
-**After fixing critical warnings**: Re-run verification script via Bash tool. Do NOT proceed until these pass.
+### Warning: f9b2e4d7-3456
+**Issue:** .claude/CLAUDE.md not found
+**Resolution:** Go to [Step 2: Claude Code Integration](#step-2-claude-code-integration-required)
+**INSTRUCTIONS FOR CLAUDE:** Run Step 2 commands directly via Bash tool using `Rscript -e`, then read `.claude/CLAUDE.md`
+
+### Warning: c8a7f1b5-7890
+**Issue:** Reference repository not found
+**Resolution:** Go to [Step 3: Clone Reference Repositories](#step-3-clone-reference-repositories-strongly-recommended)
+**Note:** This warning can be skipped with user approval (see [Repository Warnings](#repository-warnings-user-choice))
+
+### Warning: d4e8b9c2-1111
+**Issue:** yardstick not in Imports
+**Resolution:** Go to [Step 4: Add Dependencies](#step-4-add-dependencies)
+**INSTRUCTIONS FOR CLAUDE:** Run `Rscript -e 'usethis::use_package("yardstick")'` via Bash tool
+
+### Warning: d4e8b9c2-2222
+**Issue:** recipes not in Imports
+**Resolution:** Go to [Step 4: Add Dependencies](#step-4-add-dependencies)
+**INSTRUCTIONS FOR CLAUDE:** Run `Rscript -e 'usethis::use_package("recipes")'` via Bash tool
+
+### Warning: d4e8b9c2-3333
+**Issue:** rlang not in Imports
+**Resolution:** Go to [Step 4: Add Dependencies](#step-4-add-dependencies)
+**INSTRUCTIONS FOR CLAUDE:** Run `Rscript -e 'usethis::use_package("rlang")'` via Bash tool
+
+### Warning: d4e8b9c2-4444
+**Issue:** cli not in Imports
+**Resolution:** Go to [Step 4: Add Dependencies](#step-4-add-dependencies)
+**INSTRUCTIONS FOR CLAUDE:** Run `Rscript -e 'usethis::use_package("cli")'` via Bash tool
+
+### Warning: d4e8b9c2-5555
+**Issue:** tibble not in Imports
+**Resolution:** Go to [Step 4: Add Dependencies](#step-4-add-dependencies)
+**INSTRUCTIONS FOR CLAUDE:** Run `Rscript -e 'usethis::use_package("tibble")'` via Bash tool
+
+### Warning: d4e8b9c2-6666
+**Issue:** vctrs not in Imports
+**Resolution:** Go to [Step 4: Add Dependencies](#step-4-add-dependencies)
+**INSTRUCTIONS FOR CLAUDE:** Run `Rscript -e 'usethis::use_package("vctrs")'` via Bash tool
+
+**After resolving warnings:** Re-run verification script via Bash tool. Do NOT proceed until all checks pass.
 
 ---
 
 ### Repository Warnings (USER CHOICE)
 
-If verification shows missing repos/ directory:
-
-```
-✗ WARNING: repos/yardstick/ not found
-  → Follow instructions in ../shared-references/repository-access.md
-```
+**Warning c8a7f1b5-7890** can be skipped with user approval.
 
 **INSTRUCTIONS FOR CLAUDE:**
 
@@ -217,7 +235,7 @@ If verification shows missing repos/ directory:
    - Re-run verification script via Bash tool
    - Confirm repos are now found
 
-**Only repository warnings can be skipped with user approval. All other warnings MUST be fixed.**
+**Only repository warnings (c8a7f1b5-7890) can be skipped with user approval. All other warnings MUST be fixed.**
 
 ---
 
@@ -227,34 +245,7 @@ If verification shows missing repos/ directory:
 
 You should see:
 ```
-========================================
-Tidymodels Development - Pre-Flight Check
-========================================
-
-Context: Extension Development (yardstick)
-
-Package Structure
- ✓ DESCRIPTION found
- ✓ R/ directory exists
- ✓ tests/testthat/ directory exists
-
-Claude Code Integration
- ✓ usethis 3.2.1.9000+ installed
- ✓ .claude/CLAUDE.md found
-
-Repository Access
- ✓ repos/ directory exists
- ✓ repos/yardstick/ found
-
-Dependencies
- ✓ yardstick in Imports
- ✓ rlang in Imports
- ✓ cli in Imports
-
-========================================
-✓ All checks passed!
-✓ You can now proceed with development
-========================================
+All checks for extension development complete.
 ```
 
 **After verification passes**: Return to your implementation guide to start developing your metric or recipe step.
