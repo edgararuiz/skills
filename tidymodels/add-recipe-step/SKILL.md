@@ -7,6 +7,28 @@ description: Create a new preprocessing step for the recipes package following t
 
 Guide for developing new preprocessing steps that extend the recipes package. This skill provides best practices, complete code templates, and testing patterns for creating custom recipe steps.
 
+---
+
+## Prerequisites
+
+**Before implementing any recipe steps, you MUST complete the package setup:**
+
+👉 **[R Package Setup Guide](references/r-package-setup.md)** (REQUIRED)
+
+This guide provides a step-by-step checklist for:
+- Package initialization
+- Claude Code integration
+- Repository cloning for reference implementations
+- Dependency management
+- Testing infrastructure setup
+- **Verification script** (mandatory final step)
+
+**ALL verification checks must pass before proceeding with recipe step implementation.**
+
+After completing setup, return here for implementation guidance.
+
+---
+
 ## Two Development Contexts
 
 This skill supports **two distinct development contexts**:
@@ -53,35 +75,6 @@ Creating a custom recipe step provides:
 - Proper handling of grouped data frames
 - Sparse data support (when applicable)
 
-## Repository Access (Optional but Recommended)
-
-For enhanced guidance with real implementation examples from the recipes package, you can clone the source code repository locally.
-
-**Benefits:**
-- See actual step implementations
-- Reference real test patterns
-- Search through source code
-- Understand package architecture
-
-**Quick Setup:**
-
-Run from your R package directory:
-
-```bash
-# macOS/Linux/WSL
-./path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repos.sh recipes
-
-# Windows (PowerShell)
-.\path\to\skills-personal\tidymodels\shared-scripts\clone-tidymodels-repos.ps1 recipes
-
-# Any platform (Python)
-python3 /path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repos.py recipes
-```
-
-**For complete instructions**, see: [Repository Access Setup](../shared-references/repository-access.md)
-
-**Note:** Repository access is optional. This skill works with built-in references if you choose not to clone.
-
 ## Quick Navigation
 
 **Development Guides:**
@@ -97,55 +90,22 @@ python3 /path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repo
 - [Helper Functions](references/helper-functions.md) - recipes helper function reference
 
 **Shared References (Extension Development):**
-- [R Package Setup](../shared-references/r-package-setup.md) - Package initialization and structure
-- [Development Workflow](../shared-references/development-workflow.md) - Fast iteration cycle
-- [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) - Extension testing guide
-- [Roxygen Documentation](../shared-references/roxygen-documentation.md) - Documentation templates
-- [Package Imports](../shared-references/package-imports.md) - Managing dependencies
-- [Best Practices (Extension)](../shared-references/best-practices-extension.md) - Extension code style
-- [Troubleshooting (Extension)](../shared-references/troubleshooting-extension.md) - Extension issues
+- [R Package Setup](references/r-package-setup.md) - Package initialization and structure
+- [Development Workflow](references/development-workflow.md) - Fast iteration cycle
+- [Testing Patterns (Extension)](references/testing-patterns-extension.md) - Extension testing guide
+- [Roxygen Documentation](references/roxygen-documentation.md) - Documentation templates
+- [Package Imports](references/package-imports.md) - Managing dependencies
+- [Best Practices (Extension)](references/best-practices-extension.md) - Extension code style
+- [Troubleshooting (Extension)](references/troubleshooting-extension.md) - Extension issues
 
 **Source Development Specific:**
 - [Testing Patterns (Source)](references/testing-patterns-source.md) - Using internal helpers
 - [Best Practices (Source)](references/best-practices-source.md) - Using internal functions
 - [Troubleshooting (Source)](references/troubleshooting-source.md) - Source-specific issues
 
-## Prerequisites
-
-See [R Package Setup](../shared-references/r-package-setup.md) for complete details.
-
-**Quick setup:**
-
-```r
-# Check if this is a new package or existing package
-if (!file.exists("DESCRIPTION")) {
-  # New package - create full structure
-  usethis::create_package(".", open = FALSE)
-  usethis::use_mit_license()
-  usethis::use_package("recipes")
-  usethis::use_package("rlang")
-  usethis::use_package("tibble")
-  usethis::use_package("vctrs")
-  usethis::use_package("cli")
-  usethis::use_testthat()
-  usethis::use_package("modeldata", type = "Suggests")
-} else {
-  # Existing package - ensure dependencies
-  usethis::use_package("recipes")
-  usethis::use_package("rlang")
-  usethis::use_package("tibble")
-  usethis::use_package("vctrs")
-  usethis::use_package("cli")
-  if (!dir.exists("tests/testthat")) {
-    usethis::use_testthat()
-  }
-  usethis::use_package("modeldata", type = "Suggests")
-}
-```
-
 ## Development Workflow
 
-See [Development Workflow](../shared-references/development-workflow.md) for complete details.
+See [Development Workflow](references/development-workflow.md) for complete details.
 
 **Fast iteration cycle (run repeatedly):**
 
@@ -559,7 +519,7 @@ test_that("centering works with case weights", {
 
 **Reference test pattern:** `tests/testthat/test-center.R` in recipes repository
 
-See [Testing Patterns](../shared-references/testing-patterns.md) for comprehensive testing guide.
+See [Testing Patterns](references/testing-patterns.md) for comprehensive testing guide.
 
 ## Implementation Guide by Step Type
 
@@ -652,7 +612,7 @@ See [Optional Methods](references/optional-methods.md) for complete details.
 
 ## Documentation
 
-See [Roxygen Documentation](../shared-references/roxygen-documentation.md) for complete templates.
+See [Roxygen Documentation](references/roxygen-documentation.md) for complete templates.
 
 **Required roxygen tags:**
 ```r
@@ -668,7 +628,7 @@ See [Roxygen Documentation](../shared-references/roxygen-documentation.md) for c
 
 ## Testing
 
-See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) for comprehensive guide.
+See [Testing Patterns (Extension)](references/testing-patterns-extension.md) for comprehensive guide.
 
 **Required test categories:**
 1. **Correctness**: Step transforms data correctly
@@ -739,7 +699,7 @@ prep.step_center <- function(x, training, info = NULL, ...) {
 
 ## Best Practices
 
-See [Best Practices](../shared-references/best-practices-extension.md) for complete guide.
+See [Best Practices](references/best-practices-extension.md) for complete guide.
 
 **Key principles:**
 - Use base pipe `|>` not magrittr pipe `%>%`
@@ -750,7 +710,7 @@ See [Best Practices](../shared-references/best-practices-extension.md) for compl
 
 ## Troubleshooting
 
-See [Troubleshooting (Extension)](../shared-references/troubleshooting-extension.md) for complete guide.
+See [Troubleshooting (Extension)](references/troubleshooting-extension.md) for complete guide.
 
 **Common issues:**
 - "No visible global function definition" → Add to package imports
@@ -768,14 +728,14 @@ See [Troubleshooting (Extension)](../shared-references/troubleshooting-extension
 4. **Follow the template:** Use complete examples from reference files
 5. **Learn helpers:** See [Helper Functions](references/helper-functions.md)
 6. **Add optional methods:** See [Optional Methods](references/optional-methods.md) if needed
-7. **Test thoroughly:** See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md)
-8. **Document completely:** See [Roxygen Documentation](../shared-references/roxygen-documentation.md)
+7. **Test thoroughly:** See [Testing Patterns (Extension)](references/testing-patterns-extension.md)
+8. **Document completely:** See [Roxygen Documentation](references/roxygen-documentation.md)
 9. **Run final check:** `devtools::check()` before publishing
 
 **For Source Development (contributing to recipes):**
 
 1. **Start here:** [Source Development Guide](references/source-guide.md)
-2. **Clone repository:** See [Repository Access](../shared-references/repository-access.md)
+2. **Clone repository:** See [Repository Access](references/repository-access.md)
 3. **Study existing steps:** Browse `R/center.R`, `R/dummy.R`, `R/pca.R`, etc.
 4. **Follow package conventions:** File naming, internal functions, three-function pattern
 5. **Test with internal helpers:** See [Testing Patterns (Source)](references/testing-patterns-source.md)

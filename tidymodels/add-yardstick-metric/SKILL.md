@@ -7,6 +7,28 @@ description: Guide for creating new yardstick metrics. Use when a developer need
 
 Guide for developing new metrics that extend the yardstick package. This skill provides best practices, code templates, and testing patterns for creating custom performance metrics.
 
+---
+
+## Prerequisites
+
+**Before implementing any metrics, you MUST complete the package setup:**
+
+👉 **[R Package Setup Guide](references/r-package-setup.md)** (REQUIRED)
+
+This guide provides a step-by-step checklist for:
+- Package initialization
+- Claude Code integration
+- Repository cloning for reference implementations
+- Dependency management
+- Testing infrastructure setup
+- **Verification script** (mandatory final step)
+
+**ALL verification checks must pass before proceeding with metric implementation.**
+
+After completing setup, return here for implementation guidance.
+
+---
+
 ## Two Development Contexts
 
 This skill supports **two distinct development contexts**:
@@ -53,35 +75,6 @@ Creating a custom yardstick metric provides:
 - Integration with `metric_set()`
 - Optional autoplot support for visualization (curves and confusion matrices)
 
-## Repository Access (Optional but Recommended)
-
-For enhanced guidance with real implementation examples from the yardstick package, you can clone the source code repository locally.
-
-**Benefits:**
-- See actual metric implementations
-- Reference real test patterns
-- Search through source code
-- Understand package architecture
-
-**Quick Setup:**
-
-Run from your R package directory:
-
-```bash
-# macOS/Linux/WSL
-./path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repos.sh yardstick
-
-# Windows (PowerShell)
-.\path\to\skills-personal\tidymodels\shared-scripts\clone-tidymodels-repos.ps1 yardstick
-
-# Any platform (Python)
-python3 /path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repos.py yardstick
-```
-
-**For complete instructions**, see: [Repository Access Setup](../shared-references/repository-access.md)
-
-**Note:** Repository access is optional. This skill works with built-in references if you choose not to clone.
-
 ## Quick Navigation
 
 **Development Guides:**
@@ -106,49 +99,22 @@ python3 /path/to/skills-personal/tidymodels/shared-scripts/clone-tidymodels-repo
 - [Autoplot Support](references/autoplot.md) - Optional visualization (curves, confusion matrices)
 
 **Shared References (Extension Development):**
-- [R Package Setup](../shared-references/r-package-setup.md) - Package initialization and structure
-- [Development Workflow](../shared-references/development-workflow.md) - Fast iteration cycle
-- [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) - Extension testing guide
-- [Roxygen Documentation](../shared-references/roxygen-documentation.md) - Documentation templates
-- [Package Imports](../shared-references/package-imports.md) - Managing dependencies
-- [Best Practices (Extension)](../shared-references/best-practices-extension.md) - Extension code style
-- [Troubleshooting (Extension)](../shared-references/troubleshooting-extension.md) - Extension issues
+- [R Package Setup](references/r-package-setup.md) - Package initialization and structure
+- [Development Workflow](references/development-workflow.md) - Fast iteration cycle
+- [Testing Patterns (Extension)](references/testing-patterns-extension.md) - Extension testing guide
+- [Roxygen Documentation](references/roxygen-documentation.md) - Documentation templates
+- [Package Imports](references/package-imports.md) - Managing dependencies
+- [Best Practices (Extension)](references/best-practices-extension.md) - Extension code style
+- [Troubleshooting (Extension)](references/troubleshooting-extension.md) - Extension issues
 
 **Source Development Specific:**
 - [Testing Patterns (Source)](references/testing-patterns-source.md) - Using internal test helpers
 - [Best Practices (Source)](references/best-practices-source.md) - Using internal functions
 - [Troubleshooting (Source)](references/troubleshooting-source.md) - Source-specific issues
 
-## Prerequisites
-
-See [R Package Setup](../shared-references/r-package-setup.md) for complete details.
-
-**Quick setup:**
-
-```r
-# Check if this is a new package or existing package
-if (!file.exists("DESCRIPTION")) {
-  # New package - create full structure
-  usethis::create_package(".", open = FALSE)
-  usethis::use_mit_license()
-  usethis::use_package("yardstick")
-  usethis::use_package("rlang")
-  usethis::use_package("cli")
-  usethis::use_testthat()
-} else {
-  # Existing package - ensure dependencies
-  usethis::use_package("yardstick")
-  usethis::use_package("rlang")
-  usethis::use_package("cli")
-  if (!dir.exists("tests/testthat")) {
-    usethis::use_testthat()
-  }
-}
-```
-
 ## Development Workflow
 
-See [Development Workflow](../shared-references/development-workflow.md) for complete details.
+See [Development Workflow](references/development-workflow.md) for complete details.
 
 **Fast iteration cycle (run repeatedly):**
 
@@ -230,169 +196,23 @@ See [Development Workflow](../shared-references/development-workflow.md) for com
 
 ## Complete Example: Numeric Metric (MAE)
 
-This example shows all required components for a numeric metric **using extension development patterns** (exported functions only).
+For a complete, step-by-step implementation of a numeric metric (MAE), see the comprehensive example with all required components in:
 
-**For source development**, see [Source Development Guide](references/source-guide.md) for examples using internal functions.
+👉 **[Numeric Metrics Reference](references/numeric-metrics.md)**
 
-**Reference implementation:** `R/num-mae.R` in yardstick repository
+This reference includes:
+- Implementation function (`mae_impl`) with case weights handling
+- Vector interface (`mae_vec`) with validation and NA handling
+- Data frame method with `new_numeric_metric()` wrapper
+- Complete test suite covering correctness, NA handling, input validation, and case weights
+- Working examples you can adapt for your own metrics
 
-### 1. Implementation function
+**Quick preview of the pattern:**
+- `_impl()` function: Core calculation logic
+- `_vec()` function: Validation and NA handling
+- `.data.frame()` method: Integration with yardstick system
 
-```r
-# R/mae.R
-
-mae_impl <- function(truth, estimate, case_weights = NULL) {
-  errors <- abs(truth - estimate)
-
-  if (is.null(case_weights)) {
-    mean(errors)
-  } else {
-    # Handle hardhat weights
-    wts <- if (inherits(case_weights, c("hardhat_importance_weights",
-                                        "hardhat_frequency_weights"))) {
-      as.double(case_weights)
-    } else {
-      case_weights
-    }
-    weighted.mean(errors, w = wts)
-  }
-}
-```
-
-### 2. Vector interface
-
-```r
-#' @export
-mae_vec <- function(truth, estimate, na_rm = TRUE, case_weights = NULL, ...) {
-  # Validate na_rm parameter
-  if (!is.logical(na_rm) || length(na_rm) != 1) {
-    cli::cli_abort("{.arg na_rm} must be a single logical value.")
-  }
-
-  # Validate inputs
-  yardstick::check_numeric_metric(truth, estimate, case_weights)
-
-  # Handle missing values
-  if (na_rm) {
-    result <- yardstick::yardstick_remove_missing(truth, estimate, case_weights)
-    truth <- result$truth
-    estimate <- result$estimate
-    case_weights <- result$case_weights
-  } else if (yardstick::yardstick_any_missing(truth, estimate, case_weights)) {
-    return(NA_real_)
-  }
-
-  # Call implementation
-  mae_impl(truth, estimate, case_weights)
-}
-```
-
-### 3. Data frame method
-
-```r
-#' Mean Absolute Error
-#'
-#' Calculate the mean absolute error between truth and estimate.
-#'
-#' @family numeric metrics
-#' @family accuracy metrics
-#' @templateVar fn mae
-#' @template return
-#' @template event_first
-#'
-#' @inheritParams rmse
-#'
-#' @author Your Name
-#'
-#' @export
-mae <- function(data, ...) {
-  UseMethod("mae")
-}
-
-mae <- yardstick::new_numeric_metric(
-  mae,
-  direction = "minimize",
-  range = c(0, Inf)
-)
-
-#' @export
-#' @rdname mae
-mae.data.frame <- function(data, truth, estimate, na_rm = TRUE,
-                           case_weights = NULL, ...) {
-  yardstick::numeric_metric_summarizer(
-    name = "mae",
-    fn = mae_vec,
-    data = data,
-    truth = !!rlang::enquo(truth),
-    estimate = !!rlang::enquo(estimate),
-    na_rm = na_rm,
-    case_weights = !!rlang::enquo(case_weights)
-  )
-}
-```
-
-### 4. Tests
-
-```r
-# tests/testthat/test-mae.R
-
-test_that("mae works correctly", {
-  df <- data.frame(
-    truth = c(1, 2, 3, 4, 5),
-    estimate = c(1.5, 2.5, 2.5, 3.5, 4.5)
-  )
-
-  result <- mae(df, truth, estimate)
-
-  # Expected: mean(abs(c(0.5, 0.5, 0.5, 0.5, 0.5))) = 0.5
-  expect_equal(result$.estimate, 0.5)
-  expect_equal(result$.metric, "mae")
-  expect_equal(result$.estimator, "standard")
-})
-
-test_that("mae handles NA correctly", {
-  df <- data.frame(
-    truth = c(1, 2, NA, 4, 5),
-    estimate = c(1.5, 2.5, 2.5, 3.5, 4.5)
-  )
-
-  # With na_rm = TRUE (default)
-  result_remove <- mae(df, truth, estimate, na_rm = TRUE)
-  expect_false(is.na(result_remove$.estimate))
-
-  # With na_rm = FALSE
-  result_keep <- mae(df, truth, estimate, na_rm = FALSE)
-  expect_true(is.na(result_keep$.estimate))
-})
-
-test_that("mae validates inputs", {
-  df <- data.frame(
-    truth = c(1, 2, 3),
-    estimate = c("a", "b", "c")  # Wrong type
-  )
-
-  expect_error(mae(df, truth, estimate))
-})
-
-test_that("mae works with case weights", {
-  df <- data.frame(
-    truth = c(1, 2, 3),
-    estimate = c(1.5, 2.5, 3.5),
-    weights = c(1, 2, 1)
-  )
-
-  # Calculate expected weighted value
-  # errors = abs(c(0.5, 0.5, 0.5))
-  # weighted mean = (1*0.5 + 2*0.5 + 1*0.5) / (1+2+1) = 0.5
-
-  result <- mae(df, truth, estimate, case_weights = weights)
-  expect_equal(result$.estimate, 0.5)
-})
-```
-
-**Reference test pattern:** `tests/testthat/test-num-mae.R` in yardstick repository
-
-See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) for comprehensive testing guide.
+See also [Extension Development Guide](references/extension-guide.md) for the complete implementation walkthrough.
 
 ## Implementation Guide by Metric Type
 
@@ -556,7 +376,7 @@ See [Testing Patterns (Extension)](../shared-references/testing-patterns-extensi
 
 ## Documentation
 
-See [Roxygen Documentation](../shared-references/roxygen-documentation.md) for complete templates.
+See [Roxygen Documentation](references/roxygen-documentation.md) for complete templates.
 
 **Required roxygen tags:**
 ```r
@@ -573,7 +393,7 @@ See [Roxygen Documentation](../shared-references/roxygen-documentation.md) for c
 
 ## Testing
 
-See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md) for comprehensive guide.
+See [Testing Patterns (Extension)](references/testing-patterns-extension.md) for comprehensive guide.
 
 **Required test categories:**
 1. **Correctness**: Metric calculates correctly
@@ -715,7 +535,7 @@ test_that("mae returns correct structure", {
 
 ### Package-level documentation
 
-See [Package Imports](../shared-references/package-imports.md) for complete guide.
+See [Package Imports](references/package-imports.md) for complete guide.
 
 Create `R/{packagename}-package.R`:
 
@@ -740,7 +560,7 @@ mae <- function(data, ...) {
 
 ## Best Practices
 
-See [Best Practices (Extension)](../shared-references/best-practices-extension.md) for complete guide.
+See [Best Practices (Extension)](references/best-practices-extension.md) for complete guide.
 
 **Key principles:**
 - Use base pipe `|>` not magrittr pipe `%>%`
@@ -751,7 +571,7 @@ See [Best Practices (Extension)](../shared-references/best-practices-extension.m
 
 ## Troubleshooting
 
-See [Troubleshooting (Extension)](../shared-references/troubleshooting-extension.md) for complete guide.
+See [Troubleshooting (Extension)](references/troubleshooting-extension.md) for complete guide.
 
 **Common issues:**
 - "No visible global function definition" → Add to package imports
@@ -771,14 +591,14 @@ See [Troubleshooting (Extension)](../shared-references/troubleshooting-extension
    - Survival: [Static](references/static-survival-metrics.md), [Dynamic](references/dynamic-survival-metrics.md), [Integrated](references/integrated-survival-metrics.md), [Linear Predictor](references/linear-predictor-survival-metrics.md)
    - Quantile: [Quantile](references/quantile-metrics.md)
 4. **Follow the template:** Use complete examples from reference files
-5. **Test thoroughly:** See [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md)
-6. **Document completely:** See [Roxygen Documentation](../shared-references/roxygen-documentation.md)
+5. **Test thoroughly:** See [Testing Patterns (Extension)](references/testing-patterns-extension.md)
+6. **Document completely:** See [Roxygen Documentation](references/roxygen-documentation.md)
 7. **Run final check:** `devtools::check()` before publishing
 
 **For Source Development (contributing to yardstick):**
 
 1. **Start here:** [Source Development Guide](references/source-guide.md)
-2. **Clone repository:** See [Repository Access](../shared-references/repository-access.md)
+2. **Clone repository:** See [Repository Access](references/repository-access.md)
 3. **Study existing metrics:** Browse `R/num-*.R`, `R/class-*.R`, etc.
 4. **Follow package conventions:** File naming, internal functions, templates
 5. **Test with internal helpers:** See [Testing Patterns (Source)](references/testing-patterns-source.md)

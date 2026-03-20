@@ -2,7 +2,7 @@
 
 **Purpose:** Guide for creating new skills in the tidymodels skill system (e.g., add-parsnip-model, add-dials-parameter).
 
-**Last Updated:** 2026-03-18
+**Last Updated:** 2026-03-19
 
 ---
 
@@ -93,6 +93,125 @@ tidymodels/shared-scripts/
 
 ---
 
+## Core Principle: Avoid Code Duplication
+
+**The #1 rule for skill architecture: Each piece of content should exist in exactly ONE place.**
+
+### Why This Matters
+
+Code duplication causes:
+- **Inconsistency**: Different versions of the same instructions get out of sync
+- **User confusion**: Users follow incomplete/outdated version
+- **Maintenance burden**: Must update multiple places when things change
+- **Trust erosion**: Users discover conflicting information
+- **Premature execution**: Claude Code sees abbreviated instructions in SKILL.md and executes before reading full reference
+- **Incomplete context**: Short checklists treated as "good enough", causing Claude to skip critical details in references
+- **Behavioral issues**: Claude refuses to read reference files from top-level folders when partial info exists elsewhere
+
+### How to Maintain Single Source of Truth
+
+**SKILL.md:**
+- ❌ No code blocks (no "Quick setup", no examples)
+- ✅ Overview + navigation links only
+- ✅ Links to references for all actual content
+
+**extension-guide.md / source-guide.md:**
+- ❌ No setup code (link to r-package-setup.md)
+- ❌ No testing patterns (link to testing-patterns-*.md)
+- ✅ Step-by-step implementation specific to the feature
+- ✅ Links to references for universal patterns
+
+**references/*.md:**
+- ✅ Deep-dive content on specific topics
+- ✅ Complete, self-contained examples
+- ✅ Links to shared-references for universal patterns
+
+**shared-references/*.md:**
+- ✅ Universal patterns that apply to all R packages
+- ✅ Content used by multiple skills
+- ✅ The canonical source for general R package development
+
+### When You're Tempted to Duplicate
+
+**❌ "But users need a quick reference in SKILL.md!"**
+→ ✅ Add a prominent link with clear description instead
+
+**❌ "But this example would help here too!"**
+→ ✅ Link to the reference that has the example
+
+**❌ "But I need to show just this one setup step!"**
+→ ✅ Link to the full setup guide, users need the complete sequence anyway
+
+**❌ "But users should see use_claude_code() mentioned here!"**
+→ ✅ Say "See r-package-setup.md" only—never show the actual command in SKILL.md
+→ **Why:** Claude sees the command and executes it before reading full context
+
+**❌ "But I'll mark it 'optional' so Claude knows it's not required!"**
+→ ✅ Remove "optional" labels—Claude ignores them and executes anyway
+→ **Why:** Real-world evidence shows Claude consistently disregards "optional" markers
+
+**The test:** If you're pasting code from one file to another, STOP. Create or link to a reference instead.
+
+---
+
+## Claude Code Behavioral Patterns
+
+### Key Findings from Real-World Usage
+
+When designing skills, account for these observed Claude Code behaviors:
+
+#### 1. Refuses to Read Top-Level References When Partial Info Exists
+**Behavior:** When Claude sees abbreviated setup instructions or short checklists in SKILL.md or extension-guide.md, it may refuse to read the full reference file (e.g., r-package-setup.md) even when explicitly instructed to do so.
+
+**Solution:**
+- Remove ALL setup code from SKILL.md and extension-guide.md
+- Only include "See [R Package Setup](../shared-references/r-package-setup.md)" links
+- Never provide partial/abbreviated setup instructions anywhere except r-package-setup.md
+
+#### 2. Treats Short Checklists as "Good Enough"
+**Behavior:** Claude may see a short checklist in a high-level document and consider it sufficient guidance, skipping detailed reference documentation.
+
+**Solution:**
+- Make SKILL.md purely navigational (overview + links only)
+- No code blocks, no checklists, no abbreviated instructions
+- All actual content lives in dedicated reference files
+
+#### 3. Ignores "Optional" Labels
+**Behavior:** Marking steps as "optional" or "recommended" has little effect—Claude tends to execute them regardless.
+
+**Solution:**
+- Only mark steps as "optional" if they truly don't matter
+- For important-but-flexible steps, use "STRONGLY RECOMMENDED" instead
+- Be explicit about consequences of skipping (e.g., "reduces development quality")
+
+#### 4. Executes Setup Commands Prematurely
+**Behavior:** If Claude sees specific commands (like `use_claude_code()` or repo cloning scripts) in SKILL.md or guides, it may execute them before reading full context from r-package-setup.md, missing critical ordering dependencies.
+
+**Solution:**
+- Centralize ALL setup commands exclusively in r-package-setup.md
+- High-level documents should only reference the setup guide, never show commands
+- Prevents Claude from executing out-of-order or without proper context
+
+#### 5. Better at Running Commands Than Guiding Users
+**Behavior:** Claude Code can run R commands directly via `Rscript -e` using the Bash tool, and should do so autonomously rather than asking users to run them.
+
+**Solution:**
+- Write "INSTRUCTIONS FOR CLAUDE: Run this via Bash tool" instead of "Show the user this command"
+- Claude should execute, verify, and proceed—not hand off to user
+- Improves user experience by reducing context switching
+
+### Design Implications
+
+These behavioral patterns inform our architectural decisions:
+
+1. **Single source of truth** - Not just for maintenance, but to prevent Claude from fragmenting its attention
+2. **Centralized setup** - Prevents premature execution and ensures proper sequencing
+3. **Clear labels** - "Optional" is meaningless; be explicit about importance and consequences
+4. **Autonomous execution** - Claude Code should run commands directly when possible, not delegate to user
+5. **Minimal high-level docs** - SKILL.md and guides should be thin navigation layers, not content repositories
+
+---
+
 ## File-by-File Implementation Guide
 
 ### 1. SKILL.md (Main Entry Point)
@@ -179,11 +298,17 @@ This skill supports **two distinct development contexts**:
 
 ## Prerequisites
 
-[Standard prerequisites section - see shared-references/r-package-setup.md]
+**⚠️ IMPORTANT**: Before implementing [features], complete the package setup sequence:
+
+👉 **[R Package Setup Guide](../shared-references/r-package-setup.md)**
+
+This guide includes critical steps like `use_claude_code()` (if available) that must run BEFORE adding dependencies. Following the complete sequence ensures proper package initialization and Claude Code integration.
+
+After completing package setup, return here to implement your [feature].
 
 ## Development Workflow
 
-[Standard workflow section - see shared-references/development-workflow.md]
+[Link to shared-references/development-workflow.md - do NOT duplicate code here]
 
 ## Complete Example: [Primary Use Case]
 
@@ -229,6 +354,9 @@ If you're contributing to [package] itself, you have access to internal function
 - Link extensively to other documents
 - Keep main content focused on extension development
 - Reference source guide for package-specific patterns
+- **NEVER duplicate code across SKILL.md and reference files** - SKILL.md should only link to references, not repeat their content
+- Prerequisites section should link to r-package-setup.md, NOT include abbreviated setup code
+- Single source of truth: all setup instructions live in shared-references/r-package-setup.md
 
 ---
 
@@ -1148,24 +1276,50 @@ When you add a new skill, update related skills:
 ## Common Pitfalls to Avoid
 
 ### ❌ Don't:
-1. **Mix extension and source patterns in examples** - Choose one context per example
-2. **Assume `:::` access in extension examples** - Always use exported functions
-3. **Put package-specific content in shared-references** - Keep universal
-4. **Show code fragments without context** - Provide complete examples
-5. **Forget to update cross-references** - Keep links bidirectional
-6. **Skip the context discrimination section** - Always clarify extension vs source
-7. **Use generic error messages** - Be specific to the context
-8. **Leave broken links** - Test all cross-references
+1. **DUPLICATE CODE BETWEEN SKILL.md AND REFERENCES** - This is the #1 anti-pattern
+   - ❌ NEVER include setup code blocks in SKILL.md (e.g., "Quick setup")
+   - ❌ NEVER include abbreviated versions of reference content
+   - ❌ NEVER include short checklists that Claude might treat as "good enough"
+   - ✅ ALWAYS link to the full reference (e.g., r-package-setup.md)
+   - **Why:** Creates inconsistency, users follow incomplete instructions, maintenance nightmare
+   - **Example of the problem:** User follows "Quick setup" in SKILL.md, misses `use_claude_code()` from r-package-setup.md
+   - **Real-world finding:** Claude was refusing to read reference files from top-level folders, treating short checklists as sufficient guidance instead of reading the full r-package-setup.md reference
+2. **Include detailed setup instructions in high-level documents (SKILL.md, extension-guide.md)**
+   - ❌ NEVER include `use_claude_code()` or repo cloning details in SKILL.md or guides
+   - ❌ NEVER create short checklists that Claude might execute prematurely
+   - ✅ ALWAYS centralize these instructions exclusively in r-package-setup.md
+   - **Why:** Claude may execute setup steps before reading full reference documentation
+   - **Real-world finding:** Claude would see short checklist in SKILL.md and execute it before reading r-package-setup.md, missing critical context and order dependencies
+3. **Use "Optional" labels for steps that should actually be completed**
+   - ❌ NEVER mark steps as "optional" if they're important
+   - ✅ Be clear about what is truly optional vs. strongly recommended
+   - **Why:** Claude consistently disregards "optional" labels and executes those steps anyway
+   - **Real-world finding:** "Optional" monikers were effectively meaningless—Claude would do the work regardless
+4. **Mix extension and source patterns in examples** - Choose one context per example
+5. **Assume `:::` access in extension examples** - Always use exported functions
+6. **Put package-specific content in shared-references** - Keep universal
+7. **Show code fragments without context** - Provide complete examples
+8. **Forget to update cross-references** - Keep links bidirectional
+9. **Skip the context discrimination section** - Always clarify extension vs source
+10. **Use generic error messages** - Be specific to the context
+11. **Leave broken links** - Test all cross-references
 
 ### ✅ Do:
-1. **Start with SKILL.md structure from existing skills** - Copy, then adapt
-2. **Test all code examples** - They should run as shown
-3. **Link generously** - Help users navigate
-4. **Be explicit about constraints** - Extension development has limits
-5. **Provide both extension and source examples** - When patterns differ significantly
-6. **Update related skills** - Add cross-references when appropriate
-7. **Follow naming conventions** - Consistent with existing skills
-8. **Include troubleshooting** - Anticipate common problems
+1. **Use references as single source of truth** - SKILL.md links, references contain content
+2. **Make SKILL.md purely navigational** - Overview + links, no duplicated code blocks
+3. **Link to r-package-setup.md for ALL setup instructions** - Never abbreviate or duplicate
+4. **Centralize setup commands exclusively in r-package-setup.md** - Prevents premature execution
+5. **Write "INSTRUCTIONS FOR CLAUDE" for autonomous execution** - Claude should run commands via Bash tool
+6. **Avoid "optional" labels that Claude ignores** - Be explicit about importance and consequences
+7. **Force reference reading** - Only show "See [reference]" links, never partial content
+8. **Start with SKILL.md structure from existing skills** - Copy, then adapt
+9. **Test all code examples** - They should run as shown
+10. **Link generously** - Help users navigate
+11. **Be explicit about constraints** - Extension development has limits
+12. **Provide both extension and source examples** - When patterns differ significantly
+13. **Update related skills** - Add cross-references when appropriate
+14. **Follow naming conventions** - Consistent with existing skills
+15. **Include troubleshooting** - Anticipate common problems
 
 ---
 
@@ -1298,18 +1452,183 @@ Skills don't have version numbers themselves, but:
 
 ---
 
+## Skill Composition: Integration with usethis Claude Code Setup
+
+### Overview
+
+When users run `usethis::use_claude_code()` (available in usethis 3.2.1.9000+), it creates:
+- `.claude/CLAUDE.md` - R package development instructions
+- `.claude/settings.json` - Recommended permissions
+- `.claude/skills/tidy-argument-checking/` - Patterns for validating function arguments
+- `.claude/skills/tidy-deprecate-function/` - Best practices for deprecating functions
+
+Tidymodels-dev skills can automatically incorporate these tidyverse patterns when they're present.
+
+### Detection Pattern
+
+Skills should check for the presence of usethis-created skills:
+
+```markdown
+# In your skill's guidance (e.g., extension-guide.md)
+
+## Argument Validation
+
+When implementing your [metric/step/model], validate arguments appropriately.
+
+**Note:** If you set up Claude Code using `usethis::use_claude_code()`, the `tidy-argument-checking`
+skill provides comprehensive patterns for argument validation. Those patterns apply to general R package
+development and complement the tidymodels-specific guidance here.
+
+[Your tidymodels-specific argument validation patterns...]
+```
+
+### When to Reference Tidy Skills
+
+**Do reference tidy-* skills for:**
+- General R package practices (argument checking, deprecation)
+- Code style and conventions
+- Error message patterns
+- Testing strategies that apply to all R packages
+
+**Don't duplicate tidy-* skills for:**
+- Domain-specific patterns (metric implementation, recipe prep/bake)
+- Package-specific APIs (yardstick classes, recipes infrastructure)
+- Tidymodels ecosystem conventions
+
+### Implementation Approach
+
+**In SKILL.md or extension-guide.md:**
+```markdown
+## Prerequisites
+
+### Setup Claude Code (Recommended)
+
+If using Claude Code for development, see [R Package Setup](../shared-references/r-package-setup.md)
+for instructions on running `usethis::use_claude_code()`.
+
+This provides access to tidyverse team's general R package development patterns which complement
+the tidymodels-specific guidance in this skill.
+```
+
+**When discussing general R topics:**
+```markdown
+## Error Handling
+
+[Your tidymodels-specific error handling patterns]
+
+**For general argument validation patterns**, see the `tidy-argument-checking` skill if you
+ran `usethis::use_claude_code()`.
+```
+
+### Reading Tidy Skills at Runtime
+
+When a tidymodels-dev skill is invoked, Claude Code should:
+
+1. **Check for `.claude/CLAUDE.md`** - If it exists, read it first to understand the project's R package development context
+2. **Detect `.claude/skills/tidy-*` directories** - Look for tidyverse team skills
+3. **Read relevant tidy skills** when they apply to the current task
+4. **Incorporate patterns** for general R package development
+5. **Keep tidymodels-dev skills focused** on domain-specific guidance
+
+**Automatic Detection Pattern:**
+
+When a skill is invoked:
+```markdown
+# Skill should check and read if present
+- If .claude/CLAUDE.md exists → Read it for general R package development context
+- If .claude/skills/tidy-argument-checking/ exists → Available for argument validation guidance
+- If .claude/skills/tidy-deprecate-function/ exists → Available for deprecation guidance
+```
+
+**Example scenario:**
+- User asks: "How should I validate arguments in my yardstick metric?"
+- **First:** Check if `.claude/CLAUDE.md` exists and read it for general R context
+- **Tidymodels skill provides:** Metric-specific validation (truth/estimate columns, case weights, etc.)
+- **Tidy skill provides:** General R argument checking patterns (type checking, NULL handling, etc.)
+- **Result:** Complete guidance combining both domain-specific and general best practices
+
+### Benefits of This Approach
+
+1. **Avoid duplication**: General R patterns stay in tidy-* skills
+2. **Stay focused**: Tidymodels skills focus on package-specific guidance
+3. **Consistency**: Users get tidyverse patterns across all their R development
+4. **Maintainability**: Updates to tidy-* skills benefit all users automatically
+
+### Skill Invocation Best Practices
+
+When a tidymodels-dev skill guides a user through package setup that includes `use_claude_code()`:
+
+**After `use_claude_code()` runs:**
+
+1. **Use `AskUserQuestion` to prompt the user:**
+   ```
+   Question: "The package setup created `.claude/CLAUDE.md` with R package development
+              instructions. Should I read this file now to incorporate tidyverse
+              development patterns?"
+
+   Options:
+   - "Yes, read CLAUDE.md now (Recommended)"
+   - "Skip for now"
+   ```
+
+2. **If user chooses "Yes":**
+   - Read `.claude/CLAUDE.md` using the Read tool
+   - Incorporate tidyverse patterns (testing, documentation, code style, etc.)
+   - Continue with tidymodels-specific guidance
+
+3. **If user chooses "Skip":**
+   - Continue with tidymodels-specific guidance only
+   - Tidymodels skills still provide complete, working guidance
+
+4. **Proceed with domain-specific implementation:**
+   - Focus on tidymodels patterns (metrics, recipe steps, etc.)
+   - Apply any general R practices learned from CLAUDE.md
+
+**Example workflow:**
+```
+User runs setup code with use_claude_code()
+→ Claude uses AskUserQuestion: "Should I read CLAUDE.md?"
+→ User: "Yes, read CLAUDE.md now"
+→ Claude reads .claude/CLAUDE.md
+→ Claude learns: use base pipe |>, air format ., expect_snapshot(), etc.
+→ Claude proceeds with yardstick metric implementation using those patterns
+```
+
+### Fallback Behavior
+
+If tidy-* skills are not present:
+- Tidymodels-dev skills still provide complete, working guidance
+- No functionality is lost
+- Users just don't get the additional general R package patterns
+
+### Documentation in r-package-setup.md
+
+The `r-package-setup.md` file now includes a section on `use_claude_code()`:
+- Explains what it creates
+- Shows version check pattern
+- Lists benefits including skill composition
+- Makes it clear it's optional but recommended
+
+---
+
 ## Summary
 
 ### Key Principles
 
-1. **Dual Context:** Always support extension and source development
-2. **Extension First:** Main examples use extension patterns (most users)
-3. **Complete Examples:** Show full working code, not fragments
-4. **Cross-Reference Heavily:** Help users navigate
-5. **Test All Code:** Examples must work as shown
-6. **Consistent Structure:** Follow established patterns
-7. **Clear Constraints:** Be explicit about extension limitations
-8. **Package-Specific Details:** In skill directories, not shared-references
+1. **No Code Duplication:** Avoid duplicating code across files at all costs
+   - Each piece of content should exist in exactly one place
+   - SKILL.md links to references, never duplicates their content
+   - References link to shared-references for universal patterns
+   - If you find yourself copying code, create a reference and link to it instead
+   - **Why:** Prevents inconsistency, reduces maintenance burden, ensures single source of truth
+2. **Dual Context:** Always support extension and source development
+3. **Extension First:** Main examples use extension patterns (most users)
+4. **Complete Examples:** Show full working code, not fragments
+5. **Cross-Reference Heavily:** Help users navigate
+6. **Test All Code:** Examples must work as shown
+7. **Consistent Structure:** Follow established patterns
+8. **Clear Constraints:** Be explicit about extension limitations
+9. **Package-Specific Details:** In skill directories, not shared-references
 
 ### Quick Start for New Skill
 
@@ -1333,6 +1652,6 @@ A skill is complete when:
 
 ---
 
-**Last Updated:** 2026-03-18
+**Last Updated:** 2026-03-19
 
 For questions or feedback about this guide, review the planning documents in `.github/planning/` or examine existing skills for examples.

@@ -20,36 +20,15 @@ Complete guide for creating new packages that extend recipes with custom preproc
 
 ## Prerequisites
 
-### Quick Package Setup
+### Package Setup Required
 
-See [R Package Setup](../../shared-references/r-package-setup.md) for complete details.
+**⚠️ IMPORTANT**: Before implementing recipe steps, you MUST complete the package setup:
 
-```r
-# Check if this is a new package or existing package
-if (!file.exists("DESCRIPTION")) {
-  # New package - create full structure
-  usethis::create_package(".", open = FALSE)
-  usethis::use_mit_license()
-  usethis::use_package("recipes")
-  usethis::use_package("rlang")
-  usethis::use_package("tibble")
-  usethis::use_package("vctrs")
-  usethis::use_package("cli")
-  usethis::use_testthat()
-  usethis::use_package("modeldata", type = "Suggests")
-} else {
-  # Existing package - ensure dependencies
-  usethis::use_package("recipes")
-  usethis::use_package("rlang")
-  usethis::use_package("tibble")
-  usethis::use_package("vctrs")
-  usethis::use_package("cli")
-  if (!dir.exists("tests/testthat")) {
-    usethis::use_testthat()
-  }
-  usethis::use_package("modeldata", type = "Suggests")
-}
-```
+👉 **[R Package Setup Guide](r-package-setup.md)** (REQUIRED)
+
+Complete all steps in the setup guide and ensure the verification script passes.
+
+**After setup verification passes, return here to implement your recipe step.**
 
 ---
 
@@ -358,7 +337,7 @@ test_that("centering validates input types", {
 })
 ```
 
-See [Testing Patterns (Extension)](../../shared-references/testing-patterns-extension.md) for comprehensive testing guide.
+See [Testing Patterns (Extension)](testing-patterns-extension.md) for comprehensive testing guide.
 
 ---
 
@@ -501,7 +480,7 @@ recipes::check_new_data(col_names, object, new_data)
 
 ## Development Workflow
 
-See [Development Workflow](../../shared-references/development-workflow.md) for complete details.
+See [Development Workflow](development-workflow.md) for complete details.
 
 **Fast iteration cycle:**
 1. `devtools::document()` - Generate documentation
@@ -532,7 +511,7 @@ NULL
 
 ## Testing
 
-See [Testing Patterns (Extension)](../../shared-references/testing-patterns-extension.md) for comprehensive guide.
+See [Testing Patterns (Extension)](testing-patterns-extension.md) for comprehensive guide.
 
 **Required test categories:**
 1. **Correctness**: Step transforms data correctly
@@ -546,7 +525,7 @@ See [Testing Patterns (Extension)](../../shared-references/testing-patterns-exte
 
 ## Best Practices
 
-See [Best Practices (Extension)](../../shared-references/best-practices-extension.md) for complete guide.
+See [Best Practices (Extension)](best-practices-extension.md) for complete guide.
 
 **Key principles:**
 - Use base pipe `|>` not `%>%`
@@ -559,7 +538,7 @@ See [Best Practices (Extension)](../../shared-references/best-practices-extensio
 
 ## Troubleshooting
 
-See [Troubleshooting (Extension)](../../shared-references/troubleshooting-extension.md) for complete guide.
+See [Troubleshooting (Extension)](troubleshooting-extension.md) for complete guide.
 
 **Common issues:**
 - Column selection not working → Check `recipes_eval_select()` usage
@@ -582,21 +561,21 @@ See [Troubleshooting (Extension)](../../shared-references/troubleshooting-extens
 - [Optional Methods](optional-methods.md)
 
 ### Shared References
-- [R Package Setup](../../shared-references/r-package-setup.md)
-- [Development Workflow](../../shared-references/development-workflow.md)
-- [Testing Patterns](../../shared-references/testing-patterns-extension.md)
-- [Roxygen Documentation](../../shared-references/roxygen-documentation.md)
-- [Best Practices](../../shared-references/best-practices-extension.md)
-- [Troubleshooting](../../shared-references/troubleshooting-extension.md)
+- [R Package Setup](r-package-setup.md)
+- [Development Workflow](development-workflow.md)
+- [Testing Patterns](testing-patterns-extension.md)
+- [Roxygen Documentation](roxygen-documentation.md)
+- [Best Practices](best-practices-extension.md)
+- [Troubleshooting](troubleshooting-extension.md)
 
 ---
 
 ## Next Steps
 
-1. **Set up your package** following [R Package Setup](../../shared-references/r-package-setup.md)
+1. **Set up your package** following [R Package Setup](r-package-setup.md)
 2. **Choose your step type** from [Step Architecture](step-architecture.md)
 3. **Implement your step** following the guide above
-4. **Test thoroughly** using [Testing Patterns](../../shared-references/testing-patterns-extension.md)
+4. **Test thoroughly** using [Testing Patterns](testing-patterns-extension.md)
 5. **Run `devtools::check()`** to ensure CRAN compliance
 6. **Publish** to CRAN or share with your team
 
@@ -604,7 +583,7 @@ See [Troubleshooting (Extension)](../../shared-references/troubleshooting-extens
 
 ## Getting Help
 
-- Check [Troubleshooting Guide](../../shared-references/troubleshooting-extension.md)
+- Check [Troubleshooting Guide](troubleshooting-extension.md)
 - Review [Step Architecture](step-architecture.md)
 - Study the main [recipes SKILL.md](SKILL.md) for more details
 - Search GitHub issues: https://github.com/tidymodels/recipes/issues
