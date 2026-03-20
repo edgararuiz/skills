@@ -19,7 +19,7 @@ This skill supports **two distinct development contexts**:
 - ✅ Use this for: New packages, standalone steps, CRAN submissions
 - 📦 Package detection: No `recipes` in DESCRIPTION's `Package:` field
 - ⚠️ **Constraint**: Must use `recipes::` prefix for all functions
-- 📖 **Guide**: [R Package Setup](references/r-package-setup.md)
+- 📖 **Guide**: [Extension Prerequisites](references/extension-prerequisites.md)
 
 ### 🔧 Source Development (Advanced)
 **Contributing directly to recipes** via pull requests.
@@ -37,7 +37,7 @@ This skill supports **two distinct development contexts**:
 
 **Choose your context:**
 
-- **Creating a new package?** → Start with [R Package Setup](references/r-package-setup.md)
+- **Creating a new package?** → Start with [Extension Prerequisites](references/extension-prerequisites.md)
 - **Contributing to recipes?** → Clone repository, then see [Source Development Guide](references/source-guide.md)
 
 **Not sure which?** If you're in the `tidymodels/recipes` repository, use source development. Otherwise, use extension development.
@@ -70,7 +70,7 @@ Creating a custom recipe step provides:
 - [Helper Functions](references/helper-functions.md) - recipes helper function reference
 
 **Shared References (Extension Development):**
-- [R Package Setup](references/r-package-setup.md) - Package initialization and structure
+- [Extension Prerequisites](references/extension-prerequisites.md) - Package initialization and structure
 - [Development Workflow](references/development-workflow.md) - Fast iteration cycle
 - [Testing Patterns (Extension)](references/testing-patterns-extension.md) - Extension testing guide
 - [Roxygen Documentation](references/roxygen-documentation.md) - Documentation templates
@@ -702,7 +702,7 @@ See [Troubleshooting (Extension)](references/troubleshooting-extension.md) for c
 
 **For Extension Development (creating new packages):**
 
-1. **Setup package structure:** [R Package Setup](references/r-package-setup.md) - START HERE
+1. **Setup package structure:** [Extension Prerequisites](references/extension-prerequisites.md) - START HERE
 
 **For Source Development (contributing to recipes):**
 

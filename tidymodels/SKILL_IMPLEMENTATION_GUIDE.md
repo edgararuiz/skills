@@ -74,7 +74,7 @@ tidymodels/
     ├── testing-patterns-extension.md
     ├── best-practices-extension.md
     ├── troubleshooting-extension.md
-    ├── r-package-setup.md
+    ├── extension-prerequisites.md
     ├── development-workflow.md
     ├── roxygen-documentation.md
     ├── package-imports.md
@@ -116,7 +116,7 @@ Code duplication causes:
 - ✅ Links to references for all actual content
 
 **extension-guide.md / source-guide.md:**
-- ❌ No setup code (link to r-package-setup.md)
+- ❌ No setup code (link to extension-prerequisites.md)
 - ❌ No testing patterns (link to testing-patterns-*.md)
 - ✅ Step-by-step implementation specific to the feature
 - ✅ Links to references for universal patterns
@@ -143,7 +143,7 @@ Code duplication causes:
 → ✅ Link to the full setup guide, users need the complete sequence anyway
 
 **❌ "But users should see use_claude_code() mentioned here!"**
-→ ✅ Say "See r-package-setup.md" only—never show the actual command in SKILL.md
+→ ✅ Say "See extension-prerequisites.md" only—never show the actual command in SKILL.md
 → **Why:** Claude sees the command and executes it before reading full context
 
 **❌ "But I'll mark it 'optional' so Claude knows it's not required!"**
@@ -161,12 +161,12 @@ Code duplication causes:
 When designing skills, account for these observed Claude Code behaviors:
 
 #### 1. Refuses to Read Top-Level References When Partial Info Exists
-**Behavior:** When Claude sees abbreviated setup instructions or short checklists in SKILL.md or extension-guide.md, it may refuse to read the full reference file (e.g., r-package-setup.md) even when explicitly instructed to do so.
+**Behavior:** When Claude sees abbreviated setup instructions or short checklists in SKILL.md or extension-guide.md, it may refuse to read the full reference file (e.g., extension-prerequisites.md) even when explicitly instructed to do so.
 
 **Solution:**
 - Remove ALL setup code from SKILL.md and extension-guide.md
-- Only include "See [R Package Setup](../shared-references/r-package-setup.md)" links
-- Never provide partial/abbreviated setup instructions anywhere except r-package-setup.md
+- Only include "See [R Package Setup](../shared-references/extension-prerequisites.md)" links
+- Never provide partial/abbreviated setup instructions anywhere except extension-prerequisites.md
 
 #### 2. Treats Short Checklists as "Good Enough"
 **Behavior:** Claude may see a short checklist in a high-level document and consider it sufficient guidance, skipping detailed reference documentation.
@@ -185,10 +185,10 @@ When designing skills, account for these observed Claude Code behaviors:
 - Be explicit about consequences of skipping (e.g., "reduces development quality")
 
 #### 4. Executes Setup Commands Prematurely
-**Behavior:** If Claude sees specific commands (like `use_claude_code()` or repo cloning scripts) in SKILL.md or guides, it may execute them before reading full context from r-package-setup.md, missing critical ordering dependencies.
+**Behavior:** If Claude sees specific commands (like `use_claude_code()` or repo cloning scripts) in SKILL.md or guides, it may execute them before reading full context from extension-prerequisites.md, missing critical ordering dependencies.
 
 **Solution:**
-- Centralize ALL setup commands exclusively in r-package-setup.md
+- Centralize ALL setup commands exclusively in extension-prerequisites.md
 - High-level documents should only reference the setup guide, never show commands
 - Prevents Claude from executing out-of-order or without proper context
 
@@ -283,7 +283,7 @@ This skill supports **two distinct development contexts**:
 - [List all reference/*.md files with descriptions]
 
 **Shared References (Extension Development):**
-- [R Package Setup](../shared-references/r-package-setup.md)
+- [R Package Setup](../shared-references/extension-prerequisites.md)
 - [Development Workflow](../shared-references/development-workflow.md)
 - [Testing Patterns (Extension)](../shared-references/testing-patterns-extension.md)
 - [Roxygen Documentation](../shared-references/roxygen-documentation.md)
@@ -300,7 +300,7 @@ This skill supports **two distinct development contexts**:
 
 **⚠️ IMPORTANT**: Before implementing [features], complete the package setup sequence:
 
-👉 **[R Package Setup Guide](../shared-references/r-package-setup.md)**
+👉 **[R Package Setup Guide](../shared-references/extension-prerequisites.md)**
 
 This guide includes critical steps like `use_claude_code()` (if available) that must run BEFORE adding dependencies. Following the complete sequence ensures proper package initialization and Claude Code integration.
 
@@ -355,8 +355,8 @@ If you're contributing to [package] itself, you have access to internal function
 - Keep main content focused on extension development
 - Reference source guide for package-specific patterns
 - **NEVER duplicate code across SKILL.md and reference files** - SKILL.md should only link to references, not repeat their content
-- Prerequisites section should link to r-package-setup.md, NOT include abbreviated setup code
-- Single source of truth: all setup instructions live in shared-references/r-package-setup.md
+- Prerequisites section should link to extension-prerequisites.md, NOT include abbreviated setup code
+- Single source of truth: all setup instructions live in shared-references/extension-prerequisites.md
 
 ---
 
@@ -391,7 +391,7 @@ Complete guide for creating new packages that extend [package] with custom [feat
 
 ### Quick Package Setup
 
-See [R Package Setup](../shared-references/r-package-setup.md) for complete details.
+See [R Package Setup](../shared-references/extension-prerequisites.md) for complete details.
 
 [Standard setup code block]
 
@@ -510,7 +510,7 @@ See [Troubleshooting (Extension)](../shared-references/troubleshooting-extension
 
 ## Next Steps
 
-1. **Set up your package** following [R Package Setup](../shared-references/r-package-setup.md)
+1. **Set up your package** following [R Package Setup](../shared-references/extension-prerequisites.md)
 2. [Additional steps...]
 
 ---
@@ -1107,7 +1107,7 @@ Universal best practices for extension developers.
 ### troubleshooting-extension.md
 Universal troubleshooting for extension developers.
 
-### r-package-setup.md
+### extension-prerequisites.md
 How to initialize an R package structure (used by all skills).
 
 ### development-workflow.md
@@ -1134,7 +1134,7 @@ How to clone tidymodels repositories (optional but recommended).
 - `best-practices-extension.md`
 - `development-workflow.md`
 - `package-imports.md`
-- `r-package-setup.md`
+- `extension-prerequisites.md`
 - `repository-access.md`
 - `roxygen-documentation.md`
 - `testing-patterns-extension.md`
@@ -1163,7 +1163,7 @@ This script copies the updated files from `shared-references/` and `shared-scrip
 
 **Workflow:**
 ```
-Edit shared-references/r-package-setup.md
+Edit shared-references/extension-prerequisites.md
     ↓
 Run ./localize-shared-files.sh
     ↓
@@ -1252,7 +1252,7 @@ See [Metric System](references/metric-system.md) for complete guide.
 ### To Shared References
 
 ```markdown
-See [R Package Setup](../shared-references/r-package-setup.md) for complete details.
+See [R Package Setup](../shared-references/extension-prerequisites.md) for complete details.
 See [Development Workflow](../shared-references/development-workflow.md) for the fast iteration cycle.
 ```
 
@@ -1326,16 +1326,16 @@ When you add a new skill, update related skills:
    - ❌ NEVER include setup code blocks in SKILL.md (e.g., "Quick setup")
    - ❌ NEVER include abbreviated versions of reference content
    - ❌ NEVER include short checklists that Claude might treat as "good enough"
-   - ✅ ALWAYS link to the full reference (e.g., r-package-setup.md)
+   - ✅ ALWAYS link to the full reference (e.g., extension-prerequisites.md)
    - **Why:** Creates inconsistency, users follow incomplete instructions, maintenance nightmare
-   - **Example of the problem:** User follows "Quick setup" in SKILL.md, misses `use_claude_code()` from r-package-setup.md
-   - **Real-world finding:** Claude was refusing to read reference files from top-level folders, treating short checklists as sufficient guidance instead of reading the full r-package-setup.md reference
+   - **Example of the problem:** User follows "Quick setup" in SKILL.md, misses `use_claude_code()` from extension-prerequisites.md
+   - **Real-world finding:** Claude was refusing to read reference files from top-level folders, treating short checklists as sufficient guidance instead of reading the full extension-prerequisites.md reference
 2. **Include detailed setup instructions in high-level documents (SKILL.md, extension-guide.md)**
    - ❌ NEVER include `use_claude_code()` or repo cloning details in SKILL.md or guides
    - ❌ NEVER create short checklists that Claude might execute prematurely
-   - ✅ ALWAYS centralize these instructions exclusively in r-package-setup.md
+   - ✅ ALWAYS centralize these instructions exclusively in extension-prerequisites.md
    - **Why:** Claude may execute setup steps before reading full reference documentation
-   - **Real-world finding:** Claude would see short checklist in SKILL.md and execute it before reading r-package-setup.md, missing critical context and order dependencies
+   - **Real-world finding:** Claude would see short checklist in SKILL.md and execute it before reading extension-prerequisites.md, missing critical context and order dependencies
 3. **Use "Optional" labels for steps that should actually be completed**
    - ❌ NEVER mark steps as "optional" if they're important
    - ✅ Be clear about what is truly optional vs. strongly recommended
@@ -1353,8 +1353,8 @@ When you add a new skill, update related skills:
 ### ✅ Do:
 1. **Use references as single source of truth** - SKILL.md links, references contain content
 2. **Make SKILL.md purely navigational** - Overview + links, no duplicated code blocks
-3. **Link to r-package-setup.md for ALL setup instructions** - Never abbreviate or duplicate
-4. **Centralize setup commands exclusively in r-package-setup.md** - Prevents premature execution
+3. **Link to extension-prerequisites.md for ALL setup instructions** - Never abbreviate or duplicate
+4. **Centralize setup commands exclusively in extension-prerequisites.md** - Prevents premature execution
 5. **Write "INSTRUCTIONS FOR CLAUDE" for autonomous execution** - Claude should run commands via Bash tool
 6. **Avoid "optional" labels that Claude ignores** - Be explicit about importance and consequences
 7. **Force reference reading** - Only show "See [reference]" links, never partial content
@@ -1549,7 +1549,7 @@ development and complement the tidymodels-specific guidance here.
 
 ### Setup Claude Code (Recommended)
 
-If using Claude Code for development, see [R Package Setup](../shared-references/r-package-setup.md)
+If using Claude Code for development, see [R Package Setup](../shared-references/extension-prerequisites.md)
 for instructions on running `usethis::use_claude_code()`.
 
 This provides access to tidyverse team's general R package development patterns which complement
@@ -1647,9 +1647,9 @@ If tidy-* skills are not present:
 - No functionality is lost
 - Users just don't get the additional general R package patterns
 
-### Documentation in r-package-setup.md
+### Documentation in extension-prerequisites.md
 
-The `r-package-setup.md` file now includes a section on `use_claude_code()`:
+The `extension-prerequisites.md` file now includes a section on `use_claude_code()`:
 - Explains what it creates
 - Shows version check pattern
 - Lists benefits including skill composition

@@ -27,7 +27,7 @@ Successfully copied shared-references and shared-scripts into each skill's refer
 ```
 tidymodels/
 ├── shared-references/
-│   ├── r-package-setup.md
+│   ├── extension-prerequisites.md
 │   ├── development-workflow.md
 │   └── ...
 ├── shared-scripts/
@@ -53,7 +53,7 @@ tidymodels/
 │   └── ...
 ├── add-yardstick-metric/
 │   └── references/
-│       ├── r-package-setup.md          ← COPIED
+│       ├── extension-prerequisites.md          ← COPIED
 │       ├── development-workflow.md     ← COPIED
 │       ├── extension-guide.md
 │       ├── scripts/                    ← NEW
@@ -63,7 +63,7 @@ tidymodels/
 │       └── ...
 └── add-recipe-step/
     └── references/
-        ├── r-package-setup.md          ← COPIED
+        ├── extension-prerequisites.md          ← COPIED
         ├── development-workflow.md     ← COPIED
         ├── extension-guide.md
         ├── scripts/                    ← NEW
@@ -83,13 +83,13 @@ All references to shared files have been updated to use local paths:
 
 **Before**:
 ```markdown
-[R Package Setup Guide](../shared-references/r-package-setup.md)
+[R Package Setup Guide](../shared-references/extension-prerequisites.md)
 [Development Workflow](../shared-references/development-workflow.md)
 ```
 
 **After**:
 ```markdown
-[R Package Setup Guide](references/r-package-setup.md)
+[R Package Setup Guide](references/extension-prerequisites.md)
 [Development Workflow](references/development-workflow.md)
 ```
 
@@ -104,12 +104,12 @@ All references to shared files have been updated to use local paths:
 
 **Before**:
 ```markdown
-[R Package Setup Guide](../../shared-references/r-package-setup.md)
+[R Package Setup Guide](../../shared-references/extension-prerequisites.md)
 ```
 
 **After**:
 ```markdown
-[R Package Setup Guide](r-package-setup.md)
+[R Package Setup Guide](extension-prerequisites.md)
 ```
 
 **Why it matters**:
@@ -119,7 +119,7 @@ All references to shared files have been updated to use local paths:
 
 ---
 
-#### In r-package-setup.md Files
+#### In extension-prerequisites.md Files
 
 **Before**:
 ```bash
@@ -142,13 +142,13 @@ scripts/verify-setup.R
 
 **Before**:
 ```r
-print_action("Review instructions in ../shared-references/r-package-setup.md")
+print_action("Review instructions in ../shared-references/extension-prerequisites.md")
 cat("Rscript -e 'source(\"~/.claude/plugins/cache/.../verify-setup.R\")'")
 ```
 
 **After**:
 ```r
-print_action("Review instructions in ../r-package-setup.md")
+print_action("Review instructions in ../extension-prerequisites.md")
 cat("Rscript -e 'source(\"scripts/verify-setup.R\")'")
 ```
 
@@ -225,7 +225,7 @@ To verify localization worked:
 
 1. Invoke add-yardstick-metric skill
 2. Observe Claude's behavior:
-   - [ ] Does it navigate to `references/r-package-setup.md`?
+   - [ ] Does it navigate to `references/extension-prerequisites.md`?
    - [ ] Does it actually READ the file (not substitute knowledge)?
    - [ ] Does it run the scripts from `scripts/` directory?
    - [ ] Does verification script work with local paths?
@@ -236,7 +236,7 @@ To verify localization worked:
 ## Success Metrics
 
 If localization worked:
-- ✅ Claude reads r-package-setup.md (doesn't substitute own knowledge)
+- ✅ Claude reads extension-prerequisites.md (doesn't substitute own knowledge)
 - ✅ Claude follows the setup checklist
 - ✅ Claude runs scripts from local scripts/ directory
 - ✅ Verification script references work correctly
@@ -267,7 +267,7 @@ If localization failed:
 ## Next Steps
 
 1. Test with fresh skill invocation
-2. Verify Claude actually reads r-package-setup.md
+2. Verify Claude actually reads extension-prerequisites.md
 3. Confirm scripts work from local paths
 4. If successful: Consider removing references to old shared-references in any remaining docs
 

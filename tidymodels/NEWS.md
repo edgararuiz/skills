@@ -1,7 +1,7 @@
 # Tidymodels Skills - News
 
-- **r-package-setup.md: Fixed Claude Code Execution Instructions** (2026-03-19)
-  - **CRITICAL FIX**: Updated r-package-setup.md to clarify Claude Code SHOULD run R commands directly
+- **extension-prerequisites.md: Fixed Claude Code Execution Instructions** (2026-03-19)
+  - **CRITICAL FIX**: Updated extension-prerequisites.md to clarify Claude Code SHOULD run R commands directly
   - Removed misleading guidance stating "you cannot run R commands directly"
   - All setup steps now explicitly instruct Claude to run `Rscript -e` commands via Bash tool
   - Changed from "Ask user to run..." to "Run this command via Bash tool..."
@@ -13,9 +13,9 @@
     - Short checklists in SKILL.md were being treated as "good enough" instead of reading full references
     - "Optional" labels were effectively disregarded by Claude, executing marked-optional steps anyway
   - **Architectural changes to prevent premature execution**:
-    - Centralized `use_claude_code()` and repo cloning instructions exclusively in r-package-setup.md
+    - Centralized `use_claude_code()` and repo cloning instructions exclusively in extension-prerequisites.md
     - Removed these details from SKILL.md and extension-guide.md to prevent Claude from executing before reading full reference
-    - High-level documents now contain only "see r-package-setup.md" to force proper reference reading
+    - High-level documents now contain only "see extension-prerequisites.md" to force proper reference reading
     - Removed misleading "optional" monikers that Claude consistently ignored
   - Steps updated: package creation, Claude Code integration, dependencies, testing, and configurations
   - Result: Claude now runs full setup autonomously, verifying each step before proceeding
@@ -25,7 +25,7 @@
   - **BREAKING**: Removed all code blocks from SKILL.md files to eliminate duplication
   - SKILL.md is now purely navigational (overview + links to references)
   - Removed duplicated package setup code from extension-guide.md files (both recipe and yardstick)
-  - Setup code now exists only in r-package-setup.md (single source of truth)
+  - Setup code now exists only in extension-prerequisites.md (single source of truth)
   - Removed duplicate MAE implementation from add-yardstick-metric SKILL.md
   - Complete MAE example now lives only in numeric-metrics.md reference
   - Prevents users from following incomplete/stale setup instructions
@@ -40,7 +40,7 @@
   - Seamless integration: Claude reads CLAUDE.md and incorporates tidyverse patterns automatically
   - Skill composition: tidymodels-dev skills combine with tidy-* skills for complete R package guidance
   - Graceful fallback: skills work perfectly without usethis dev version
-  - Clear instructions in r-package-setup.md, extension guides, and SKILL_IMPLEMENTATION_GUIDE.md
+  - Clear instructions in extension-prerequisites.md, extension guides, and SKILL_IMPLEMENTATION_GUIDE.md
 
 - **Extension vs Source Development Architecture** (2026-03-18)
   - Skills now support two distinct development contexts

@@ -19,7 +19,7 @@ This skill supports **two distinct development contexts**:
 - ✅ Use this for: New packages, standalone metrics, CRAN submissions
 - 📦 Package detection: No `yardstick` in DESCRIPTION's `Package:` field
 - ⚠️ **Constraint**: Can only use exported functions (no `:::`)
-- 📖 **Guide**: [R Package Setup](references/r-package-setup.md)
+- 📖 **Guide**: [Extension Prerequisites](references/extension-prerequisites.md)
 
 ### 🔧 Source Development (Advanced)
 **Contributing directly to yardstick** via pull requests.
@@ -37,7 +37,7 @@ This skill supports **two distinct development contexts**:
 
 **Choose your context:**
 
-- **Creating a new package?** → Start with [R Package Setup](references/r-package-setup.md)
+- **Creating a new package?** → Start with [Extension Prerequisites](references/extension-prerequisites.md)
 - **Contributing to yardstick?** → Clone repository, then see [Source Development Guide](references/source-guide.md)
 
 **Not sure which?** If you're in the `tidymodels/yardstick` repository, use source development. Otherwise, use extension development.
@@ -79,7 +79,7 @@ Creating a custom yardstick metric provides:
 - [Autoplot Support](references/autoplot.md) - Optional visualization (curves, confusion matrices)
 
 **Shared References (Extension Development):**
-- [R Package Setup](references/r-package-setup.md) - Package initialization and structure
+- [Extension Prerequisites](references/extension-prerequisites.md) - Package initialization and structure
 - [Development Workflow](references/development-workflow.md) - Fast iteration cycle
 - [Testing Patterns (Extension)](references/testing-patterns-extension.md) - Extension testing guide
 - [Roxygen Documentation](references/roxygen-documentation.md) - Documentation templates
@@ -563,7 +563,7 @@ See [Troubleshooting (Extension)](references/troubleshooting-extension.md) for c
 
 **For Extension Development (creating new packages):**
 
-1. **Setup package structure:** [R Package Setup](references/r-package-setup.md) - START HERE
+1. **Setup package structure:** [Extension Prerequisites](references/extension-prerequisites.md) - START HERE
 
 **For Source Development (contributing to yardstick):**
 

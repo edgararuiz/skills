@@ -617,7 +617,7 @@ See [Troubleshooting (Source)](troubleshooting-source.md) for common review feed
 - [Case Weights](case-weights.md)
 
 ### Shared References
-- [R Package Setup](../r-package-setup.md)
+- [R Package Setup](../extension-prerequisites.md)
 - [Development Workflow](../development-workflow.md)
 - [Roxygen Documentation](../roxygen-documentation.md)
 

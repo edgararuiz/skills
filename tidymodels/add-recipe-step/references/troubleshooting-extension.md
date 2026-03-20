@@ -38,7 +38,7 @@ writeLines(c(
 
 Or manually edit `.Rbuildignore` to include these patterns.
 
-See [r-package-setup.md](r-package-setup.md) for details.
+See [extension-prerequisites.md](extension-prerequisites.md) for details.
 
 ### "No visible global function definition"
 
@@ -526,6 +526,6 @@ package_name::          # See package contents (RStudio)
 ## Next Steps
 
 - Review development workflow: [development-workflow.md](development-workflow.md)
-- Set up package properly: [r-package-setup.md](r-package-setup.md)
+- Set up package properly: [extension-prerequisites.md](extension-prerequisites.md)
 - Follow best practices: [best-practices.md](best-practices.md)
 - Learn testing patterns: [testing-patterns.md](testing-patterns.md)

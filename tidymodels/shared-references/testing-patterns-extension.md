@@ -658,4 +658,4 @@ testthat::snapshot_accept()
 
 - Document your functions: [roxygen-documentation.md](roxygen-documentation.md)
 - Follow coding best practices: [best-practices.md](best-practices.md)
-- Review package setup: [r-package-setup.md](r-package-setup.md)
+- Review package setup: [extension-prerequisites.md](extension-prerequisites.md)
