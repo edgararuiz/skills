@@ -1,5 +1,24 @@
 # Tidymodels Skills - News
 
+- **UUID-Based Warning System in verify-setup.R** (2026-03-20)
+  - **CRITICAL ANTI-PATTERN FIX**: Replaced verbose error messages with UUID-only warnings
+  - **Why UUIDs?** Combat Claude's propensity to start developing instead of reading documentation
+  - Previous verbose warnings gave Claude enough context to attempt fixes without reading full prerequisites
+  - Claude would see "Run: usethis::create_package()" and execute immediately, bypassing complete setup sequence
+  - **New behavior**: verify-setup.R outputs only cryptic UUIDs (e.g., "Warning - e0f0c00a-0000")
+  - Forces Claude to look up each UUID in extension-prerequisites.md for resolution details
+  - Ensures Claude reads complete setup instructions before attempting any fixes
+  - **Behavioral changes**:
+    - All checks run independently (no early exits)
+    - Always shows "All checks for [context] development complete." regardless of warnings
+    - Source development skips all checks (avoids confusion with usethis dev version requirements)
+    - Repos check now runs in empty directories (was previously skipped due to "unknown" context)
+  - **Output format**: Clean, minimal, no blank lines between messages
+  - **Path robustness**: Updated SKILL.md files to use `Sys.glob(path.expand(...))` for wildcard expansion
+  - Single source of truth: UUID resolution details live only in extension-prerequisites.md
+  - Result: Claude cannot skip documentation reading; must follow complete setup sequence
+  - Propagated to both add-yardstick-metric and add-recipe-step skills
+
 - **extension-prerequisites.md: Fixed Claude Code Execution Instructions** (2026-03-19)
   - **CRITICAL FIX**: Updated extension-prerequisites.md to clarify Claude Code SHOULD run R commands directly
   - Removed misleading guidance stating "you cannot run R commands directly"
