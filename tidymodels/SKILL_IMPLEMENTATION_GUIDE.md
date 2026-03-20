@@ -2,7 +2,7 @@
 
 **Purpose:** Guide for creating new skills in the tidymodels skill system (e.g., add-parsnip-model, add-dials-parameter).
 
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-20
 
 ---
 
@@ -71,9 +71,7 @@ tidymodels/
 │       └── ...
 │
 └── shared-references/                # Universal cross-skill resources
-    ├── extension-requirements.md#testing-requirements
-    ├── extension-requirements.md#best-practices
-    ├── extension-requirements.md#common-issues-solutions
+    ├── extension-requirements.md     # All-in-one: best practices, testing, troubleshooting
     ├── extension-prerequisites.md
     ├── development-workflow.md
     ├── roxygen-documentation.md
@@ -285,11 +283,12 @@ This skill supports **two distinct development contexts**:
 **Shared References (Extension Development):**
 - [Extension Prerequisites](../shared-references/extension-prerequisites.md)
 - [Development Workflow](../shared-references/development-workflow.md)
-- [Testing Patterns (Extension)](../shared-references/extension-requirements.md#testing-requirements)
+- [Extension Requirements](../shared-references/extension-requirements.md) - Complete guide:
+  - [Best Practices](../shared-references/extension-requirements.md#best-practices)
+  - [Testing Patterns](../shared-references/extension-requirements.md#testing-requirements)
+  - [Troubleshooting](../shared-references/extension-requirements.md#common-issues-solutions)
 - [Roxygen Documentation](../shared-references/roxygen-documentation.md)
 - [Package Imports](../shared-references/package-imports.md)
-- [Best Practices (Extension)](../shared-references/extension-requirements.md#best-practices)
-- [Troubleshooting (Extension)](../shared-references/extension-requirements.md#common-issues-solutions)
 
 **Source Development Specific:**
 - [Testing Patterns (Source)](testing-patterns-source.md)
@@ -1698,6 +1697,6 @@ A skill is complete when:
 
 ---
 
-**Last Updated:** 2026-03-19
+**Last Updated:** 2026-03-20
 
 For questions or feedback about this guide, review the planning documents in `.github/planning/` or examine existing skills for examples.
