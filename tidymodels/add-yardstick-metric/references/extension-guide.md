@@ -9,7 +9,7 @@ Complete guide for creating new packages that extend yardstick with custom metri
 
 **CLAUDE: THIS R PACKAGE SETUP IS CUSTOM. IT NEEDS TO BE FOLLOWED TO THE LETTER**
 
-👉 **[FOLLOW THE STEPS IN: Extension Prerequisites Guide](references/extension-prerequisites.md)** (REQUIRED)
+👉 **[FOLLOW THE STEPS IN: Extension Prerequisites Guide](extension-prerequisites.md)** (REQUIRED)
 
 
 **CLAUDE: DO NOT PROCEED WITHOUT GOING THROUGH THE R PACKAGE SETUP GUIDE.**
@@ -118,7 +118,7 @@ mae_impl <- function(truth, estimate, case_weights = NULL) {
 
 ### Step 1: Choose Your Metric Type
 
-See the decision tree in the main [SKILL.md](SKILL.md#choosing-your-metric-type) to determine:
+See the decision tree in the main [SKILL.md](../SKILL.md#choosing-your-metric-type) to determine:
 - Numeric metric (regression)
 - Class metric (classification with classes)
 - Probability metric (classification with probabilities)
@@ -512,7 +512,7 @@ See [Troubleshooting (Extension)](troubleshooting-extension.md) for complete gui
 ## Next Steps
 
 1. **Complete extension prerequisites** following [Extension Prerequisites](extension-prerequisites.md)
-2. **Choose your metric type** from the [main SKILL.md](SKILL.md)
+2. **Choose your metric type** from the [main SKILL.md](../SKILL.md)
 3. **Implement your metric** following the step-by-step guide above
 4. **Test thoroughly** using [Testing Patterns](testing-patterns-extension.md)
 5. **Run `devtools::check()`** to ensure CRAN compliance
@@ -524,5 +524,5 @@ See [Troubleshooting (Extension)](troubleshooting-extension.md) for complete gui
 
 - Check [Troubleshooting Guide](troubleshooting-extension.md)
 - Review existing examples in reference documentation
-- Study the main [yardstick SKILL.md](SKILL.md) for more details
+- Study the main [yardstick SKILL.md](../SKILL.md) for more details
 - Search GitHub issues: https://github.com/tidymodels/yardstick/issues

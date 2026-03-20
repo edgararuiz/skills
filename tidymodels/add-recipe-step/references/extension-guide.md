@@ -8,7 +8,7 @@ Complete guide for creating new packages that extend recipes with custom preproc
 
 **CLAUDE: THIS R PACKAGE SETUP IS CUSTOM. IT NEEDS TO BE FOLLOWED TO THE LETTER**
 
-👉 **[FOLLOW THE STEPS IN: Extension Prerequisites Guide](references/extension-prerequisites.md)** (REQUIRED)
+👉 **[FOLLOW THE STEPS IN: Extension Prerequisites Guide](extension-prerequisites.md)** (REQUIRED)
 
 
 **CLAUDE: DO NOT PROCEED WITHOUT GOING THROUGH THE R PACKAGE SETUP GUIDE.**
@@ -596,5 +596,5 @@ See [Troubleshooting (Extension)](troubleshooting-extension.md) for complete gui
 
 - Check [Troubleshooting Guide](troubleshooting-extension.md)
 - Review [Step Architecture](step-architecture.md)
-- Study the main [recipes SKILL.md](SKILL.md) for more details
+- Study the main [recipes SKILL.md](../SKILL.md) for more details
 - Search GitHub issues: https://github.com/tidymodels/recipes/issues

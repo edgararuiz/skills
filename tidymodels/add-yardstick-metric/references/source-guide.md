@@ -31,7 +31,7 @@ cd yardstick
 git checkout -b feature/add-metric-name
 ```
 
-See [Repository Access](../repository-access.md) for more details.
+See [Repository Access](repository-access.md) for more details.
 
 ### Install Development Dependencies
 
@@ -168,7 +168,7 @@ Determine which category your metric falls into:
 - Probability (classification with probabilities)
 - Survival (time-to-event)
 
-See the main [SKILL.md](SKILL.md) for the complete decision tree.
+See the main [SKILL.md](../SKILL.md) for the complete decision tree.
 
 ### Step 2: Create Source File
 
@@ -617,9 +617,9 @@ See [Troubleshooting (Source)](troubleshooting-source.md) for common review feed
 - [Case Weights](case-weights.md)
 
 ### Shared References
-- [Extension Prerequisites](../extension-prerequisites.md)
-- [Development Workflow](../development-workflow.md)
-- [Roxygen Documentation](../roxygen-documentation.md)
+- [Extension Prerequisites](extension-prerequisites.md)
+- [Development Workflow](development-workflow.md)
+- [Roxygen Documentation](roxygen-documentation.md)
 
 ---
 

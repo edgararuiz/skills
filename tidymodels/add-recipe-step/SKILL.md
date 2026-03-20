@@ -504,7 +504,7 @@ test_that("centering works with case weights", {
 
 **Reference test pattern:** `tests/testthat/test-center.R` in recipes repository
 
-See [Testing Patterns](references/testing-patterns.md) for comprehensive testing guide.
+See [Testing Patterns](references/testing-patterns-extension.md) for comprehensive testing guide.
 
 ## Implementation Guide by Step Type
 
