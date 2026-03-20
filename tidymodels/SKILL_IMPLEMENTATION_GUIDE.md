@@ -104,6 +104,9 @@ Code duplication causes:
 - **User confusion**: Users follow incomplete/outdated version
 - **Maintenance burden**: Must update multiple places when things change
 - **Trust erosion**: Users discover conflicting information
+- **Premature execution**: Claude Code sees abbreviated instructions in SKILL.md and executes before reading full reference
+- **Incomplete context**: Short checklists treated as "good enough", causing Claude to skip critical details in references
+- **Behavioral issues**: Claude refuses to read reference files from top-level folders when partial info exists elsewhere
 
 ### How to Maintain Single Source of Truth
 
@@ -139,7 +142,73 @@ Code duplication causes:
 **❌ "But I need to show just this one setup step!"**
 → ✅ Link to the full setup guide, users need the complete sequence anyway
 
+**❌ "But users should see use_claude_code() mentioned here!"**
+→ ✅ Say "See r-package-setup.md" only—never show the actual command in SKILL.md
+→ **Why:** Claude sees the command and executes it before reading full context
+
+**❌ "But I'll mark it 'optional' so Claude knows it's not required!"**
+→ ✅ Remove "optional" labels—Claude ignores them and executes anyway
+→ **Why:** Real-world evidence shows Claude consistently disregards "optional" markers
+
 **The test:** If you're pasting code from one file to another, STOP. Create or link to a reference instead.
+
+---
+
+## Claude Code Behavioral Patterns
+
+### Key Findings from Real-World Usage
+
+When designing skills, account for these observed Claude Code behaviors:
+
+#### 1. Refuses to Read Top-Level References When Partial Info Exists
+**Behavior:** When Claude sees abbreviated setup instructions or short checklists in SKILL.md or extension-guide.md, it may refuse to read the full reference file (e.g., r-package-setup.md) even when explicitly instructed to do so.
+
+**Solution:**
+- Remove ALL setup code from SKILL.md and extension-guide.md
+- Only include "See [R Package Setup](../shared-references/r-package-setup.md)" links
+- Never provide partial/abbreviated setup instructions anywhere except r-package-setup.md
+
+#### 2. Treats Short Checklists as "Good Enough"
+**Behavior:** Claude may see a short checklist in a high-level document and consider it sufficient guidance, skipping detailed reference documentation.
+
+**Solution:**
+- Make SKILL.md purely navigational (overview + links only)
+- No code blocks, no checklists, no abbreviated instructions
+- All actual content lives in dedicated reference files
+
+#### 3. Ignores "Optional" Labels
+**Behavior:** Marking steps as "optional" or "recommended" has little effect—Claude tends to execute them regardless.
+
+**Solution:**
+- Only mark steps as "optional" if they truly don't matter
+- For important-but-flexible steps, use "STRONGLY RECOMMENDED" instead
+- Be explicit about consequences of skipping (e.g., "reduces development quality")
+
+#### 4. Executes Setup Commands Prematurely
+**Behavior:** If Claude sees specific commands (like `use_claude_code()` or repo cloning scripts) in SKILL.md or guides, it may execute them before reading full context from r-package-setup.md, missing critical ordering dependencies.
+
+**Solution:**
+- Centralize ALL setup commands exclusively in r-package-setup.md
+- High-level documents should only reference the setup guide, never show commands
+- Prevents Claude from executing out-of-order or without proper context
+
+#### 5. Better at Running Commands Than Guiding Users
+**Behavior:** Claude Code can run R commands directly via `Rscript -e` using the Bash tool, and should do so autonomously rather than asking users to run them.
+
+**Solution:**
+- Write "INSTRUCTIONS FOR CLAUDE: Run this via Bash tool" instead of "Show the user this command"
+- Claude should execute, verify, and proceed—not hand off to user
+- Improves user experience by reducing context switching
+
+### Design Implications
+
+These behavioral patterns inform our architectural decisions:
+
+1. **Single source of truth** - Not just for maintenance, but to prevent Claude from fragmenting its attention
+2. **Centralized setup** - Prevents premature execution and ensures proper sequencing
+3. **Clear labels** - "Optional" is meaningless; be explicit about importance and consequences
+4. **Autonomous execution** - Claude Code should run commands directly when possible, not delegate to user
+5. **Minimal high-level docs** - SKILL.md and guides should be thin navigation layers, not content repositories
 
 ---
 
@@ -1210,30 +1279,47 @@ When you add a new skill, update related skills:
 1. **DUPLICATE CODE BETWEEN SKILL.md AND REFERENCES** - This is the #1 anti-pattern
    - ❌ NEVER include setup code blocks in SKILL.md (e.g., "Quick setup")
    - ❌ NEVER include abbreviated versions of reference content
+   - ❌ NEVER include short checklists that Claude might treat as "good enough"
    - ✅ ALWAYS link to the full reference (e.g., r-package-setup.md)
    - **Why:** Creates inconsistency, users follow incomplete instructions, maintenance nightmare
    - **Example of the problem:** User follows "Quick setup" in SKILL.md, misses `use_claude_code()` from r-package-setup.md
-2. **Mix extension and source patterns in examples** - Choose one context per example
-3. **Assume `:::` access in extension examples** - Always use exported functions
-4. **Put package-specific content in shared-references** - Keep universal
-5. **Show code fragments without context** - Provide complete examples
-6. **Forget to update cross-references** - Keep links bidirectional
-7. **Skip the context discrimination section** - Always clarify extension vs source
-8. **Use generic error messages** - Be specific to the context
-9. **Leave broken links** - Test all cross-references
+   - **Real-world finding:** Claude was refusing to read reference files from top-level folders, treating short checklists as sufficient guidance instead of reading the full r-package-setup.md reference
+2. **Include detailed setup instructions in high-level documents (SKILL.md, extension-guide.md)**
+   - ❌ NEVER include `use_claude_code()` or repo cloning details in SKILL.md or guides
+   - ❌ NEVER create short checklists that Claude might execute prematurely
+   - ✅ ALWAYS centralize these instructions exclusively in r-package-setup.md
+   - **Why:** Claude may execute setup steps before reading full reference documentation
+   - **Real-world finding:** Claude would see short checklist in SKILL.md and execute it before reading r-package-setup.md, missing critical context and order dependencies
+3. **Use "Optional" labels for steps that should actually be completed**
+   - ❌ NEVER mark steps as "optional" if they're important
+   - ✅ Be clear about what is truly optional vs. strongly recommended
+   - **Why:** Claude consistently disregards "optional" labels and executes those steps anyway
+   - **Real-world finding:** "Optional" monikers were effectively meaningless—Claude would do the work regardless
+4. **Mix extension and source patterns in examples** - Choose one context per example
+5. **Assume `:::` access in extension examples** - Always use exported functions
+6. **Put package-specific content in shared-references** - Keep universal
+7. **Show code fragments without context** - Provide complete examples
+8. **Forget to update cross-references** - Keep links bidirectional
+9. **Skip the context discrimination section** - Always clarify extension vs source
+10. **Use generic error messages** - Be specific to the context
+11. **Leave broken links** - Test all cross-references
 
 ### ✅ Do:
 1. **Use references as single source of truth** - SKILL.md links, references contain content
 2. **Make SKILL.md purely navigational** - Overview + links, no duplicated code blocks
 3. **Link to r-package-setup.md for ALL setup instructions** - Never abbreviate or duplicate
-4. **Start with SKILL.md structure from existing skills** - Copy, then adapt
-5. **Test all code examples** - They should run as shown
-6. **Link generously** - Help users navigate
-7. **Be explicit about constraints** - Extension development has limits
-8. **Provide both extension and source examples** - When patterns differ significantly
-9. **Update related skills** - Add cross-references when appropriate
-10. **Follow naming conventions** - Consistent with existing skills
-11. **Include troubleshooting** - Anticipate common problems
+4. **Centralize setup commands exclusively in r-package-setup.md** - Prevents premature execution
+5. **Write "INSTRUCTIONS FOR CLAUDE" for autonomous execution** - Claude should run commands via Bash tool
+6. **Avoid "optional" labels that Claude ignores** - Be explicit about importance and consequences
+7. **Force reference reading** - Only show "See [reference]" links, never partial content
+8. **Start with SKILL.md structure from existing skills** - Copy, then adapt
+9. **Test all code examples** - They should run as shown
+10. **Link generously** - Help users navigate
+11. **Be explicit about constraints** - Extension development has limits
+12. **Provide both extension and source examples** - When patterns differ significantly
+13. **Update related skills** - Add cross-references when appropriate
+14. **Follow naming conventions** - Consistent with existing skills
+15. **Include troubleshooting** - Anticipate common problems
 
 ---
 
