@@ -1,5 +1,29 @@
 # Tidymodels Skills - News
 
+- **Repository Structure Standardization** (2026-03-20)
+  - **Scripts Reorganization**: Moved `shared-scripts/` to `shared-references/scripts/`
+    - Creates consistency between source and localized structures
+    - Scripts now live under references/, matching skill folder patterns
+    - Reduces top-level directory complexity
+    - Updated `localize-shared-files.sh` to copy from new location
+    - All script paths in documentation updated automatically via `replace-text.py`
+  - **Package Prefix Standardization**: Added "package-" prefix to shared reference filenames
+    - Renamed 5 core shared references:
+      - `development-workflow.md` → `package-development-workflow.md`
+      - `extension-prerequisites.md` → `package-extension-prerequisites.md`
+      - `extension-requirements.md` → `package-extension-requirements.md`
+      - `repository-access.md` → `package-repository-access.md`
+      - `roxygen-documentation.md` → `package-roxygen-documentation.md`
+    - Consistent naming: all shared references now use "package-" prefix
+    - Clear distinction: these are R package development resources
+    - All 252+ references updated automatically via `rename-and-update.py`
+    - Section anchors preserved across renames
+  - **Benefits**:
+    - Clearer file organization and semantic grouping
+    - Single source structure mirrors localized structure
+    - Future-proof for adding non-package shared references
+    - Easier to identify R package development resources at a glance
+
 - **Development Scripts Reorganization & Link Verification** (2026-03-20)
   - Added new maintenance scripts in `dev-scripts/` subfolder:
     - `verify-references.py` - Validates all markdown links and anchors
