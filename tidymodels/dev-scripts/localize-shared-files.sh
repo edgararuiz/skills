@@ -7,7 +7,8 @@
 set -e  # Exit on error
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+# Go to parent directory (tidymodels/)
+cd "$SCRIPT_DIR/.."
 
 echo "========================================"
 echo "Localizing Shared Files to Skills"

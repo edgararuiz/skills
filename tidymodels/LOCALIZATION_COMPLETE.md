@@ -83,14 +83,14 @@ All references to shared files have been updated to use local paths:
 
 **Before**:
 ```markdown
-[Extension Prerequisites Guide](../shared-references/extension-prerequisites.md)
-[Development Workflow](../shared-references/development-workflow.md)
+[Extension Prerequisites Guide](shared-references/extension-prerequisites.md)
+[Development Workflow](shared-references/development-workflow.md)
 ```
 
 **After**:
 ```markdown
-[Extension Prerequisites Guide](references/extension-prerequisites.md)
-[Development Workflow](references/development-workflow.md)
+[Extension Prerequisites Guide](shared-references/extension-prerequisites.md)
+[Development Workflow](shared-references/development-workflow.md)
 ```
 
 **Why it matters**:
@@ -104,12 +104,12 @@ All references to shared files have been updated to use local paths:
 
 **Before**:
 ```markdown
-[Extension Prerequisites Guide](../../shared-references/extension-prerequisites.md)
+[Extension Prerequisites Guide](shared-references/extension-prerequisites.md)
 ```
 
 **After**:
 ```markdown
-[Extension Prerequisites Guide](extension-prerequisites.md)
+[Extension Prerequisites Guide](shared-references/extension-prerequisites.md)
 ```
 
 **Why it matters**:

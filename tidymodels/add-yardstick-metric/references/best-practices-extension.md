@@ -466,7 +466,7 @@ Don't assume functions handle edge cases - test them:
 - Perfect predictions
 - Extreme numeric values
 
-See [testing-patterns.md](testing-patterns.md) for comprehensive testing guide.
+See [testing-patterns-extension.md](testing-patterns-extension.md) for comprehensive testing guide.
 
 ## Code Formatting
 
@@ -517,7 +517,7 @@ Before considering your code complete:
 
 ## Next Steps
 
-- Review testing patterns: [testing-patterns.md](testing-patterns.md)
+- Review testing patterns: [testing-patterns-extension.md](testing-patterns-extension.md)
 - Learn documentation: [roxygen-documentation.md](roxygen-documentation.md)
 - Complete extension prerequisites: [extension-prerequisites.md](extension-prerequisites.md)
 - Follow workflow: [development-workflow.md](development-workflow.md)
